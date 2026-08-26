@@ -105,6 +105,18 @@
     font:clamp(16px,2.4vw,21px)/1.8 var(--mono);letter-spacing:.02em}
   /* Holding text, not a passphrase — smaller than the generated output. */
   textarea::placeholder{color:var(--dim);font-size:.88rem;line-height:2.1}
+  /* A generated passphrase arrives hidden: transparent text with a soft shadow
+     blurs it without blurring the box, so a shoulder-surfer sees smudges, not
+     words. The eye button lifts it. (Ported from BIP-39 Checksum.) */
+  textarea.shield{color:transparent;text-shadow:0 0 .55em var(--muted);caret-color:transparent}
+  .inwrap{position:relative}
+  .inwrap.on textarea{padding-right:5.2rem}
+  .inctl{position:absolute;top:.6rem;right:.8rem;display:flex;gap:.35rem}
+  .ictl{padding:.4rem;border-radius:7px;line-height:0;cursor:pointer;
+    border:1px solid var(--line);background:var(--panel);color:var(--muted)}
+  .ictl:hover{color:var(--ink);border-color:rgba(247,147,26,.5)}
+  .ictl:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+  .ictl svg{width:16px;height:16px}
   textarea:focus{outline:none;border-color:rgba(247,147,26,.6);
     box-shadow:0 0 0 3px rgba(247,147,26,.09)}
   .row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-top:1rem}
@@ -290,8 +302,21 @@
   <div class="card" id="inputcard">
     <div id="badge" class="badge on"><span class="led"></span><span id="badgetxt">Checking…</span></div>
     <div class="h">Your passphrase — or type any password to test its strength</div>
+    <div class="inwrap" id="inwrap">
     <textarea id="passphrase" rows="2" spellcheck="false" autocomplete="off" autocapitalize="off"
       autocorrect="off" placeholder="Your passphrase will appear here — press Generate below, ideally with the wi-fi off. Or type any password to see how it holds up."></textarea>
+    <div class="inctl" id="inctl" style="display:none">
+      <button class="ictl" id="peek" type="button" aria-label="Show the passphrase" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>
+          <line id="peekslash" x1="4" y1="21" x2="20" y2="3" style="display:none"/>
+        </svg></button>
+      <button class="ictl" id="incopy" type="button" aria-label="Copy the passphrase">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+        </svg></button>
+    </div>
+    </div>
     <div class="meter" id="meter" style="display:none">
       <div class="mrow">
         <span class="mlab">Approximate time to crack</span>
@@ -317,7 +342,6 @@
         <option value="common">Common English · 7,459 words</option>
         <option value="ascii">ASCII characters · 94 symbols</option>
       </select>
-      <button id="copy">Copy</button>
     </div>
     <div class="hint">Words and characters come from your browser's random number generator, the
       one built for security work — never <code>Math.random</code>. Edit the box to test a
@@ -654,6 +678,39 @@ function updateMeter(animate) {
       + "<b>Generate</b> for words with randomness that can be counted honestly.";
 }
 
+/* ---- blur shield (ported from BIP-39 Checksum) ------------------------ */
+// A generated passphrase arrives hidden — smudges, not words — and the eye
+// button reveals it. The eye is a preference, not a per-phrase state: once
+// someone turns the blur off, later generations stay visible until they turn
+// it back on. Hand-editing the box drops the shield and its controls instead
+// of hiding what is being typed (the preference itself is untouched).
+let shieldWanted = true;
+function applyShield() {
+  $("inwrap").classList.add("on");
+  $("inctl").style.display = "flex";
+  $("passphrase").classList.toggle("shield", shieldWanted);
+  $("peek").setAttribute("aria-pressed", String(!shieldWanted));
+  $("peek").setAttribute("aria-label", shieldWanted ? "Show the passphrase" : "Hide the passphrase");
+  $("peekslash").style.display = shieldWanted ? "none" : "block";
+}
+function shieldReset() {
+  $("passphrase").classList.remove("shield");
+  $("inwrap").classList.remove("on");
+  $("inctl").style.display = "none";
+}
+$("peek").onclick = () => {
+  shieldWanted = $("passphrase").classList.toggle("shield");
+  $("peek").setAttribute("aria-pressed", String(!shieldWanted));
+  $("peek").setAttribute("aria-label", shieldWanted ? "Show the passphrase" : "Hide the passphrase");
+  $("peekslash").style.display = shieldWanted ? "none" : "block";
+};
+$("incopy").onclick = () => {
+  if (!$("passphrase").value.trim()) return;
+  navigator.clipboard?.writeText($("passphrase").value)
+    .then(() => { $("cliphint").style.display = "block"; })
+    .catch(() => {});
+};
+
 /* ---- generate / copy ------------------------------------------------- */
 function generate() {
   const count = +$("wordcount").value;
@@ -673,6 +730,7 @@ function generate() {
   $("passphrase").value = phrase;
   $("cliphint").style.display = "none";
   $("st").textContent = "";
+  applyShield();                                // blurred or not, per the eye's setting
   updateMeter(true);
 }
 
@@ -701,13 +759,10 @@ $("wordcount").onchange = () => {
   generate();
 };
 $("wordlist").onchange = () => { rebuildCountOptions(); generate(); };
-$("copy").onclick = () => {
-  if (!$("passphrase").value.trim()) return;   // nothing to copy yet
-  navigator.clipboard?.writeText($("passphrase").value)
-    .then(() => { $("cliphint").style.display = "block"; })
-    .catch(() => {});
-};
 $("passphrase").addEventListener("input", () => {
+  // hand-editing means the box no longer holds the untouched generated
+  // passphrase — drop the blur and its controls rather than hide typing
+  if ($("inctl").style.display !== "none") shieldReset();
   $("cliphint").style.display = "none";
   updateMeter();
 });
