@@ -6,7 +6,7 @@
 <meta http-equiv="Content-Security-Policy"
       content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; form-action 'none'; base-uri 'none'">
 <meta name="description" content="Generate a random passphrase from the EFF wordlist or common English words. Self-contained, offline, no network.">
-<title>Use a Passphrase</title>
+<title>Passphrase Generator</title>
 <!-- Inline favicon: a data: URI is not a fetch, so this adds no request — it
      removes one, the automatic /favicon.ico that would 404. -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'%3E%3Cdefs%3E%3CradialGradient id='g' cx='35%25' cy='30%25' r='70%25'%3E%3Cstop offset='0%25' stop-color='%23FFD000'/%3E%3Cstop offset='50%25' stop-color='%23FF9100'/%3E%3Cstop offset='100%25' stop-color='%23E04000'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='250' cy='250' r='218' fill='url(%23g)'/%3E%3Cg fill='%23FFFFFF'%3E%3Crect x='120' y='230' width='60' height='60' rx='14'/%3E%3Crect x='207' y='230' width='60' height='60' rx='14'/%3E%3Crect x='294' y='230' width='60' height='60' rx='14'/%3E%3Crect x='140' y='150' width='220' height='40' rx='20' opacity='.85'/%3E%3Crect x='120' y='320' width='234' height='40' rx='20' opacity='.85'/%3E%3C/g%3E%3C/svg%3E">
@@ -240,7 +240,7 @@
           <rect x="120" y="320" width="234" height="40" rx="20" opacity=".85"></rect>
         </g>
       </svg>
-      <div class="label">USE A PASSPHRASE</div>
+      <div class="label">PASSPHRASE GENERATOR</div>
     </div>
     <button id="theme" type="button" aria-label="Switch colour theme"><span id="themeglyph">☀</span> <span id="themetxt">Light</span></button>
   </div>
@@ -251,9 +251,9 @@
      are here too. Everything happens in your browser; nothing is stored or sent.</p>
 
   <div class="stats">
-    <div class="stat"><div class="num">7,776<span>·</span>7,459<span>·</span>94</div><div class="lab">Words · words · symbols</div></div>
-    <div class="stat"><div class="num">~13 <span>bits</span></div><div class="lab">Of randomness per word</div></div>
     <div class="stat"><div class="num">Nothing</div><div class="lab">Leaves this page</div></div>
+    <div class="stat"><div class="num">Offline</div><div class="lab">Works with the wi-fi off</div></div>
+    <div class="stat"><div class="num">One file</div><div class="lab">Nothing to install</div></div>
   </div>
 
   <div class="warn">
@@ -345,11 +345,14 @@
       </details>
 
       <details>
-        <summary>Why not random characters, like <code>ipz2!az8k%0h</code>?</summary>
-        <p>Random characters are secure, but they are a huge pain to remember. Random
-        passphrases give the best combination of <b>memorability</b> and <b>security</b>:
-        <code>p%9y#k&amp;yFm?</code> and <code>logic finite eager ratio</code> take a comparable
-        number of centuries to crack — which would you rather type from memory?</p>
+        <summary>Words or ASCII characters — which should I use?</summary>
+        <p>Both are offered here, and generated at random they are both strong; the difference
+        is what your memory has to carry. <code>p%9y#k&amp;yFm?</code> and
+        <code>logic finite eager ratio</code> take a comparable number of centuries to crack,
+        but only one of them survives being typed from memory. Use <b>words</b> for anything you
+        personally have to remember and type — a master password, a computer login. Use
+        <b>ASCII characters</b> where a password manager fills the field for you, or where a
+        site's length limit squeezes out a passphrase.</p>
       </details>
 
       <details>
@@ -372,10 +375,10 @@
         comparison tool, not a promise.</p>
       </details>
 
-      <div class="grp2">The wordlists</div>
+      <div class="grp2">The generation pools</div>
 
       <details>
-        <summary>What is the difference between the two lists?</summary>
+        <summary>What is the difference between the two wordlists?</summary>
         <p><b>The EFF large wordlist</b> is 7,776 words chosen by the Electronic Frontier
         Foundation specifically for passphrases: every word is common enough to spell, no word
         is a prefix of another, and easily-confused pairs were removed. It is the same list
@@ -390,30 +393,33 @@
         <summary>Where does the randomness come from?</summary>
         <p>From <code>crypto.getRandomValues</code>, the random number generator your browser
         provides for security work. The everyday one, <code>Math.random</code>, is predictable
-        enough that it should never choose a passphrase, and it appears nowhere in this file.
-        Neither list is a round number in binary, so each draw uses rejection sampling — a draw
-        that lands past the end of the list is thrown away and taken again — which keeps every
-        word exactly as likely as every other. No modulo, so no modulo bias.</p>
+        enough that it should never choose a password, and it appears nowhere in this file.
+        None of the three pools is a round number in binary, so each draw uses rejection
+        sampling — a draw that lands past the end of the pool is thrown away and taken again —
+        which keeps every word, and every character, exactly as likely as every other. No
+        modulo, so no modulo bias.</p>
       </details>
 
       <details>
-        <summary>What is the ASCII characters option for?</summary>
-        <p>A classic random password — <code>ipz2!az8k%0h</code>-style — drawn from all 94
-        printable ASCII characters. Each character carries about 6.6 bits, so 16 characters is
-        roughly 105 bits: stronger per keystroke than words, but hopeless to memorise. Use it
-        where a password manager fills the field for you, or where a site's length limit is too
-        tight for a passphrase. It uses the same cryptographic generator and the same
-        rejection sampling as the wordlists, so every symbol is exactly as likely as every
-        other.</p>
+        <summary>What exactly is in the ASCII pool?</summary>
+        <p>Every printable ASCII character except the space — 94 in all: letters in both cases,
+        the digits, and every symbol on a US keyboard. That is the classic
+        <code>ipz2!az8k%0h</code>-style random password. Each character carries about 6.6 bits,
+        and the pool is drawn from with the same cryptographic generator and the same rejection
+        sampling as the wordlists, so every symbol is exactly as likely as every other. Some
+        sites reject certain symbols; if one does, just generate again — never trim or swap
+        characters by hand.</p>
       </details>
 
       <details>
-        <summary>How many words do I need?</summary>
+        <summary>How many words — or characters — do I need?</summary>
         <p>Each word adds about 13 bits, and every bit doubles the work a guesser faces. Four
         words (~52 bits) is a strong everyday password. Five or six words is a good master
         password for a password manager. Eight or more approaches the strength of the keys that
-        protect cryptocurrency wallets. The meter above shows the honest count for whatever you
-        generate.</p>
+        protect cryptocurrency wallets. In ASCII mode the same arithmetic runs per character:
+        each of the 94 symbols carries about 6.6 bits, so 8 characters matches a 4-word phrase
+        and 16 characters (~105 bits) beats an 8-word one. The meter above shows the honest
+        count for whatever you generate.</p>
       </details>
 
       <div class="grp2">Trust</div>
@@ -439,7 +445,7 @@
   </div>
 
   <footer>
-    <div class="l">USE A PASSPHRASE <span>· GENERATOR</span></div>
+    <div class="l">PASSPHRASE <span>· GENERATOR</span></div>
     <div class="r">RUNS OFFLINE</div>
     <div class="prov">
       Generator and crack-time code adapted from <code>mike-hearn/useapassphrase</code> (MIT).
