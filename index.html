@@ -103,7 +103,8 @@
   textarea{width:100%;min-height:5.2rem;padding:1rem 1.1rem;border:1px solid var(--line);
     border-radius:12px;background:var(--field);color:var(--ink);resize:vertical;
     font:clamp(16px,2.4vw,21px)/1.8 var(--mono);letter-spacing:.02em}
-  textarea::placeholder{color:var(--dim)}
+  /* Holding text, not a passphrase — smaller than the generated output. */
+  textarea::placeholder{color:var(--dim);font-size:.88rem;line-height:2.1}
   textarea:focus{outline:none;border-color:rgba(247,147,26,.6);
     box-shadow:0 0 0 3px rgba(247,147,26,.09)}
   .row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-top:1rem}
@@ -290,7 +291,7 @@
     <div id="badge" class="badge on"><span class="led"></span><span id="badgetxt">Checking…</span></div>
     <div class="h">Your passphrase — or type any password to test its strength</div>
     <textarea id="passphrase" rows="2" spellcheck="false" autocomplete="off" autocapitalize="off"
-      autocorrect="off" placeholder="loading…"></textarea>
+      autocorrect="off" placeholder="Your passphrase will appear here — press Generate below, ideally with the wi-fi off. Or type any password to see how it holds up."></textarea>
     <div class="meter" id="meter" style="display:none">
       <div class="mrow">
         <span class="mlab">Approximate time to crack</span>
@@ -701,6 +702,7 @@ $("wordcount").onchange = () => {
 };
 $("wordlist").onchange = () => { rebuildCountOptions(); generate(); };
 $("copy").onclick = () => {
+  if (!$("passphrase").value.trim()) return;   // nothing to copy yet
   navigator.clipboard?.writeText($("passphrase").value)
     .then(() => { $("cliphint").style.display = "block"; })
     .catch(() => {});
@@ -753,8 +755,9 @@ matchMedia("(prefers-color-scheme: light)").addEventListener("change", () => {
 });
 applyTheme(store.get());
 
-/* ---- initial passphrase ---------------------------------------------- */
-generate();
+/* No passphrase is generated on load. Deliberate: the page should not mint a
+   secret before the user has decided to ask for one — or had the chance to
+   disconnect first. The box holds instructions until Generate is pressed. */
 </script>
 </body>
 </html>
