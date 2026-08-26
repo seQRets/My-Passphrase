@@ -9,8 +9,9 @@ the page ever tried to phone home.
 
 - Random passphrases of 3–12 words, drawn with `crypto.getRandomValues`
   (rejection-sampled, so every word is exactly as likely as every other)
-- Two wordlists: the EFF large wordlist (7,776 words, the diceware list) or a
-  common-English list (7,459 words)
+- Three generation pools: the EFF large wordlist (7,776 words, the diceware
+  list), a common-English list (7,459 words), or the 94 printable ASCII
+  characters for a classic random password
 - Approximate crack time via zxcvbn, assuming 10,000 guesses/second — edit the
   box to test any password of your own
 - Light and dark themes, following the OS until you pin one
