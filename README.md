@@ -19,7 +19,7 @@ the page ever tried to phone home.
 ## Credits
 
 - Generator and crack-time code adapted from
-  [mike-hearn/useapassphrase](https://github.com/mike-hearn/useapassphrase) (MIT)
+  [mike-hearn/useapassphrase](https://github.com/mike-hearn/useapassphrase) (ISC)
 - Strength estimation by [zxcvbn](https://github.com/dropbox/zxcvbn), created at
   Dropbox by Dan Wheeler (MIT), embedded verbatim
 - [EFF large wordlist](https://www.eff.org/dice) (CC-BY 3.0)
@@ -30,4 +30,4 @@ the page ever tried to phone home.
 
 ## License
 
-MIT
+[MIT](LICENSE) © Toothjockey LLC
