@@ -115,9 +115,15 @@
   button.primary{background:var(--orange);border-color:var(--orange);color:#000}
   button.primary:hover{background:var(--gold);border-color:var(--gold);color:#000}
   .hint{font-size:.78rem;color:var(--dim);margin-top:.9rem;letter-spacing:.02em}
+  /* Native select arrows sit hard against the right border, which reads as
+     awkward next to the buttons. appearance:none swaps in our own chevron —
+     a data: URI, so it is drawn, not fetched — inset from the edge. */
   select{font-family:var(--sans);font-size:.82rem;font-weight:700;letter-spacing:.08em;
-    text-transform:uppercase;padding:.7rem .8rem;border-radius:9px;cursor:pointer;
+    text-transform:uppercase;padding:.7rem 2.3rem .7rem .8rem;border-radius:9px;cursor:pointer;
     border:1px solid var(--line);background:var(--panel);color:var(--muted);
+    appearance:none;-webkit-appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23F7931A' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right .9rem center;
     max-width:100%}
   select:hover{border-color:rgba(247,147,26,.5);color:var(--ink)}
   .meter{margin-top:1.2rem;padding-top:1.2rem;border-top:1px solid var(--line2)}
@@ -297,8 +303,8 @@
       <button class="primary" id="gen">Generate new passphrase</button>
       <select id="wordcount" aria-label="How many words">
         <option value="3">3 words</option>
-        <option value="4" selected>4 words</option>
-        <option value="5">5 words</option>
+        <option value="4">4 words</option>
+        <option value="5" selected>5 words</option>
         <option value="6">6 words</option>
         <option value="7">7 words</option>
         <option value="8">8 words</option>
@@ -673,7 +679,7 @@ function generate() {
    ASCII pool, so its options swap when the pool does — each mode remembers the
    count it was last set to. */
 const COUNTS = {
-  words: { values: [3, 4, 5, 6, 7, 8, 10, 12], unit: "words", last: "4" },
+  words: { values: [3, 4, 5, 6, 7, 8, 10, 12], unit: "words", last: "5" },
   chars: { values: [8, 12, 16, 20, 24, 32, 48, 64], unit: "characters", last: "16" }
 };
 function countMode() { return LISTS[$("wordlist").value].chars ? "chars" : "words"; }
