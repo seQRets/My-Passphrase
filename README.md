@@ -1,4 +1,4 @@
-# Passphrase Generator
+# My Passphrase
 
 A passphrase and password generator in **one self-contained HTML file**. No
 build, no dependencies, no network requests — save `index.html`, open it in a
