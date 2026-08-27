@@ -199,6 +199,9 @@
     background:rgba(247,147,26,.05);border-radius:0 12px 12px 0;
     font-size:.92rem;color:var(--muted);margin-bottom:1.6rem}
   .warn b{color:var(--ink)}
+  .warn a{color:var(--accent-ink);text-decoration:underline;text-underline-offset:2px}
+  .warn a:hover{color:var(--ink)}
+  .warn a:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
   .warn ol{margin:.7rem 0 .2rem;padding-left:1.35rem}
   .warn ol li{font-size:.88rem;padding-left:.3rem;margin-bottom:.45rem;list-style:decimal}
   .warn ol li::before{content:none}
@@ -322,10 +325,13 @@
             password manager.</li>
         <li>Close the browser completely before reconnecting.</li>
       </ol>
-      <p>And for the truly paranoid, skip the computer entirely: <b>print the EFF wordlist and
-      roll dice</b>. The list holds exactly 7,776 words — every outcome of five six-sided dice —
-      so five rolls pick one word, repeated until your passphrase is long enough. Physical dice
-      are randomness nobody has to audit.</p>
+      <p>And for the truly paranoid, take the randomness away from the computer entirely:
+      <b>roll dice</b>. The EFF wordlist holds exactly 7,776 words — every outcome of five
+      six-sided dice — so five rolls pick one word, repeated until your passphrase is long
+      enough. Look each roll up in
+      <a href="https://www.eff.org/files/2016/07/18/eff_large_wordlist.txt" target="_blank"
+      rel="noopener noreferrer">the EFF's published list</a>, or a printout of it if even the
+      lookup should happen off-screen. Physical dice are randomness nobody has to audit.</p>
     </details>
   </div>
 
