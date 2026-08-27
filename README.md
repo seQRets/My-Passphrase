@@ -38,7 +38,7 @@ the browser to refuse if anything on the page ever tried to phone home.
 ## Use it
 
 1. Download `index.html` from the
-   [latest release](https://github.com/seQRets/Passphrase/releases/latest)
+   [latest release](https://github.com/seQRets/My-Passphrase/releases/latest)
    (or clone the repo — the file is the app).
 2. Optionally verify the download — each release publishes the SHA-256 of its
    attached file:
@@ -78,7 +78,7 @@ how to report a vulnerability.
 - Common-English list derived from
   [first20hours/google-10000-english](https://github.com/first20hours/google-10000-english)
 - Design adapted from the sister project,
-  [seQRets/BIP-39_Checksum](https://github.com/seQRets/BIP-39_Checksum)
+  [seQRets/My-Seed-Phrase](https://github.com/seQRets/My-Seed-Phrase)
 
 ## License
 

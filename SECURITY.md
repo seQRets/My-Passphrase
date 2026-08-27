@@ -6,7 +6,7 @@
 
 Report it privately:
 
-1. **[Open a private security advisory](https://github.com/seQRets/Passphrase/security/advisories/new)** — preferred
+1. **[Open a private security advisory](https://github.com/seQRets/My-Passphrase/security/advisories/new)** — preferred
 2. Or email **security@seqrets.app**
 
 Include what you did, what happened, what you expected instead, and your
@@ -19,7 +19,7 @@ You should get an acknowledgement within a week.
 ## Before you report
 
 Check that the copy you loaded matches what was published: every
-[release](https://github.com/seQRets/Passphrase/releases) states the SHA-256 of
+[release](https://github.com/seQRets/My-Passphrase/releases) states the SHA-256 of
 its attached `index.html`, and
 
 ```
@@ -74,6 +74,6 @@ things that matter are specific.
 
 ## Supported versions
 
-The [latest release](https://github.com/seQRets/Passphrase/releases/latest)
+The [latest release](https://github.com/seQRets/My-Passphrase/releases/latest)
 and the current `main` branch. Older releases stay available for download but
 are not patched — a fix ships as a new release with a new checksum.
