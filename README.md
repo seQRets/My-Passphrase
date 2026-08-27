@@ -14,6 +14,9 @@ the page ever tried to phone home.
   characters for a classic random password
 - Approximate crack time via zxcvbn, assuming 10,000 guesses/second — edit the
   box to test any password of your own
+- Show the secret as a plain-text QR code — blurred until revealed — for
+  wallets that scan a passphrase in (e.g. Krux) instead of typing it on-device
+- Generated secrets arrive blurred, with in-field eye/copy/QR controls
 - Light and dark themes, following the OS until you pin one
 
 ## Credits
@@ -22,6 +25,9 @@ the page ever tried to phone home.
   [mike-hearn/useapassphrase](https://github.com/mike-hearn/useapassphrase) (ISC)
 - Strength estimation by [zxcvbn](https://github.com/dropbox/zxcvbn), created at
   Dropbox by Dan Wheeler (MIT), embedded verbatim
+- QR encoding by
+  [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator)
+  (Kazuhiko Arase, MIT), embedded verbatim
 - [EFF large wordlist](https://www.eff.org/dice) (CC-BY 3.0)
 - Common-English list derived from
   [first20hours/google-10000-english](https://github.com/first20hours/google-10000-english)
