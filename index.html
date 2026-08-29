@@ -83,11 +83,13 @@
   .ctanote{font-size:.78rem;color:var(--dim);letter-spacing:.02em}
   /* ---- tooltips: hover/focus on desktop, tap on mobile (JS toggles .on) ---- */
   .tipwrap{position:relative;display:inline-flex;align-items:center}
-  .tipbtn{width:1.6em;height:1.6em;border-radius:50%;border:1px solid var(--line);
-    background:var(--panel);color:var(--dim);font:700 .8em/1 var(--sans);cursor:pointer;
+  /* solid ink chip — a pale outline disappeared on the light ground. The
+     tokens flip it per theme: black chip, white i in light; the reverse in dark. */
+  .tipbtn{width:1.6em;height:1.6em;border-radius:50%;border:1px solid var(--ink);
+    background:var(--ink);color:var(--bg);font:700 .8em/1 var(--sans);cursor:pointer;
     display:inline-flex;align-items:center;justify-content:center;padding:0;
     letter-spacing:0;text-transform:none}
-  .tipbtn:hover{color:var(--accent-ink);border-color:rgba(247,147,26,.5)}
+  .tipbtn:hover{background:var(--orange);border-color:var(--orange);color:#000}
   .tipbtn:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
   .tipbox{position:absolute;top:calc(100% + .65rem);left:50%;transform:translateX(-50%);
     z-index:30;width:min(21rem,84vw);background:var(--bg);border:1px solid var(--line);
@@ -402,7 +404,7 @@
             sign in to nothing.</li>
         <li>Turn off Wi-Fi and unplug any internet cable.</li>
         <li>Open the saved file in that profile and check the badge below reads
-            <b>Offline — no route out</b>.</li>
+            <b>Offline — safe to generate</b>.</li>
         <li>Generate your passphrase, then write it down, memorize it or store it in your
             password manager.</li>
         <li>Close the browser completely before reconnecting.</li>
@@ -3284,7 +3286,7 @@ function netBadge() {
   $("badgetxt").textContent = online
     ? (local ? "Online — disconnect first"
              : "Online — your secret is at risk")
-    : "Offline — no route out";
+    : "Offline — safe to generate";
 }
 addEventListener("online", netBadge);
 addEventListener("offline", netBadge);
