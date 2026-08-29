@@ -95,6 +95,26 @@
   .cta:hover{background:var(--gold);border-color:var(--gold)}
   .cta:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
   .ctanote{font-size:.78rem;color:var(--dim);letter-spacing:.02em}
+  /* ---- tooltips: hover/focus on desktop, tap on mobile (JS toggles .on) ---- */
+  .tipwrap{position:relative;display:inline-flex;align-items:center}
+  .tipbtn{width:1.6em;height:1.6em;border-radius:50%;border:1px solid var(--line);
+    background:var(--panel);color:var(--dim);font:700 .8em/1 var(--sans);cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;padding:0;
+    letter-spacing:0;text-transform:none}
+  .tipbtn:hover{color:var(--accent-ink);border-color:rgba(247,147,26,.5)}
+  .tipbtn:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+  .tipbox{position:absolute;top:calc(100% + .65rem);left:50%;transform:translateX(-50%);
+    z-index:30;width:min(21rem,84vw);background:var(--bg);border:1px solid var(--line);
+    border-radius:12px;padding:.85rem 1.05rem;box-shadow:0 8px 30px rgba(0,0,0,.45);
+    font:400 .82rem/1.7 var(--sans);letter-spacing:.01em;text-transform:none;
+    color:var(--muted);text-align:left;opacity:0;visibility:hidden;
+    transition:opacity .15s;pointer-events:none}
+  .tipbox b{color:var(--ink)}
+  .tipbox code{font-size:.9em}
+  .tipwrap:hover .tipbox,.tipwrap:focus-within .tipbox,.tipwrap.on .tipbox{
+    opacity:1;visibility:visible;pointer-events:auto}
+  /* the title's trigger must not inherit the headline size */
+  h1 .tipwrap{font-size:1.05rem;vertical-align:super;margin-left:.6rem}
 
   .stats{display:flex;gap:clamp(2rem,6vw,4.5rem);margin:2.6rem 0 2.2rem;flex-wrap:wrap}
   .stat .num{font-size:clamp(1.7rem,4vw,2.4rem);font-weight:800;letter-spacing:-.02em;
@@ -221,7 +241,9 @@
   li b{color:var(--ink);font-weight:700}
   .warn{border-left:2px solid var(--orange);padding:.85rem 1.15rem;
     background:rgba(247,147,26,.05);border-radius:0 12px 12px 0;
-    font-size:.92rem;color:var(--muted);margin-bottom:1.6rem}
+    /* the stats row used to hold the hero and this strip apart — now the strip
+       spaces itself */
+    font-size:.92rem;color:var(--muted);margin:2.6rem 0 1.8rem}
   .warn b{color:var(--ink)}
   .warn a{color:var(--accent-ink);text-decoration:underline;text-underline-offset:2px}
   .warn a:hover{color:var(--ink)}
@@ -229,8 +251,17 @@
   .warn ol{margin:.7rem 0 .2rem;padding-left:1.35rem}
   .warn ol li{font-size:.88rem;padding-left:.3rem;margin-bottom:.45rem;list-style:decimal}
   .warn ol li::before{content:none}
-  .warn details{margin-top:.7rem}
+  .warn details{margin-top:0}
   .warn details p{font-size:.88rem;margin-top:.6rem}
+  /* the offline-guide disclosure: one clean line, larger type, and the same
+     rotating chevron as the Q&A header instead of the little triangle */
+  .warn summary{display:flex;align-items:center;gap:.6rem;color:var(--ink);
+    font-size:.95rem;font-weight:800;letter-spacing:.16em}
+  .warn summary:hover{color:var(--accent-ink)}
+  .warn summary::before{content:'❯';color:var(--accent-ink);display:inline-block;
+    font-size:1.25em;line-height:1;margin-right:0;
+    transform:none;transition:transform .2s ease}
+  .warn details[open] summary::before{content:'❯';transform:rotate(90deg)}
   .qa details{margin:0;border-bottom:1px solid var(--line2)}
   .qa details:last-child,.qa details:has(+ .grp2){border-bottom:none}
   .qa summary{padding:.85rem 0;font-size:.95rem;font-weight:600;letter-spacing:0;
@@ -328,7 +359,10 @@
     </div>
     <button id="theme" type="button" aria-label="Switch colour theme"><span id="themeglyph">☀</span> <span id="themetxt">Light</span></button>
   </div>
-  <h1>My <em>Passphrase</em></h1>
+  <h1>My <em>Passphrase</em><span class="tipwrap"><button class="tipbtn" type="button"
+      aria-label="Why this page is safe to use">i</button><span class="tipbox" role="tooltip"
+      ><b>Nothing</b> leaves this page.<br><b>Offline</b> — works with the wi-fi
+      off.<br><b>One file</b> — nothing to install.</span></span></h1>
   <p class="dek"><b>A free passphrase &amp; password generator.</b> Truly random words that are
      easy to remember and take centuries to crack — or classic random characters when a site
      demands them. Made entirely in your browser; nothing is stored or sent.</p>
@@ -337,18 +371,12 @@
     <span class="ctanote">Press the button, read the crack time, done.</span>
   </div>
 
-  <div class="stats">
-    <div class="stat"><div class="num">Nothing</div><div class="lab">Leaves this page</div></div>
-    <div class="stat"><div class="num">Offline</div><div class="lab">Works with the wi-fi off</div></div>
-    <div class="stat"><div class="num">One file</div><div class="lab">Nothing to install</div></div>
-  </div>
-
   <div class="warn">
-    <b>Getting a password from a website? Really?</b> Fair question. This page makes zero
-    network calls — no images, no fonts, no scripts — and it tells your browser to refuse if it
-    ever tried. Check your browser's network tab to verify.
     <details>
       <summary>How to run it safely — 6 steps</summary>
+      <p><b>Getting a password from a website? Really?</b> Fair question. This page makes zero
+      network calls — no images, no fonts, no scripts — and it tells your browser to refuse if
+      it ever tried. Check your browser's network tab to verify.</p>
       <p><b>Browser extensions are the risk this page cannot touch.</b> Anything you have added
       to your browser can read what appears on this page. For a passphrase that will guard
       something important, use a browser profile with nothing installed in it.</p>
@@ -408,6 +436,11 @@
     </div>
     <div class="row">
       <button class="primary" id="gen">Generate new passphrase</button>
+      <span class="tipwrap"><button class="tipbtn" type="button"
+        aria-label="Where the randomness comes from">i</button><span class="tipbox"
+        role="tooltip">Words and characters come from your browser's random number generator,
+        the one built for security work — never <code>Math.random</code>. Edit the box to test
+        a password of your own; nothing is saved, recorded or sent anywhere.</span></span>
       <select id="wordcount" aria-label="How many words">
         <option value="3">3 words</option>
         <option value="4">4 words</option>
@@ -424,9 +457,6 @@
         <option value="ascii">ASCII characters · 94 symbols</option>
       </select>
     </div>
-    <div class="hint">Words and characters come from your browser's random number generator, the
-      one built for security work — never <code>Math.random</code>. Edit the box to test a
-      password of your own; nothing is saved, recorded or sent anywhere.</div>
     <div class="hint" id="cliphint" style="display:none">⚠︎ Copied. The clipboard can be read
       by any program running on your computer, and apps that keep a clipboard history save
       their own copy. Paste it where it belongs, then copy something harmless.</div>
@@ -3270,6 +3300,18 @@ applyTheme(store.get());
 
 // the Q&A header advertises how much it folds away
 $("qacount").textContent = "· " + document.querySelectorAll(".qatop .qa details").length + " questions";
+
+/* tooltips: CSS handles hover and keyboard focus; a tap toggles for touch
+   screens, and tapping anywhere else closes whatever is open */
+document.querySelectorAll(".tipbtn").forEach(b => {
+  b.addEventListener("click", e => {
+    e.stopPropagation();
+    const w = b.parentElement;
+    document.querySelectorAll(".tipwrap.on").forEach(x => { if (x !== w) x.classList.remove("on") });
+    w.classList.toggle("on");
+  });
+});
+addEventListener("click", () => document.querySelectorAll(".tipwrap.on").forEach(x => x.classList.remove("on")));
 
 /* No passphrase is generated on load. Deliberate: the page should not mint a
    secret before the user has decided to ask for one — or had the chance to
