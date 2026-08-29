@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Content-Security-Policy"
       content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; form-action 'none'; base-uri 'none'">
-<meta name="description" content="Generate a random passphrase from the EFF wordlist or common English words. Self-contained, offline, no network.">
+<meta name="description" content="Generate a random passphrase from the EFF wordlist or common English words. Self-contained, works offline, never touches the internet.">
 <title>My Passphrase</title>
 <!-- Inline favicon: a data: URI is not a fetch, so this adds no request — it
      removes one, the automatic /favicon.ico that would 404. -->
@@ -101,6 +101,8 @@
     opacity:1;visibility:visible;pointer-events:auto}
   /* the title's trigger must not inherit the headline size */
   h1 .tipwrap{font-size:1.05rem;vertical-align:super;margin-left:.6rem}
+  /* nor should the meter label's shrink it to label size */
+  .mlab .tipwrap{font-size:.92rem;margin-left:.5rem;vertical-align:-.35em}
 
   .stats{display:flex;gap:clamp(2rem,6vw,4.5rem);margin:2.6rem 0 2.2rem;flex-wrap:wrap}
   .stat .num{font-size:clamp(1.7rem,4vw,2.4rem);font-weight:800;letter-spacing:-.02em;
@@ -111,7 +113,8 @@
 
   /* ---- cards ---- */
   .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;
-        padding:clamp(1.4rem,3vw,2.1rem);margin-bottom:1.15rem;box-shadow:var(--shadow)}
+        padding:clamp(2rem,4.2vw,2.9rem) clamp(1.4rem,3vw,2.1rem);
+        margin-bottom:1.15rem;box-shadow:var(--shadow)}
   .h{font-size:.72rem;font-weight:700;letter-spacing:.22em;color:var(--dim);
      text-transform:uppercase;margin-bottom:1.1rem}
 
@@ -202,6 +205,20 @@
   .mnote b{color:var(--ink);font-weight:700}
   .ok-c{color:var(--green-ink)} .warn-c{color:var(--accent-ink)} .bad-c{color:var(--red-ink)}
   .status{font-size:.92rem;margin-top:1rem;min-height:1.4em;font-weight:600}
+  /* an empty status was silently reserving a line below the buttons, making
+     the card bottom-heavy — take it out of flow until it has something to say */
+  .status:empty{display:none}
+  /* ---- footer credits fold behind a small disclosure ---- */
+  .creds{flex-basis:100%;margin-top:1.2rem}
+  .creds>summary{display:flex;align-items:center;gap:.5rem;color:var(--dim);
+    font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase}
+  .creds>summary:hover{color:var(--accent-ink)}
+  .creds>summary::before{content:'❯';color:var(--accent-ink);display:inline-block;
+    font-size:1.2em;line-height:1;transform:none;transition:transform .2s ease}
+  .creds[open]>summary::before{content:'❯';transform:rotate(90deg)}
+  .creds>.prov{margin-top:.9rem}
+  .copyline{flex-basis:100%;font-size:.72rem;color:var(--dim);margin-top:1.4rem;
+    letter-spacing:.02em;text-transform:none;font-weight:400}
   .status.bad{color:var(--red-ink)} .status.ok{color:var(--green-ink)}
 
   /* ---- tables ---- */
@@ -307,8 +324,6 @@
   .flinks .g{color:var(--accent-ink);font-size:1.05em;letter-spacing:0}
   .prov{overflow-wrap:anywhere;font-size:.78rem;color:var(--dim);line-height:1.8;margin-top:1.1rem;
     letter-spacing:.01em;text-transform:none;font-weight:400;flex-basis:100%}
-  .flinknote{flex-basis:100%;font-size:.74rem;color:var(--dim);margin-top:.8rem;
-    letter-spacing:.01em;text-transform:none;font-weight:400}
   @media(max-width:640px){ main{padding-top:3.5rem} .stats{gap:1.75rem} }
   /* On a phone the flex row wraps at whatever widths the labels happen to make,
      which reads as accidental. The primary action and the two selects take the
@@ -319,6 +334,14 @@
     .row .primary,.row select{grid-column:1 / -1}
     .row button,.row select{width:100%;padding-left:.6rem;padding-right:.6rem;
                             letter-spacing:.06em}
+    /* the ⓘ is a button too, so the width:100% above stretched it into a
+       pill — keep it a small circle and give it the last spot in the grid,
+       tucked into the lower-right corner of the field */
+    .row .tipwrap{grid-column:1 / -1;order:99;justify-self:end}
+    .row .tipbtn{width:1.9em;height:1.9em;padding:0}
+    /* centered bubbles overflow a phone screen when the trigger sits near an
+       edge — hang them from the trigger's right edge instead */
+    .tipbox{left:auto;right:0;transform:none}
   }
 </style>
 <script>try{if(localStorage.getItem("passphrase-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
@@ -364,9 +387,10 @@
   <div class="warn">
     <details>
       <summary>How to run it safely — 6 steps</summary>
-      <p><b>Getting a password from a website? Really?</b> Fair question. This page makes zero
-      network calls — no images, no fonts, no scripts — and it tells your browser to refuse if
-      it ever tried. Check your browser's network tab to verify.</p>
+      <p><b>Getting a password from a website? Really?</b> Fair question. This page never
+      touches the internet — no images, no fonts, no scripts — and it tells your browser to
+      refuse if it ever tried. Check the Network tab in your browser's developer tools to
+      verify.</p>
       <p><b>Browser extensions are the risk this page cannot touch.</b> Anything you have added
       to your browser can read what appears on this page. For a passphrase that will guard
       something important, use a browser profile with nothing installed in it.</p>
@@ -376,7 +400,7 @@
         <li>Make a fresh browser profile — Chrome/Edge: profile icon → Add; Firefox:
             <code>about:profiles</code> → Create a New Profile. Install nothing into it,
             sign in to nothing.</li>
-        <li>Turn off Wi-Fi and unplug any network cable.</li>
+        <li>Turn off Wi-Fi and unplug any internet cable.</li>
         <li>Open the saved file in that profile and check the badge below reads
             <b>Offline — no route out</b>.</li>
         <li>Generate your passphrase, then write it down, memorize it or store it in your
@@ -418,7 +442,13 @@
     </div>
     <div class="meter" id="meter" style="display:none">
       <div class="mrow">
-        <span class="mlab">Approximate time to crack</span>
+        <span class="mlab">Approximate time to crack<span class="tipwrap"><button class="tipbtn"
+          type="button" aria-label="How this is measured">i</button><span class="tipbox"
+          role="tooltip">A bit is one yes-or-no answer a guesser has to get right, and every
+          bit doubles their work. The crack time assumes 10,000 guesses per second, typical
+          for a properly hashed password database. Generated passphrases show their true
+          entropy; for text you type, the figure is zxcvbn's estimate — an upper bound, not
+          a guarantee.</span></span></span>
         <span class="mval" id="mval"></span>
       </div>
       <div class="bar"><div class="fill" id="mfill"></div></div>
@@ -610,16 +640,18 @@
   <footer>
     <div class="l">MY PASSPHRASE <span>· GENERATOR</span></div>
     <div class="r">RUNS OFFLINE</div>
-    <div class="prov">
-      Generator and crack-time code adapted from <code>mike-hearn/useapassphrase</code> (ISC).
-      Strength estimates by <code>zxcvbn</code>, created at Dropbox by Dan Wheeler, embedded
-      verbatim. QR encoding by <code>kazuhikoarase/qrcode-generator</code> (MIT), embedded
-      verbatim. Wordlists: the EFF large wordlist (CC-BY 3.0) and a common-English list derived
-      from <code>first20hours/google-10000-english</code>. Design adapted from
-      <code>seQRets/My-Seed-Phrase</code>. No fonts, scripts, styles or images are loaded from
-      anywhere.<br>
-      Copyright © 2026 Toothjockey LLC — MIT licensed, and open source so you can check all of this.
-    </div>
+    <details class="creds">
+      <summary>Credits</summary>
+      <div class="prov">
+        Generator and crack-time code adapted from <code>mike-hearn/useapassphrase</code> (ISC).
+        Strength estimates by <code>zxcvbn</code>, created at Dropbox by Dan Wheeler, embedded
+        verbatim. QR encoding by <code>kazuhikoarase/qrcode-generator</code> (MIT), embedded
+        verbatim. Wordlists: the EFF large wordlist (CC-BY 3.0) and a common-English list derived
+        from <code>first20hours/google-10000-english</code>. Design adapted from
+        <code>seQRets/My-Seed-Phrase</code>. No fonts, scripts, styles or images are loaded from
+        the internet.
+      </div>
+    </details>
     <div class="flinks">
       <a href="https://github.com/seQRets/My-Passphrase" target="_blank" rel="noopener noreferrer">
         <span class="g" aria-hidden="true">‹›</span> Source on GitHub</a>
@@ -628,8 +660,8 @@
       <a href="https://myseedphrase.app" target="_blank" rel="noopener noreferrer">
         <span class="g" aria-hidden="true">↗</span> myseedphrase.app</a>
     </div>
-    <div class="flinknote">All links leave this page and open in a new tab. Nothing on this
-      page loads from anywhere — that stays true whether or not you ever click them.</div>
+    <div class="copyline">Copyright © 2026 Toothjockey LLC — MIT licensed, and open source so
+      you can check all of this.</div>
   </footer>
 </main>
 
@@ -3097,17 +3129,15 @@ function updateMeter(animate) {
     fill.style.transition = "";
   }
   fill.style.width = pct + "%";
+  // one short line — the full how-it's-measured story lives in the ⓘ beside
+  // the meter label
   $("mnote").innerHTML = generated
     ? "<b>" + Math.round(bits) + " bits of real randomness</b> — " + lastGenerated.count
       + (LISTS[lastGenerated.list].chars ? " characters" : " words")
-      + " drawn uniformly from " + LISTS[lastGenerated.list].label + ". A bit is one "
-      + "yes-or-no answer a guesser has to get right, and every bit doubles their work. The "
-      + "crack time assumes 10,000 guesses per second, typical for a properly hashed password "
-      + "database."
-    : "<b>About " + Math.round(bits) + " bits, estimated.</b> This text was typed or edited, "
-      + "so the figure is zxcvbn's pattern-based estimate — an upper bound, not a guarantee. "
-      + "Anything a human invents tends to be far more guessable than it looks. Press "
-      + "<b>Generate</b> for words with randomness that can be counted honestly.";
+      + " drawn uniformly from " + LISTS[lastGenerated.list].label + "."
+    : "<b>About " + Math.round(bits) + " bits, estimated</b> — typed text is judged by "
+      + "zxcvbn's pattern hunt. Press <b>Generate</b> for randomness that can be counted "
+      + "honestly.";
 }
 
 /* ---- blur shield (ported from BIP-39 Checksum) ------------------------ */
@@ -3252,8 +3282,8 @@ function netBadge() {
   const b = $("badge");
   b.className = "badge " + (online ? "on" : "off");
   $("badgetxt").textContent = online
-    ? (local ? "Online — disconnect for a passphrase that matters"
-             : "Served over the network — save this page and run it offline")
+    ? (local ? "Online — disconnect first"
+             : "Online — your secret is at risk")
     : "Offline — no route out";
 }
 addEventListener("online", netBadge);

@@ -1,7 +1,7 @@
 # My Passphrase
 
 A passphrase and password generator in **one self-contained HTML file**. No
-build, no dependencies, no network requests — save `index.html`, open it in a
+build, no dependencies, nothing ever sent over the internet — save `index.html`, open it in a
 browser, done. It works with the Wi-Fi off, and a Content-Security-Policy tells
 the browser to refuse if anything on the page ever tried to phone home.
 
@@ -58,7 +58,7 @@ libraries are all in plain sight.
 
 ## Security
 
-The page makes zero network calls — no images, no fonts, no scripts — and its
+The page never touches the internet — no images, no fonts, no scripts — and its
 CSP (`default-src 'none'`) makes the browser enforce that. Nothing typed or
 generated is stored, logged, or sent. What a web page *cannot* defend against
 (browser extensions, a compromised machine, clipboard snooping) is documented

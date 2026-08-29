@@ -33,7 +33,7 @@ copy.
 ## Scope
 
 This project is one self-contained HTML file. There is no backend, no database,
-no accounts, no cookies and no network calls, so the surface is narrow and the
+no accounts, no cookies and no internet calls, so the surface is narrow and the
 things that matter are specific.
 
 **In scope**
@@ -41,7 +41,7 @@ things that matter are specific.
 - Anything weakening the randomness behind generation — bias between words or
   characters, use of a non-cryptographic source, or the rejection sampling
   being avoidable
-- Anything that causes the page to make a network request
+- Anything that causes the page to make an internet request
 - Anything that causes a generated or typed secret to be stored, logged, or
   leave the page
 - The QR code encoding a different string than the one in the box
