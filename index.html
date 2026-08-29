@@ -239,7 +239,8 @@
   li::before{content:'';position:absolute;left:0;top:.55em;width:8px;height:8px;
     border-radius:50%;background:var(--orange);opacity:.7}
   li b{color:var(--ink);font-weight:700}
-  .warn{border-left:2px solid var(--orange);padding:.85rem 1.15rem;
+  .warn{border-left:2px solid var(--orange);
+    padding:1.6rem clamp(1.4rem,3.5vw,2.4rem) 1.8rem;
     background:rgba(247,147,26,.05);border-radius:0 12px 12px 0;
     /* the stats row used to hold the hero and this strip apart — now the strip
        spaces itself */
@@ -248,11 +249,14 @@
   .warn a{color:var(--accent-ink);text-decoration:underline;text-underline-offset:2px}
   .warn a:hover{color:var(--ink)}
   .warn a:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
-  .warn ol{margin:.7rem 0 .2rem;padding-left:1.35rem}
-  .warn ol li{font-size:.88rem;padding-left:.3rem;margin-bottom:.45rem;list-style:decimal}
+  .warn ol{margin:1.15rem 0 .4rem;padding-left:1.5rem}
+  .warn ol li{font-size:.88rem;line-height:1.7;padding-left:.35rem;margin-bottom:.8rem;
+    list-style:decimal}
   .warn ol li::before{content:none}
   .warn details{margin-top:0}
-  .warn details p{font-size:.88rem;margin-top:.6rem}
+  .warn details p{font-size:.88rem;line-height:1.7;margin-top:1.05rem}
+  /* room between the header and the guide it reveals */
+  .warn details[open] summary{margin-bottom:1.2rem}
   /* the offline-guide disclosure: one clean line, larger type, and the same
      rotating chevron as the Q&A header instead of the little triangle */
   .warn summary{display:flex;align-items:center;gap:.6rem;color:var(--ink);
