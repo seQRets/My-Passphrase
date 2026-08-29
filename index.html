@@ -13,12 +13,14 @@
 <style>
   :root{
     color-scheme:dark;
-    /* Not pure black: a warm charcoal ground (the dark twin of the cream
-       light theme) with slightly stronger panel and line tints, so cards
-       and fields separate from the page instead of sinking into it. */
-    --bg:#17130E; --panel:rgba(255,255,255,0.055); --panel2:rgba(255,255,255,0.03);
+    /* Near-black, neutral — no brown cast. The panel and line tints stay a
+       step stronger so cards and fields separate from the ground. The text
+       tokens carry the real legibility: body text and labels sat at 46% and
+       28% white, far fainter than the light theme's solid grays — they now
+       match the light theme's contrast. */
+    --bg:#0C0C0E; --panel:rgba(255,255,255,0.055); --panel2:rgba(255,255,255,0.03);
     --line:rgba(255,255,255,0.12); --line2:rgba(255,255,255,0.08);
-    --ink:#F4F6FB; --muted:rgba(244,246,251,0.46); --dim:rgba(244,246,251,0.28);
+    --ink:#F4F6FB; --muted:rgba(244,246,251,0.72); --dim:rgba(244,246,251,0.5);
     --orange:#F7931A; --gold:#F0B429; --green:#36D399; --red:#F87171;
     /* Text-weight variants. The deck orange only reaches 2.2:1 on a light
        ground, so light mode swaps in a deeper burnt orange for small text
@@ -244,6 +246,19 @@
   .qa .grp2{font-size:.68rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
     color:var(--dim);margin:1.7rem 0 .2rem;padding-top:1.3rem;border-top:1px solid var(--line)}
   .qa .grp2:first-child{margin-top:0;padding-top:0;border-top:none}
+  /* ---- the whole Q&A folds behind one big disclosure ---- */
+  .qatop{margin-top:0}
+  .qatop>summary{display:flex;align-items:center;gap:.85rem;
+    font-size:clamp(1.2rem,2.6vw,1.45rem);font-weight:800;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--ink);padding:.15rem 0}
+  .qatop>summary:hover{color:var(--accent-ink)}
+  /* a big ">" that rotates to point down when the section opens */
+  .qatop>summary::before{content:'❯';color:var(--accent-ink);display:inline-block;
+    font-size:1.1em;line-height:1;margin-right:0;vertical-align:0;
+    transform:none;transition:transform .2s ease}
+  .qatop[open]>summary::before{content:'❯';transform:rotate(90deg)}
+  .qacount{font-size:.72rem;font-weight:600;letter-spacing:.14em;color:var(--dim)}
+  .qatop>.qa{margin-top:1.2rem}
   details{margin-top:1rem}
   summary{cursor:pointer;color:var(--dim);font-size:.8rem;font-weight:700;
     letter-spacing:.14em;text-transform:uppercase;list-style:none}
@@ -419,7 +434,8 @@
   </div>
 
   <div class="card">
-    <div class="h">Questions</div>
+    <details class="qatop">
+    <summary>Q &amp; A <span class="qacount" id="qacount"></span></summary>
     <div class="qa">
 
       <div class="grp2">Passphrases</div>
@@ -546,6 +562,7 @@
       </details>
 
     </div>
+    </details>
   </div>
 
   <div class="qrveil" id="qrveil" style="display:none" role="dialog" aria-modal="true"
@@ -3250,6 +3267,9 @@ matchMedia("(prefers-color-scheme: light)").addEventListener("change", () => {
   if (!store.get()) applyTheme(null);
 });
 applyTheme(store.get());
+
+// the Q&A header advertises how much it folds away
+$("qacount").textContent = "· " + document.querySelectorAll(".qatop .qa details").length + " questions";
 
 /* No passphrase is generated on load. Deliberate: the page should not mint a
    secret before the user has decided to ask for one — or had the chance to
