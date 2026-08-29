@@ -22,7 +22,10 @@
        while keeping #F7931A for rules, borders and fills. */
     --accent-ink:#F7931A; --green-ink:#36D399; --red-ink:#F87171;
     --code-ink:#F0B429; --code-bg:rgba(240,180,41,.08);
-    --field:rgba(0,0,0,.35); --grid:rgba(247,147,26,0.025); --glow:rgba(247,147,26,0.13);
+    /* The input box was near-invisible on the pure-black ground: a faintly
+       lighter fill plus its own stronger border make it read as a field. */
+    --field:rgba(255,255,255,.06); --fieldline:rgba(255,255,255,.24);
+    --grid:rgba(247,147,26,0.025); --glow:rgba(247,147,26,0.13);
     --shadow:none;
     --sans:-apple-system,system-ui,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
     --mono:ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace;
@@ -35,7 +38,8 @@
     --ink:#1B1814; --muted:#57514A; --dim:#7D766B;
     --accent-ink:#9C5206; --green-ink:#0F7A45; --red-ink:#B3261E;
     --code-ink:#8A5A08; --code-bg:rgba(240,180,41,.16);
-    --field:#FFFFFF; --grid:rgba(247,147,26,0.055); --glow:rgba(247,147,26,0.10);
+    --field:#FFFFFF; --fieldline:rgba(27,24,20,.16);
+    --grid:rgba(247,147,26,0.055); --glow:rgba(247,147,26,0.10);
     --shadow:0 1px 2px rgba(27,24,20,.04),0 8px 24px rgba(27,24,20,.05);
   } }
   :root[data-theme="light"]{
@@ -45,7 +49,8 @@
     --ink:#1B1814; --muted:#57514A; --dim:#7D766B;
     --accent-ink:#9C5206; --green-ink:#0F7A45; --red-ink:#B3261E;
     --code-ink:#8A5A08; --code-bg:rgba(240,180,41,.16);
-    --field:#FFFFFF; --grid:rgba(247,147,26,0.055); --glow:rgba(247,147,26,0.10);
+    --field:#FFFFFF; --fieldline:rgba(27,24,20,.16);
+    --grid:rgba(247,147,26,0.055); --glow:rgba(247,147,26,0.10);
     --shadow:0 1px 2px rgba(27,24,20,.04),0 8px 24px rgba(27,24,20,.05);
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -110,7 +115,7 @@
   .badge.off .led{background:var(--green)}
 
   /* ---- input ---- */
-  textarea{width:100%;min-height:5.2rem;padding:1rem 1.1rem;border:1px solid var(--line);
+  textarea{width:100%;min-height:5.2rem;padding:1rem 1.1rem;border:1px solid var(--fieldline);
     border-radius:12px;background:var(--field);color:var(--ink);resize:vertical;
     font:clamp(16px,2.4vw,21px)/1.8 var(--mono);letter-spacing:.02em}
   /* Holding text, not a passphrase — smaller than the generated output. */
@@ -171,6 +176,10 @@
     background-repeat:no-repeat;background-position:right .9rem center;
     max-width:100%}
   select:hover{border-color:rgba(247,147,26,.5);color:var(--ink)}
+  /* The browser paints the dropdown list with the select's own colors, and the
+     translucent panel made options unreadable in dark mode — give the list a
+     solid ground and full-contrast text explicitly. */
+  option{background:var(--bg);color:var(--ink)}
   .meter{margin-top:1.2rem;padding-top:1.2rem;border-top:1px solid var(--line2)}
   .mrow{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;margin-bottom:.55rem}
   .mlab{font-size:.7rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
@@ -452,12 +461,18 @@
       </details>
 
       <details>
-        <summary>What does the crack time mean?</summary>
-        <p>It comes from <code>zxcvbn</code>, Dropbox's password strength estimator, assuming
-        10,000 guesses per second — consistent with passwords hashed using bcrypt, scrypt or
-        PBKDF2. If a service stores passwords with plain MD5 or SHA-256, guessing runs millions
-        of times faster and no amount of password strength really helps. Treat the figure as a
-        comparison tool, not a promise.</p>
+        <summary>How is the crack time calculated?</summary>
+        <p>By <code>zxcvbn</code>, an open-source strength estimator created at Dropbox — and
+        don't let the name on the box put you off: it has become the industry's de-facto
+        standard, the same engine behind the strength meters in major password managers
+        (Bitwarden among them) and at login providers such as Stripe and GitLab. Rather than
+        just counting characters, it hunts for the patterns real crackers try first —
+        dictionary words, names, dates, keyboard runs, letter-for-number swaps — and estimates
+        how many guesses your text would survive.</p>
+        <p>The time shown assumes 10,000 guesses per second, consistent with passwords hashed
+        using bcrypt, scrypt or PBKDF2. If a service stores passwords with plain MD5 or
+        SHA-256, guessing runs millions of times faster and no amount of password strength
+        really helps. Treat the figure as a comparison tool, not a promise.</p>
       </details>
 
       <div class="grp2">The generation pools</div>
