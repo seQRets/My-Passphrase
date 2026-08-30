@@ -11,7 +11,7 @@ the browser to refuse if anything on the page ever tried to phone home.
 
 ## Features
 
-- **Three generation pools**
+- **Four generation pools**
   - The **EFF large wordlist** — 7,776 words curated by the Electronic Frontier
     Foundation for passphrases; the same list diceware uses
   - **Common English** — 7,459 everyday words from a frequency corpus, for
@@ -19,6 +19,9 @@ the browser to refuse if anything on the page ever tried to phone home.
   - **ASCII characters** — all 94 printable ASCII symbols, for a classic
     `ipz2!az8k%0h`-style password where a manager autofills or a length limit
     bites
+  - **PIN digits** — 4 to 12 random digits for the PINs hardware wallets ask
+    you to set; drawn per digit, so leading zeros are as likely as anything
+    else (`0042` is a valid PIN — range-style generators can't produce it)
 - **Real randomness** — every draw comes from `crypto.getRandomValues` with
   rejection sampling, so each word and character is exactly as likely as every
   other; `Math.random` appears nowhere in the file
