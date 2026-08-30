@@ -460,7 +460,7 @@
       <button class="primary" id="gen">Generate new passphrase</button>
       <span class="tipwrap"><button class="tipbtn" type="button"
         aria-label="Where the randomness comes from">i</button><span class="tipbox"
-        role="tooltip">Words and characters come from your browser's random number generator,
+        role="tooltip">Words, characters and digits come from your browser's random number generator,
         the one built for security work — never <code>Math.random</code>. Edit the box to test
         a password of your own; nothing is saved, recorded or sent anywhere.</span></span>
       <select id="wordcount" aria-label="How many words">
@@ -477,6 +477,7 @@
         <option value="eff" selected>EFF wordlist · 7,776 words</option>
         <option value="common">Common English · 7,459 words</option>
         <option value="ascii">ASCII characters · 94 symbols</option>
+        <option value="pin">PIN digits · 0–9</option>
       </select>
     </div>
     <div class="hint" id="cliphint" style="display:none">⚠︎ Copied. The clipboard can be read
@@ -581,6 +582,20 @@
         sampling as the wordlists, so every symbol is exactly as likely as every other. Some
         sites reject certain symbols; if one does, just generate again — never trim or swap
         characters by hand.</p>
+      </details>
+
+      <details>
+        <summary>What is the PIN pool — and why is its crack time so scary?</summary>
+        <p>Random digits for device PINs — the kind a hardware wallet asks you to set. Each
+        digit is drawn independently, so leading zeros are as likely as anything else:
+        <code>0042</code> is a perfectly good 4-digit PIN, which is exactly what
+        pick-a-number-in-a-range generators can never give you. A digit carries about 3.3 bits,
+        so a 6-digit PIN is only ~20 bits and the meter will show it cracking almost instantly.
+        That figure is honest — but it describes an attacker who can guess without limit. A
+        PIN's real protection is the <b>device's lockout</b>: hardware wallets throttle,
+        lock or wipe themselves after a few wrong tries, so ~20 bits is fine there. The same
+        20 bits is catastrophic anywhere unlimited guessing is possible — never reuse a device
+        PIN as an online password.</p>
       </details>
 
       <details>
@@ -3023,10 +3038,16 @@ const COMMON_WORDS = "aaron abandoned aberdeen abilities ability able abortion a
 // The printable ASCII characters, 33–126: everything on a US keyboard except
 // space. 94 symbols ≈ 6.55 bits each, so 16 characters carry ~105 bits.
 const ASCII_CHARS = Array.from({ length: 94 }, (_, i) => String.fromCharCode(33 + i));
+// The ten digits, for device PINs. Each digit is drawn independently, so
+// leading zeros are as likely as anything else — a PIN is a string of digits,
+// not a number, and "0042" is a perfectly valid one. Range-style generators
+// ("between 1000 and 9999") silently exclude every PIN starting with 0.
+const PIN_DIGITS = Array.from({ length: 10 }, (_, i) => String(i));
 const LISTS = {
   eff:    { words: EFF_WORDS,    label: "the EFF large wordlist" },
   common: { words: COMMON_WORDS, label: "the common-English list" },
-  ascii:  { words: ASCII_CHARS,  label: "the 94 printable ASCII characters", chars: true }
+  ascii:  { words: ASCII_CHARS,  label: "the 94 printable ASCII characters", chars: true },
+  pin:    { words: PIN_DIGITS,   label: "the ten digits", chars: true }
 };
 
 const $ = id => document.getElementById(id);
@@ -3135,7 +3156,8 @@ function updateMeter(animate) {
   // the meter label
   $("mnote").innerHTML = generated
     ? "<b>" + Math.round(bits) + " bits of real randomness</b> — " + lastGenerated.count
-      + (LISTS[lastGenerated.list].chars ? " characters" : " words")
+      + (lastGenerated.list === "pin" ? " digits"
+         : LISTS[lastGenerated.list].chars ? " characters" : " words")
       + " drawn uniformly from " + LISTS[lastGenerated.list].label + "."
     : "<b>About " + Math.round(bits) + " bits, estimated</b> — typed text is judged by "
       + "zxcvbn's pattern hunt. Press <b>Generate</b> for randomness that can be counted "
@@ -3248,10 +3270,14 @@ function generate() {
    ASCII pool, so its options swap when the pool does — each mode remembers the
    count it was last set to. */
 const COUNTS = {
-  words: { values: [3, 4, 5, 6, 7, 8, 10, 12], unit: "words", last: "5" },
-  chars: { values: [8, 12, 16, 20, 24, 32, 48, 64], unit: "characters", last: "16" }
+  words:  { values: [3, 4, 5, 6, 7, 8, 10, 12], unit: "words", last: "5" },
+  chars:  { values: [8, 12, 16, 20, 24, 32, 48, 64], unit: "characters", last: "16" },
+  digits: { values: [4, 5, 6, 7, 8, 10, 12], unit: "digits", last: "6" }
 };
-function countMode() { return LISTS[$("wordlist").value].chars ? "chars" : "words"; }
+function countMode() {
+  const k = $("wordlist").value;
+  return k === "pin" ? "digits" : LISTS[k].chars ? "chars" : "words";
+}
 function rebuildCountOptions() {
   const m = COUNTS[countMode()];
   $("wordcount").innerHTML = "";
@@ -3268,7 +3294,15 @@ $("wordcount").onchange = () => {
   COUNTS[countMode()].last = $("wordcount").value;
   generate();
 };
-$("wordlist").onchange = () => { rebuildCountOptions(); generate(); };
+$("wordlist").onchange = () => {
+  rebuildCountOptions();
+  // the button names what it makes
+  const k = $("wordlist").value;
+  $("gen").textContent = k === "pin" ? "Generate new PIN"
+                       : k === "ascii" ? "Generate new password"
+                       : "Generate new passphrase";
+  generate();
+};
 $("passphrase").addEventListener("input", () => {
   // hand-editing means the box no longer holds the untouched generated
   // passphrase — drop the blur and its controls rather than hide typing
