@@ -155,6 +155,8 @@
     padding:1.4rem 1.6rem 1.6rem;max-width:23rem;width:100%;box-shadow:var(--shadow);
     text-align:center}
   .qrhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+  /* the QR stays centered; the words below it read left-justified */
+  .qrcard .hint{text-align:left}
   .qrhead .h{margin-bottom:0}
   button.qrx{padding:.1rem .5rem .25rem;font-size:1.25rem;line-height:1;font-weight:400;
     letter-spacing:0;text-transform:none;border-color:transparent;background:transparent;
@@ -633,10 +635,10 @@
   </div>
 
   <div class="qrveil" id="qrveil" style="display:none" role="dialog" aria-modal="true"
-       aria-label="Your passphrase as a QR code">
+       aria-label="Your Passphrase QR">
     <div class="qrcard">
       <div class="qrhead">
-        <div class="h">Your passphrase as a QR</div>
+        <div class="h">Your Passphrase QR</div>
         <div class="qrtools">
           <button class="ictl" id="qrpeek" type="button" aria-label="Reveal the QR" aria-pressed="false">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
@@ -664,7 +666,7 @@
     <div class="l">MY PASSPHRASE <span>· GENERATOR</span></div>
     <!-- bump the version on every release: it lets a saved copy be compared
          against the repo's releases -->
-    <div class="r">v1.6.1 · RUNS OFFLINE</div>
+    <div class="r">v1.6.2 · RUNS OFFLINE</div>
     <details class="creds">
       <summary>Credits</summary>
       <div class="prov">
