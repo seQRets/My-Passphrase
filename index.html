@@ -163,7 +163,7 @@
   /* Scanners want contrast, not theming: always dark modules on a white card
      with a proper quiet zone, in either theme. */
   .qrbox{background:#fff;border-radius:12px;padding:10px;display:inline-block;line-height:0}
-  .qrbox canvas{width:100%;max-width:248px;height:auto;image-rendering:pixelated;
+  .qrbox canvas{width:100%;max-width:320px;height:auto;image-rendering:pixelated;
     transition:filter .15s}
   /* The QR opens blurred — same idea as the passphrase shield, but stronger:
      a QR is machine-readable at a glance, so it stays smudged until the eye
@@ -643,6 +643,10 @@
               <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>
               <line id="qrpeekslash" x1="4" y1="21" x2="20" y2="3" style="display:none"/>
             </svg></button>
+          <button class="ictl" id="qrdl" type="button" aria-label="Download the QR as an image">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 4v11"/><path d="m7 11 5 5 5-5"/><path d="M5 20h14"/>
+            </svg></button>
           <button class="qrx" id="qrclose" type="button" aria-label="Close">×</button>
         </div>
       </div>
@@ -650,7 +654,9 @@
       <div class="hint">Plain text, for wallets that scan a passphrase instead of making you
         type it on the device (Krux, for one). It opens blurred: a QR is readable by any camera
         in the room, not just the one you mean, so press the eye only once the scanner is
-        pointed at it, and close this as soon as it has scanned.</div>
+        pointed at it, and close this as soon as it has scanned. Downloading saves the QR —
+        and the secret inside it — as a picture on this computer; delete the file once it has
+        served its purpose.</div>
     </div>
   </div>
 
@@ -3203,11 +3209,39 @@ $("incopy").onclick = () => {
 // the drawing is wiped on close so the secret does not linger off-screen. For
 // wallets that scan a passphrase in (Krux, for one) instead of making you
 // type it on the device.
+let lastQR = null;
 function qrHide() {
   $("qrveil").style.display = "none";
   const c = $("qrcanvas");
   c.width = c.height = 1;
+  lastQR = null;
 }
+// A high-resolution copy for saving: ~2000px on a side, drawn fresh from the
+// same matrix the modal shows. The file holds the secret — the hint tells the
+// user to delete it once it has served its purpose.
+$("qrdl").onclick = () => {
+  if (!lastQR) return;
+  const n = lastQR.getModuleCount(), quiet = 4;
+  const scale = Math.ceil(2048 / (n + quiet * 2));
+  const size = (n + quiet * 2) * scale;
+  const c = document.createElement("canvas");
+  c.width = c.height = size;
+  const ctx = c.getContext("2d");
+  ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, size, size);
+  ctx.fillStyle = "#000";
+  for (let row = 0; row < n; row++)
+    for (let col = 0; col < n; col++)
+      if (lastQR.isDark(row, col))
+        ctx.fillRect((col + quiet) * scale, (row + quiet) * scale, scale, scale);
+  c.toBlob(b => {
+    const u = URL.createObjectURL(b);
+    const a = document.createElement("a");
+    a.href = u; a.download = "my-passphrase-qr.png";
+    a.click();
+    URL.revokeObjectURL(u);
+    c.width = c.height = 1;             // wipe the off-screen drawing
+  }, "image/png");
+};
 // Every open starts blurred — the reveal is for the moment the scanner is
 // actually pointed at the screen, so it is deliberately not sticky.
 function qrShield(on) {
@@ -3223,6 +3257,7 @@ $("inqr").onclick = () => {
   const qr = qrcode(0, "M");          // 0 = smallest version that fits
   qr.addData(text, "Byte");
   qr.make();
+  lastQR = qr;                          // the download button reuses this matrix
   const n = qr.getModuleCount(), scale = 8, quiet = 4;
   const size = (n + quiet * 2) * scale;
   const c = $("qrcanvas");
