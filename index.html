@@ -140,6 +140,7 @@
      blurs it without blurring the box, so a shoulder-surfer sees smudges, not
      words. The eye button lifts it. (Ported from BIP-39 Checksum.) */
   textarea.shield{color:transparent;text-shadow:0 0 .55em var(--muted);caret-color:transparent}
+  textarea.shield::placeholder{text-shadow:none}
   .inwrap{position:relative}
   .inwrap.on textarea{padding-right:8rem}
   .inctl{position:absolute;top:.6rem;right:.8rem;display:flex;gap:.35rem}
@@ -673,7 +674,7 @@
     <div class="l">MY PASSPHRASE <span>· GENERATOR</span></div>
     <!-- bump the version on every release: it lets a saved copy be compared
          against the repo's releases -->
-    <div class="r">v1.6.4 · RUNS OFFLINE</div>
+    <div class="r">v1.6.5 · RUNS OFFLINE</div>
     <details class="creds">
       <summary>Credits</summary>
       <div class="prov">
@@ -3379,6 +3380,13 @@ function netBadge() {
 addEventListener("online", netBadge);
 addEventListener("offline", netBadge);
 netBadge();
+
+// A copy saved from the browser (File → Save Page As) serializes the live DOM
+// — the shield class, the visible controls — but not the passphrase itself,
+// so a snapshot taken mid-use wakes up with a smudged placeholder and
+// orphaned buttons beside an empty box. Reconcile with what the box holds.
+if ($("passphrase").value.trim()) applyShield();
+else shieldReset();
 
 /* ---- theme (from BIP-39 Checksum) ------------------------------------ */
 const THEME_KEY = "passphrase-theme";
