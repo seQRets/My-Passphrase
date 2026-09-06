@@ -266,6 +266,11 @@
        gap:.9rem;flex-wrap:wrap;margin-top:.6rem}
   .mgoal{font-size:var(--fs-md);font-weight:600;color:var(--muted);line-height:1.55}
   .mgoal.won{color:var(--green-ink)}
+  /* The estimator reads a sentence word by word and cannot see that grammar
+     makes the next word cheap, so sentence-shaped input gets a warning rather
+     than a quietly flattering number. */
+  .msent{margin-top:.7rem;font-size:var(--fs-sm);line-height:1.6;color:var(--red-ink)}
+  .msent b{font-weight:700}
   /* the value needs to say what it is — it is the only figure on the card with
      no label, and "309,710 centuries" alone does not announce itself */
   .mcrackwrap{display:flex;align-items:baseline;gap:.6rem;margin-left:auto}
@@ -559,6 +564,7 @@
         <span class="mcrackwrap"><span class="mclab">Crack time</span><span
           class="mcrack" id="mcrack"></span></span>
       </div>
+      <div class="msent" id="msent" style="display:none"></div>
       <details class="ctime">
         <summary>Details</summary>
         <div class="ctbody"><div class="ctrates" id="ctrates"></div>
@@ -790,7 +796,7 @@
     <div class="l">MY PASSPHRASE <span>· GENERATOR</span></div>
     <!-- bump the version on every release: it lets a saved copy be compared
          against the repo's releases -->
-    <div class="r">v1.8.0 · RUNS OFFLINE</div>
+    <div class="r">v1.8.1 · RUNS OFFLINE</div>
     <details class="creds">
       <summary>Credits</summary>
       <div class="prov">
@@ -3267,6 +3273,7 @@ function convertSecondsToReadable(seconds) {
 const AXIS_BITS = 128;                     // the bar runs 0 -> 128 bits
 const SAFE_BITS = 75;                      // past any offline brute force
 const GOAL_BITS = 128;                     // ★ — the randomness in a 12-word seed
+const SEED24_BITS = 256;                   // a 24-word seed, the most BIP-39 carries
 // One stated attack speed, not two. The pair of scenarios this replaced
 // differed by a constant 26.6 bits applied to every secret alike, so the
 // toggle could not change the ranking of anything — it relabelled the axis and
@@ -3292,6 +3299,27 @@ const BANDS = [25, 50, 64, SAFE_BITS, GOAL_BITS];
 // separated by spaces; the spaces are not secret. Deducting exactly that
 // brings its estimate of a generated phrase to within a bit or two of the
 // true entropy, and leaves passwords without spaces untouched.
+// Sentences are the estimator's blind spot. It prices each word on its own by
+// how common the word is, and never sees that grammar makes the next one
+// nearly free: "your" is followed by "own" far more often than by "urologist".
+// So an ordinary sentence scores like a passphrase — the label on this very
+// field reads 86 bits, twelve thousand centuries, for text printed on the page
+// and sitting in a public repository. Function words are what separates the
+// two: a sentence is built from them, and words drawn from a list contain
+// essentially none. Two is enough to say so out loud, and the warning does not
+// touch the number, because the honest correction is unknown and inventing a
+// smaller figure would only trade a flattering lie for a confident one.
+const FUNCTION_WORDS = new Set(("the a an and or but if of to in on at by for with from "
+  + "is are was were be been being am it its this that these those i you he she we they "
+  + "me him her us them my your his our their what which who whom how when where why "
+  + "not no nor yes do does did done have has had will would shall should can could may "
+  + "might must out up down over under about into onto off then than there here so as "
+  + "just very too also only own get got go went make made say said know knew think "
+  + "because while after before again more most some any all both each other such").split(" "));
+function sentenceWords(v) {
+  const w = v.toLowerCase().replace(/[^a-z\s']+/g, " ").split(/\s+/).filter(Boolean);
+  return { total: w.length, fn: w.filter(x => FUNCTION_WORDS.has(x)).length };
+}
 function estimateBits(r) {
   let spaceBits = 0;
   for (const m of r.match_sequence) {
@@ -3378,12 +3406,26 @@ function updateMeter(animate) {
   if (isPin) {
     g.className = "mgoal";
     g.textContent = "Safe only because the device locks after a few wrong tries.";
-  } else if (bits >= GOAL_BITS) {
+  } else if (rounded >= GOAL_BITS) {
+    // Branch on the ROUNDED figure, the one actually on screen. Comparing the
+    // raw value instead let 127.93 bits display as "128 bits" and then read
+    // "0 bits short of the ★ goal" — the headline and the line disagreeing
+    // about the same secret.
+    // Reaching the goal and sailing past it are not the same sentence. Ten
+    // words clears 128 bits by one; twelve clears it by twenty-seven. Telling
+    // both of them they hold "as much randomness as a 12-word seed" is wrong
+    // in the flattering direction for the first and the miserly one for the
+    // second, and makes two very different secrets read identically.
     g.className = "mgoal won";
-    g.textContent = "★ Goal reached — as much randomness as a 12-word seed.";
+    const over = Math.round(bits) - GOAL_BITS;
+    g.textContent = rounded >= SEED24_BITS
+      ? "★ Goal passed — beyond a 24-word seed, the most BIP-39 carries."
+      : over <= 0
+        ? "★ Goal reached — as much randomness as a 12-word seed."
+        : "★ Goal passed — " + bitWord(over) + " beyond a 12-word seed.";
   } else if (bits >= SAFE_BITS) {
     g.className = "mgoal won";
-    g.textContent = "Past brute force — " + bitWord(Math.round(GOAL_BITS - bits))
+    g.textContent = "Past brute force — " + bitWord(GOAL_BITS - rounded)
       + " short of the ★ goal.";
   } else {
     // Not a blanket verdict: how much randomness is enough depends entirely on
@@ -3405,6 +3447,23 @@ function updateMeter(animate) {
     g.textContent = (bits >= ONLINE_BITS
       ? "Fine for a login that limits guesses."
       : "Weak — offline guessing breaks this quickly.") + advice;
+  }
+
+  // A sentence gets a warning, never a silent haircut. The number stays as
+  // estimated because the honest correction is not knowable here, and quietly
+  // substituting a smaller one would trade a flattering lie for a confident
+  // one. Two function words in a phrase of four or more is the line: a secret
+  // drawn from a list essentially never reaches it.
+  const sent = generated ? { total: 0, fn: 0 } : sentenceWords(v);
+  if (sent.fn >= 2 && sent.total >= 4) {
+    $("msent").style.display = "";
+    $("msent").innerHTML = "<b>This reads like a sentence.</b> The figure above prices each "
+      + "word on its own, but grammar makes the next word easy to guess, so a sentence is "
+      + "far weaker than it looks — and one you have read anywhere is weaker still. Press "
+      + "<b>Generate</b> for randomness that can be counted.";
+  } else {
+    $("msent").style.display = "none";
+    $("msent").textContent = "";
   }
 
   // The crack time the bits imply, on its own line and nothing else on it.
