@@ -673,7 +673,7 @@
     <div class="l">MY PASSPHRASE <span>· GENERATOR</span></div>
     <!-- bump the version on every release: it lets a saved copy be compared
          against the repo's releases -->
-    <div class="r">v1.6.3 · RUNS OFFLINE</div>
+    <div class="r">v1.6.4 · RUNS OFFLINE</div>
     <details class="creds">
       <summary>Credits</summary>
       <div class="prov">
@@ -3185,8 +3185,8 @@ function updateMeter(animate) {
 // A generated passphrase arrives hidden — smudges, not words — and the eye
 // button reveals it. The eye is a preference, not a per-phrase state: once
 // someone turns the blur off, later generations stay visible until they turn
-// it back on. Hand-editing the box drops the shield and its controls instead
-// of hiding what is being typed (the preference itself is untouched).
+// it back on. Hand-typed secrets follow the same preference: with the shield
+// wanted, typing stays smudged too, so a passer-by never sees the entry.
 let shieldWanted = true;
 function setShield(on) {
   $("passphrase").classList.toggle("shield", on);
@@ -3351,13 +3351,13 @@ $("wordlist").onchange = () => {
   generate();
 };
 $("passphrase").addEventListener("input", () => {
-  // typing must stay visible, so the blur lifts — but the eye, copy and QR
-  // controls serve hand-entered secrets too: they show whenever the box has
-  // content and leave only when it is empty
+  // hand-typed secrets stay shielded while the blur preference is on, so a
+  // passer-by never sees the entry — and the eye, copy and QR controls show
+  // whenever the box has content, leaving only when it is empty
   if ($("passphrase").value.trim()) {
     $("inwrap").classList.add("on");
     $("inctl").style.display = "flex";
-    setShield(false);
+    setShield(shieldWanted);
   } else {
     shieldReset();
   }
