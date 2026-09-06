@@ -743,7 +743,7 @@
     <div class="l">MY PASSPHRASE <span>· GENERATOR</span></div>
     <!-- bump the version on every release: it lets a saved copy be compared
          against the repo's releases -->
-    <div class="r">v1.7.1 · RUNS OFFLINE</div>
+    <div class="r">v1.7.2 · RUNS OFFLINE</div>
     <details class="creds">
       <summary>Credits</summary>
       <div class="prov">
@@ -3532,6 +3532,13 @@ function rebuildCountOptions() {
   }
   $("wordcount").value = m.last;
 }
+// the button names what it makes
+function syncGenLabel() {
+  const k = $("wordlist").value;
+  $("gen").textContent = k === "pin" ? "Generate new PIN"
+                       : k === "ascii" ? "Generate new password"
+                       : "Generate new passphrase";
+}
 
 $("gen").onclick = generate;
 $("wordcount").onchange = () => {
@@ -3540,11 +3547,7 @@ $("wordcount").onchange = () => {
 };
 $("wordlist").onchange = () => {
   rebuildCountOptions();
-  // the button names what it makes
-  const k = $("wordlist").value;
-  $("gen").textContent = k === "pin" ? "Generate new PIN"
-                       : k === "ascii" ? "Generate new password"
-                       : "Generate new passphrase";
+  syncGenLabel();
   generate();
 };
 $("passphrase").addEventListener("input", () => {
@@ -3578,11 +3581,22 @@ addEventListener("offline", netBadge);
 netBadge();
 
 // A copy saved from the browser (File → Save Page As) serializes the live DOM
-// — the shield class, the visible controls — but not the passphrase itself,
-// so a snapshot taken mid-use wakes up with a smudged placeholder and
-// orphaned buttons beside an empty box. Reconcile with what the box holds.
+// but NOT the passphrase, because a textarea's value never becomes part of the
+// document. Everything the page derived from that value does get written out:
+// the crack time, the coloured ladder, the bits line, the shield, the control
+// strip, the count options, even the button's label. So a copy saved mid-use
+// opens claiming a crack time for a box that is empty — and reloading the
+// local file does not clear it, because the state is in the file. Rebuild
+// every derived control from what the page actually holds.
+qrHide();                                  // never open a modal on arrival
+$("cliphint").style.display = "none";
+$("st").textContent = "";
+rebuildCountOptions();                     // counts match the pool that is selected
+syncGenLabel();                            // and so does the button
+setScenario(scenario);                     // toggle matches the default it reset to
 if ($("passphrase").value.trim()) applyShield();
 else shieldReset();
+updateMeter();                             // empty box, no meter
 
 /* ---- theme (from BIP-39 Checksum) ------------------------------------ */
 const THEME_KEY = "passphrase-theme";
