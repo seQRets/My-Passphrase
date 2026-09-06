@@ -25,10 +25,20 @@ the browser to refuse if anything on the page ever tried to phone home.
 - **Real randomness** — every draw comes from `crypto.getRandomValues` with
   rejection sampling, so each word and character is exactly as likely as every
   other; `Math.random` appears nowhere in the file
-- **Honest strength accounting** — generated secrets show their true entropy
-  (words × bits per word), not an estimate; crack time via
-  [zxcvbn](https://github.com/dropbox/zxcvbn) at 10,000 guesses/second. Edit
-  the box to test any password of your own
+- **Entropy first** — the meter measures randomness in bits and says so in the
+  headline, because that is a property of the secret itself; crack time is a
+  consequence of it and rides underneath. The bar runs 0–128 bits, linear, with
+  ★ at 128 — as much randomness as the 12-word seed phrase behind a bitcoin
+  wallet — and a STRONG mark at 75
+- **Honest accounting** — generated secrets show their true entropy
+  (words × bits per word), never an estimate; typed text is
+  [zxcvbn](https://github.com/dropbox/zxcvbn)'s estimate and is labelled
+  `est.` Edit the box to test any password of your own
+- **One stated attack speed** — a trillion guesses a second, the pessimistic
+  end, since you never get to choose how well a site guards what you gave it.
+  Details shows the same secret costed against a throttled login too, because
+  the two differ by nine orders of magnitude and which one you face is a
+  property of the site, not of the secret
 - **Blurred by default** — a generated secret arrives as smudges, with in-field
   eye, copy, and QR controls; the eye is a sticky per-session preference
 - **QR export** — show the secret as a plain-text QR (blurred until revealed)

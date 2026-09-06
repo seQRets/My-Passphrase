@@ -32,6 +32,14 @@
     --field:#FFFFFF; --fieldline:rgba(27,24,20,.16);
     --grid:rgba(247,147,26,0.055); --glow:rgba(247,147,26,0.10);
     --shadow:0 1px 2px rgba(27,24,20,.04),0 8px 24px rgba(27,24,20,.05);
+    /* ---- type scale ----------------------------------------------------
+       Six steps. The page had grown 27 distinct font sizes, fourteen of them
+       inside the .68–.95rem band, where nobody can tell .72 from .74 and the
+       difference reads as sloppiness rather than hierarchy. The four clamp()
+       display sizes (h1, .dek, .stat .num, the Q&A header) stay responsive,
+       and em-relative sizes stay relative to their context. */
+    --fs-2xs:.62rem; --fs-xs:.72rem; --fs-sm:.82rem;
+    --fs-md:.95rem;  --fs-lg:1.15rem; --fs-xl:1.35rem;
     --sans:-apple-system,system-ui,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
     --mono:ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace;
   }
@@ -71,9 +79,9 @@
   /* ---- kicker + hero ---- */
   .topline{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1.4rem}
   .kicker{display:flex;align-items:center;gap:14px;min-width:0}
-  #theme{flex:none;padding:.45rem .8rem;font-size:.68rem}
+  #theme{flex:none;padding:.45rem .8rem;font-size:var(--fs-xs)}
   .kicker .mark{width:30px;height:30px;flex:none;display:block}
-  .kicker .label{font-size:.75rem;font-weight:700;letter-spacing:.32em;color:var(--accent-ink)}
+  .kicker .label{font-size:var(--fs-xs);font-weight:700;letter-spacing:.32em;color:var(--accent-ink)}
   h1{font-size:clamp(2.1rem,5.5vw,3.5rem);font-weight:800;letter-spacing:-.02em;
      line-height:1.04;margin-bottom:1rem}
   h1 em{color:var(--accent-ink);font-style:normal}
@@ -82,12 +90,12 @@
   /* ---- hero call-to-action: the "how do I do it" answer ---- */
   .ctarow{display:flex;align-items:center;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
   .cta{display:inline-flex;align-items:center;gap:.5rem;text-decoration:none;
-    font-size:.82rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+    font-size:var(--fs-sm);font-weight:700;letter-spacing:.1em;text-transform:uppercase;
     padding:.85rem 1.4rem;border-radius:9px;background:var(--orange);color:#000;
     border:1px solid var(--orange);transition:background .15s,border-color .15s}
   .cta:hover{background:var(--gold);border-color:var(--gold)}
   .cta:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
-  .ctanote{font-size:.78rem;color:var(--dim);letter-spacing:.02em}
+  .ctanote{font-size:var(--fs-sm);color:var(--dim);letter-spacing:.02em}
   /* ---- tooltips: hover/focus on desktop, tap on mobile (JS toggles .on) ---- */
   .tipwrap{position:relative;display:inline-flex;align-items:center}
   /* solid ink chip — a pale outline disappeared on the light ground. The
@@ -101,7 +109,7 @@
   .tipbox{position:absolute;top:calc(100% + .65rem);left:50%;transform:translateX(-50%);
     z-index:30;width:min(21rem,84vw);background:var(--bg);border:1px solid var(--line);
     border-radius:12px;padding:.85rem 1.05rem;box-shadow:0 8px 30px rgba(0,0,0,.45);
-    font:400 .82rem/1.7 var(--sans);letter-spacing:.01em;text-transform:none;
+    font:400 var(--fs-sm)/1.7 var(--sans);letter-spacing:.01em;text-transform:none;
     color:var(--muted);text-align:left;opacity:0;visibility:hidden;
     transition:opacity .15s;pointer-events:none}
   .tipbox b{color:var(--ink)}
@@ -109,27 +117,27 @@
   .tipwrap:hover .tipbox,.tipwrap:focus-within .tipbox,.tipwrap.on .tipbox{
     opacity:1;visibility:visible;pointer-events:auto}
   /* the title's trigger must not inherit the headline size */
-  h1 .tipwrap{font-size:1.05rem;vertical-align:super;margin-left:.6rem}
+  h1 .tipwrap{font-size:var(--fs-lg);vertical-align:super;margin-left:.6rem}
   /* nor should the meter label's shrink it to label size */
-  .mlab .tipwrap{font-size:.92rem;margin-left:.5rem;vertical-align:-.35em}
+  .mlab .tipwrap{font-size:var(--fs-md);margin-left:.55rem;flex:none}
 
   .stats{display:flex;gap:clamp(2rem,6vw,4.5rem);margin:2.6rem 0 2.2rem;flex-wrap:wrap}
   .stat .num{font-size:clamp(1.7rem,4vw,2.4rem);font-weight:800;letter-spacing:-.02em;
              line-height:1;white-space:nowrap}
   .stat .num span{color:var(--accent-ink)}
-  .stat .lab{font-size:.7rem;color:var(--dim);letter-spacing:.14em;font-weight:600;
+  .stat .lab{font-size:var(--fs-xs);color:var(--dim);letter-spacing:.14em;font-weight:600;
              margin-top:.5rem;text-transform:uppercase}
 
   /* ---- cards ---- */
   .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;
         padding:clamp(2rem,4.2vw,2.9rem) clamp(1.4rem,3vw,2.1rem);
         margin-bottom:1.15rem;box-shadow:var(--shadow)}
-  .h{font-size:.72rem;font-weight:700;letter-spacing:.22em;color:var(--dim);
+  .h{font-size:var(--fs-xs);font-weight:700;letter-spacing:.22em;color:var(--dim);
      text-transform:uppercase;margin-bottom:1.1rem}
 
   /* ---- online/offline badge ---- */
   .badge{display:inline-flex;align-items:center;gap:.55rem;padding:.4rem .85rem;
-    border-radius:999px;font-size:.74rem;font-weight:700;letter-spacing:.14em;
+    border-radius:999px;font-size:var(--fs-xs);font-weight:700;letter-spacing:.14em;
     text-transform:uppercase;border:1px solid;margin-bottom:1.1rem}
   .badge .led{width:8px;height:8px;border-radius:50%;flex:none}
   .badge.on{color:var(--accent-ink);border-color:rgba(247,147,26,.45);background:rgba(247,147,26,.07)}
@@ -140,9 +148,17 @@
   /* ---- input ---- */
   textarea{width:100%;min-height:5.2rem;padding:1rem 1.1rem;border:1px solid var(--fieldline);
     border-radius:12px;background:var(--field);color:var(--ink);resize:vertical;
-    font:clamp(16px,2.4vw,21px)/1.8 var(--mono);letter-spacing:.02em}
+    font:clamp(16px,2.4vw,21px)/1.8 var(--sans);letter-spacing:.02em}
+  /* Words read best in the page's sans, but a random-character secret must be
+     transcribable: in a proportional face capital I and lowercase l are the
+     same glyph, and that ambiguity is unrecoverable once it reaches a metal
+     backup. The character pools therefore keep the monospace. */
+  #passphrase.monofield{font-family:var(--mono)}
   /* Holding text, not a passphrase — smaller than the generated output. */
-  textarea::placeholder{color:var(--dim);font-size:.88rem;line-height:2.1}
+  /* Italic so it reads as prompting text rather than as a secret sitting in
+     the box — at this size the upright face looked like real content. */
+  textarea::placeholder{color:var(--dim);font-size:var(--fs-md);line-height:2.1;
+    font-style:italic}
   /* A generated passphrase arrives hidden: transparent text with a soft shadow
      blurs it without blurring the box, so a shoulder-surfer sees smudges, not
      words. The eye button lifts it. (Ported from BIP-39 Checksum.) */
@@ -165,13 +181,13 @@
   .qrhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
   /* the QR stays centered; the words below it read left-justified. One short
      bold-led warning is visible; the longer explanation folds away. */
-  .qrwarn{text-align:left;font-size:.85rem;color:var(--muted);line-height:1.6;
+  .qrwarn{text-align:left;font-size:var(--fs-sm);color:var(--muted);line-height:1.6;
     margin-top:.9rem}
   .qrwarn b{color:var(--ink)}
   .qrmore{text-align:left;margin-top:.8rem}
-  .qrmore p{font-size:.82rem;margin-top:.6rem}
+  .qrmore p{font-size:var(--fs-sm);margin-top:.6rem}
   .qrhead .h{margin-bottom:0}
-  button.qrx{padding:.1rem .5rem .25rem;font-size:1.25rem;line-height:1;font-weight:400;
+  button.qrx{padding:.1rem .5rem .25rem;font-size:var(--fs-lg);line-height:1;font-weight:400;
     letter-spacing:0;text-transform:none;border-color:transparent;background:transparent;
     color:var(--dim)}
   button.qrx:hover{color:var(--ink);border-color:var(--line);background:var(--panel2)}
@@ -188,18 +204,18 @@
   textarea:focus{outline:none;border-color:rgba(247,147,26,.6);
     box-shadow:0 0 0 3px rgba(247,147,26,.09)}
   .row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-top:1rem}
-  button{font-family:var(--sans);font-size:.82rem;font-weight:700;letter-spacing:.1em;
+  button{font-family:var(--sans);font-size:var(--fs-sm);font-weight:700;letter-spacing:.1em;
     text-transform:uppercase;padding:.7rem 1.15rem;border-radius:9px;cursor:pointer;
     border:1px solid var(--line);background:var(--panel);color:var(--muted);
     transition:border-color .15s,color .15s,background .15s}
   button:hover{border-color:rgba(247,147,26,.5);color:var(--ink)}
   button.primary{background:var(--orange);border-color:var(--orange);color:#000}
   button.primary:hover{background:var(--gold);border-color:var(--gold);color:#000}
-  .hint{font-size:.78rem;color:var(--dim);margin-top:.9rem;letter-spacing:.02em}
+  .hint{font-size:var(--fs-sm);color:var(--dim);margin-top:.9rem;letter-spacing:.02em}
   /* Native select arrows sit hard against the right border, which reads as
      awkward next to the buttons. appearance:none swaps in our own chevron —
      a data: URI, so it is drawn, not fetched — inset from the edge. */
-  select{font-family:var(--sans);font-size:.82rem;font-weight:700;letter-spacing:.08em;
+  select{font-family:var(--sans);font-size:var(--fs-sm);font-weight:700;letter-spacing:.08em;
     text-transform:uppercase;padding:.7rem 2.3rem .7rem .8rem;border-radius:9px;cursor:pointer;
     border:1px solid var(--line);background:var(--panel);color:var(--muted);
     appearance:none;-webkit-appearance:none;
@@ -214,60 +230,93 @@
   .meter{margin-top:1.2rem;padding-top:1.2rem;border-top:1px solid var(--line2)}
   .mrow{display:flex;justify-content:space-between;align-items:center;gap:.8rem;
        flex-wrap:wrap;margin-bottom:.55rem}
-  /* label and toggle travel together on the left, so the value's changing
-     width cannot shove the toggle around */
   .mhead{display:flex;align-items:center;gap:.9rem;flex-wrap:wrap}
-  .mscenwrap{display:flex;align-items:center;gap:.35rem}
-  .mscen{display:flex;border:1px solid var(--line2);border-radius:999px;overflow:hidden}
-  .mscen button{font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-       padding:.28rem .6rem;background:transparent;color:var(--dim);border:0;cursor:pointer}
-  /* the active side wears the scenario's colour: red for a careless website,
-     green for a careful one */
-  .mscen button#scworst[aria-pressed="true"]{background:var(--red-ink);color:var(--bg)}
-  .mscen button#scbest[aria-pressed="true"]{background:var(--green-ink);color:var(--bg)}
-  .mlab{font-size:.7rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
-  .mval{font:700 .95rem var(--mono)}
-  /* The crack-time ladder: six rungs, each one a jump in scale, with the goal
-     — centuries against the worst case — marked on the last. Rung boundaries
-     are tier thresholds, not a linear time axis. */
+  .mlab{display:inline-flex;align-items:center;font-size:var(--fs-md);font-weight:700;
+       letter-spacing:.18em;text-transform:uppercase;color:var(--dim);line-height:1}
+  .mval{font:700 var(--fs-xl) var(--mono)}
+  /* The entropy bar. Position is strictly linear in bits — 0 to 128, the
+     randomness in a 12-word seed phrase — because bits are what the meter
+     measures. Only the COLOUR is banded, and green is held back for the ★ so
+     that crossing it is the biggest jump on the bar. */
   .ladder{position:relative;height:10px;border-radius:999px;background:var(--panel2);
        border:1px solid var(--line2);overflow:hidden}
   .lfill{height:100%;width:0;border-radius:999px;transition:width .45s ease,background .3s ease}
   .ladder i{position:absolute;top:0;bottom:0;width:1px;background:var(--line2)}
-  .ladder i.goalmark{width:2px;background:var(--dim)}
-  .lticks{display:flex;margin-top:.4rem}
-  .lticks span{flex:1;text-align:center;font-size:.55rem;font-weight:700;
-       letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
-  .lticks .goaltick{color:var(--ink)}
-  .goalsub{display:block;font-size:.55rem;letter-spacing:.06em;text-transform:none;
-       color:var(--dim)}
-  .mgoal{font-size:.8rem;font-weight:600;color:var(--muted);margin-top:.65rem;line-height:1.6}
+  .ladder i.safemark{width:2px;background:var(--muted)}
+  /* ticks are absolutely placed, so a label sits exactly on the bit value it
+     names rather than floating in the middle of a band */
+  .lticks{position:relative;height:2.5em;margin-top:.5rem}
+  .lticks span{position:absolute;transform:translateX(-50%);font-size:var(--fs-sm);font-weight:700;
+       letter-spacing:.02em;color:var(--dim);white-space:nowrap;text-align:center}
+  .lticks span.first{left:0;transform:none}
+  .lticks .safetick{color:var(--muted)}
+  .lticks .goaltick{right:0;left:auto;transform:none;color:var(--ink)}
+  /* The sub-label is wider than the number it belongs to, and as a block child
+     of a shrink-to-fit tick it overflowed and centred on its own box instead of
+     the number's. Positioning it against the tick pins it under the number. */
+  .goalsub{position:absolute;left:50%;top:100%;transform:translateX(-50%);
+       margin-top:.2rem;white-space:nowrap;font-size:var(--fs-2xs);font-weight:600;
+       letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+  /* the one line that stays under the bar; provenance and crack time live in
+     the ⓘ, which is the only place they were ever read twice */
+  /* One row under the bar, built like the label/value row above it: where you
+     stand on the left, the crack time those bits imply on the right. The
+     reasoning behind both folds away into Details. */
+  .mstatus{display:flex;justify-content:space-between;align-items:baseline;
+       gap:.9rem;flex-wrap:wrap;margin-top:.6rem}
+  .mgoal{font-size:var(--fs-md);font-weight:600;color:var(--muted);line-height:1.55}
   .mgoal.won{color:var(--green-ink)}
-  .mnote{font-size:.8rem;color:var(--muted);margin-top:.7rem;line-height:1.6}
-  .mnote b{color:var(--ink);font-weight:700}
+  /* the value needs to say what it is — it is the only figure on the card with
+     no label, and "309,710 centuries" alone does not announce itself */
+  .mcrackwrap{display:flex;align-items:baseline;gap:.6rem;margin-left:auto}
+  .mclab{font-size:var(--fs-md);font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+       color:var(--dim);white-space:nowrap}
+  .mcrack{font:700 var(--fs-lg) var(--mono);color:var(--ink);line-height:1.4;white-space:nowrap}
+  /* Details sits under the crack time and to the same edge, so it reads as an
+     explanation of that figure rather than of the card. */
+  .ctime{margin-top:.4rem;display:flex;flex-direction:column;align-items:flex-end}
+  /* an outlined chip, so it reads as something to press rather than a caption */
+  .ctime>summary{display:inline-flex;align-items:center;width:max-content;
+       padding:.32rem .75rem;border:1px solid var(--line);border-radius:999px;
+       background:var(--panel);font-size:var(--fs-xs);letter-spacing:.16em}
+  .ctime>summary:hover{color:var(--ink);border-color:rgba(247,147,26,.5)}
+  .ctime>summary:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+  /* the caret is sized for a bare line; inside the chip it needs to sit on the
+     text baseline rather than hang off it */
+  .ctime>summary::before{font-size:1.15em;line-height:1;vertical-align:0;margin-right:.4rem}
+  .ctbody{align-self:stretch;text-align:left;font-size:var(--fs-sm);color:var(--muted);
+       line-height:1.65;margin-top:.8rem}
+  .ctbody b{color:var(--ink);font-weight:700}
+  /* the same secret costed at the rates that actually differ */
+  .ctrates{margin:0 0 .9rem}
+  .ctrates div{display:flex;justify-content:space-between;gap:1rem;
+       padding:.4rem 0;border-bottom:1px solid var(--line2)}
+  .ctrates div:first-child{border-top:1px solid var(--line2)}
+  .ctrates span{color:var(--dim)}
+  .ctrates b{white-space:nowrap}
   .ok-c{color:var(--green-ink)} .warn-c{color:var(--accent-ink)} .bad-c{color:var(--red-ink)}
-  .status{font-size:.92rem;margin-top:1rem;min-height:1.4em;font-weight:600}
+  .status{font-size:var(--fs-md);margin-top:1rem;min-height:1.4em;font-weight:600}
   /* an empty status was silently reserving a line below the buttons, making
      the card bottom-heavy — take it out of flow until it has something to say */
   .status:empty{display:none}
   /* ---- footer credits fold behind a small disclosure ---- */
   .creds{flex-basis:100%;margin-top:1.2rem}
   .creds>summary{display:flex;align-items:center;gap:.5rem;color:var(--dim);
-    font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase}
+    font-size:var(--fs-xs);font-weight:700;letter-spacing:.18em;text-transform:uppercase}
   .creds>summary:hover{color:var(--accent-ink)}
   .creds>summary::before{content:'❯';color:var(--accent-ink);display:inline-block;
     font-size:1.2em;line-height:1;transform:none;transition:transform .2s ease}
   .creds[open]>summary::before{content:'❯';transform:rotate(90deg)}
   .creds>.prov{margin-top:.9rem}
-  .copyline{flex-basis:100%;font-size:.72rem;color:var(--dim);margin-top:1.4rem;
+  .copyline{flex-basis:100%;font-size:var(--fs-xs);color:var(--dim);margin-top:1.4rem;
     letter-spacing:.02em;text-transform:none;font-weight:400}
   .status.bad{color:var(--red-ink)} .status.ok{color:var(--green-ink)}
 
   /* ---- tables ---- */
   .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  table{border-collapse:collapse;width:100%;font-size:.88rem;min-width:26rem}
+  table{border-collapse:collapse;width:100%;font-size:var(--fs-md);min-width:26rem}
   th{text-align:left;padding:.5rem .6rem;color:var(--dim);font-weight:700;
-     font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;
+     font-size:var(--fs-xs);letter-spacing:.16em;text-transform:uppercase;
      border-bottom:1px solid var(--line)}
   td{padding:.6rem;border-bottom:1px solid var(--line2);color:var(--muted)}
   tr:last-child td{border-bottom:none}
@@ -279,7 +328,7 @@
 
   /* ---- notes / Q&A ---- */
   ul{list-style:none}
-  li{font-size:.95rem;color:var(--muted);line-height:1.5;padding-left:1.4rem;
+  li{font-size:var(--fs-md);color:var(--muted);line-height:1.5;padding-left:1.4rem;
      position:relative;margin-bottom:.6rem}
   li::before{content:'';position:absolute;left:0;top:.55em;width:8px;height:8px;
     border-radius:50%;background:var(--orange);opacity:.7}
@@ -289,23 +338,23 @@
     background:rgba(247,147,26,.05);border-radius:0 12px 12px 0;
     /* the stats row used to hold the hero and this strip apart — now the strip
        spaces itself */
-    font-size:.92rem;color:var(--muted);margin:2.6rem 0 1.8rem}
+    font-size:var(--fs-md);color:var(--muted);margin:2.6rem 0 1.8rem}
   .warn b{color:var(--ink)}
   .warn a{color:var(--accent-ink);text-decoration:underline;text-underline-offset:2px}
   .warn a:hover{color:var(--ink)}
   .warn a:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
   .warn ol{margin:1.15rem 0 .4rem;padding-left:1.5rem}
-  .warn ol li{font-size:.88rem;line-height:1.7;padding-left:.35rem;margin-bottom:.8rem;
+  .warn ol li{font-size:var(--fs-md);line-height:1.7;padding-left:.35rem;margin-bottom:.8rem;
     list-style:decimal}
   .warn ol li::before{content:none}
   .warn details{margin-top:0}
-  .warn details p{font-size:.88rem;line-height:1.7;margin-top:1.05rem}
+  .warn details p{font-size:var(--fs-md);line-height:1.7;margin-top:1.05rem}
   /* room between the header and the guide it reveals */
   .warn details[open] summary{margin-bottom:1.2rem}
   /* the offline-guide disclosure: one clean line, larger type, and the same
      rotating chevron as the Q&A header instead of the little triangle */
   .warn summary{display:flex;align-items:center;gap:.6rem;color:var(--ink);
-    font-size:.95rem;font-weight:800;letter-spacing:.16em}
+    font-size:var(--fs-md);font-weight:800;letter-spacing:.16em}
   .warn summary:hover{color:var(--accent-ink)}
   .warn summary::before{content:'❯';color:var(--accent-ink);display:inline-block;
     font-size:1.25em;line-height:1;margin-right:0;
@@ -313,17 +362,17 @@
   .warn details[open] summary::before{content:'❯';transform:rotate(90deg)}
   .qa details{margin:0;border-bottom:1px solid var(--line2)}
   .qa details:last-child,.qa details:has(+ .grp2){border-bottom:none}
-  .qa summary{padding:.85rem 0;font-size:.95rem;font-weight:600;letter-spacing:0;
+  .qa summary{padding:.85rem 0;font-size:var(--fs-md);font-weight:600;letter-spacing:0;
     text-transform:none;color:var(--ink)}
   .qa summary:hover{color:var(--accent-ink)}
   .qa summary::before{content:'+';color:var(--orange);font-weight:700;
     display:inline-block;width:1.1rem}
   .qa details[open] summary::before{content:'–'}
-  .qa details p{margin:0 0 1rem;padding-left:1.1rem;font-size:.9rem;max-width:52rem;
+  .qa details p{margin:0 0 1rem;padding-left:1.1rem;font-size:var(--fs-md);max-width:52rem;
     color:var(--muted);line-height:1.6}
   .qa details p b{color:var(--ink)}
   .qa details .scroll{margin:0 0 1.1rem;padding-left:1.1rem}
-  .qa .grp2{font-size:.68rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  .qa .grp2{font-size:var(--fs-xs);font-weight:700;letter-spacing:.18em;text-transform:uppercase;
     color:var(--dim);margin:1.7rem 0 .2rem;padding-top:1.3rem;border-top:1px solid var(--line)}
   .qa .grp2:first-child{margin-top:0;padding-top:0;border-top:none}
   /* ---- the whole Q&A folds behind one big disclosure ---- */
@@ -337,10 +386,10 @@
     font-size:1.1em;line-height:1;margin-right:0;vertical-align:0;
     transform:none;transition:transform .2s ease}
   .qatop[open]>summary::before{content:'❯';transform:rotate(90deg)}
-  .qacount{font-size:.72rem;font-weight:600;letter-spacing:.14em;color:var(--dim)}
+  .qacount{font-size:var(--fs-xs);font-weight:600;letter-spacing:.14em;color:var(--dim)}
   .qatop>.qa{margin-top:1.2rem}
   details{margin-top:1rem}
-  summary{cursor:pointer;color:var(--dim);font-size:.8rem;font-weight:700;
+  summary{cursor:pointer;color:var(--dim);font-size:var(--fs-sm);font-weight:700;
     letter-spacing:.14em;text-transform:uppercase;list-style:none}
   summary::-webkit-details-marker{display:none}
   /* The caret is the only signal this line opens — at text size it vanished,
@@ -348,23 +397,23 @@
   summary::before{content:'▸';color:var(--accent-ink);display:inline-block;
     font-size:1.6em;line-height:0;vertical-align:-.1em;margin-right:.45rem}
   details[open] summary::before{content:'▾ '}
-  details p{font-size:.9rem;color:var(--muted);margin-top:.8rem;line-height:1.6}
+  details p{font-size:var(--fs-md);color:var(--muted);margin-top:.8rem;line-height:1.6}
 
   footer{border-top:1px solid var(--line);margin-top:2.6rem;padding-top:1.5rem;
     display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;
-    font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase}
+    font-size:var(--fs-xs);font-weight:700;letter-spacing:.18em;text-transform:uppercase}
   footer .l{color:var(--accent-ink)} footer .l span{color:var(--dim);font-weight:600}
   footer .r{color:var(--dim)}
   .flinks{flex-basis:100%;display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.2rem}
   .flinks a{display:inline-flex;align-items:center;gap:.55rem;
-    font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+    font-size:var(--fs-xs);font-weight:700;letter-spacing:.16em;text-transform:uppercase;
     padding:.6rem 1rem;border-radius:9px;text-decoration:none;
     border:1px solid var(--line);background:var(--panel);color:var(--muted);
     transition:border-color .15s,color .15s,background .15s}
   .flinks a:hover{border-color:rgba(247,147,26,.5);color:var(--ink)}
   .flinks a:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
   .flinks .g{color:var(--accent-ink);font-size:1.05em;letter-spacing:0}
-  .prov{overflow-wrap:anywhere;font-size:.78rem;color:var(--dim);line-height:1.8;margin-top:1.1rem;
+  .prov{overflow-wrap:anywhere;font-size:var(--fs-sm);color:var(--dim);line-height:1.8;margin-top:1.1rem;
     letter-spacing:.01em;text-transform:none;font-weight:400;flex-basis:100%}
   @media(max-width:640px){ main{padding-top:3.5rem} .stats{gap:1.75rem} }
   /* On a phone the flex row wraps at whatever widths the labels happen to make,
@@ -461,7 +510,7 @@
 
   <div class="card" id="inputcard">
     <div id="badge" class="badge on"><span class="led"></span><span id="badgetxt">Checking…</span></div>
-    <div class="h">Your passphrase — or type any password to test its strength</div>
+    <div class="h" id="fieldlab">Your passphrase appears here — or type your own to test it</div>
     <div class="inwrap" id="inwrap">
     <textarea id="passphrase" rows="2" spellcheck="false" autocomplete="off" autocapitalize="off"
       autocorrect="off" placeholder="Your passphrase will appear here — press Generate below, ideally with the wi-fi off. Or type any password to see how it holds up."></textarea>
@@ -485,32 +534,38 @@
     <div class="meter" id="meter" style="display:none">
       <div class="mrow">
         <span class="mhead">
-        <span class="mlab">Time to crack<span class="tipwrap"><button class="tipbtn"
-          type="button" aria-label="How this is measured">i</button><span class="tipbox"
-          role="tooltip">A bit is one yes-or-no answer a guesser has to get right, and every
-          bit doubles their work. Generated secrets show their true randomness; for text you
-          type, the figure is zxcvbn's estimate — an upper bound, not a
-          guarantee.</span></span></span>
-        <span class="mscenwrap" id="mscenwrap"><span class="mscen" role="group" aria-label="Attack scenario">
-          <button id="scworst" type="button" aria-pressed="true">Worst case</button>
-          <button id="scbest" type="button" aria-pressed="false">Best case</button>
-        </span><span class="tipwrap"><button class="tipbtn" type="button"
-          aria-label="What the two cases mean">i</button><span class="tipbox"
-          role="tooltip">Both assume a website where you used this passphrase or password
-          gets hacked. <b>Worst case:</b> it stored the secret carelessly, and guessing runs
-          at about a trillion tries a second. <b>Best case:</b> it was properly hashed,
-          slowing guessing to about 10,000 a second. Your goal should be to reach ★ Centuries
-          of protection under the worst case.</span></span></span>
+        <span class="mlab">Randomness<span class="tipwrap"><button class="tipbtn"
+          type="button" aria-label="What randomness means and how it is measured"
+          >i</button><span class="tipbox" role="tooltip">Randomness is counted in
+          <b>bits</b> — its formal name is <b>entropy</b>. A bit is one yes-or-no answer a
+          guesser has to get right, so every bit doubles their work: 65 bits is twice the
+          work of 64, and a thousand times the work of 55. A secret's bits come from how it
+          was drawn, not from how it looks — which is why a generated secret shows its true
+          count, and text you type can only be estimated, marked
+          <b>est.</b></span></span></span>
         </span>
         <span class="mval" id="mval"></span>
       </div>
       <div class="ladder" aria-hidden="true"><div class="lfill" id="mfill"></div><i
-        style="left:16.66%"></i><i style="left:33.33%"></i><i style="left:50%"></i><i
-        style="left:66.66%"></i><i class="goalmark" style="left:83.33%"></i></div>
-      <div class="lticks" aria-hidden="true"><span>Instant</span><span>Minutes</span><span>Hours</span><span>Days</span><span>Years</span><span class="goaltick">★ Centuries<span class="goalsub">(goal)</span></span></div>
-      <div class="mgoal" id="mgoal"></div>
-      <div class="mnote" id="mnote"></div>
+        style="left:19.53%"></i><i style="left:39.06%"></i><i class="safemark"
+        style="left:58.59%"></i><i style="left:78.13%"></i></div>
+      <div class="lticks" aria-hidden="true"><span class="first">0</span><span
+        style="left:19.53%">25</span><span style="left:39.06%">50</span><span
+        class="safetick" style="left:58.59%">75<span class="goalsub">strong</span></span><span
+        style="left:78.13%">100</span><span
+        class="goaltick">128 &#9733;<span class="goalsub">goal</span></span></div>
+      <div class="mstatus">
+        <span class="mgoal" id="mgoal"></span>
+        <span class="mcrackwrap"><span class="mclab">Crack time</span><span
+          class="mcrack" id="mcrack"></span></span>
+      </div>
+      <details class="ctime">
+        <summary>Details</summary>
+        <div class="ctbody"><div class="ctrates" id="ctrates"></div>
+          <div id="ctbody"></div></div>
+      </details>
     </div>
+
     <div class="row">
       <button class="primary" id="gen">Generate new passphrase</button>
       <span class="tipwrap"><button class="tipbtn" type="button"
@@ -519,10 +574,9 @@
         the one built for security work — never <code>Math.random</code>. Edit the box to test
         a password of your own; nothing is saved, recorded or sent anywhere.</span></span>
       <select id="wordcount" aria-label="How many words">
-        <option value="3">3 words</option>
         <option value="4">4 words</option>
-        <option value="5" selected>5 words</option>
-        <option value="6">6 words</option>
+        <option value="5">5 words</option>
+        <option value="6" selected>6 words</option>
         <option value="7">7 words</option>
         <option value="8">8 words</option>
         <option value="10">10 words</option>
@@ -555,28 +609,33 @@
         number or a symbol. Crackers know every one of those patterns, and passwords built from
         them fall instantly.</p>
         <div class="scroll"><table>
-          <tr><th>Pattern</th><th>Example</th><th>Worst-case time to crack</th></tr>
+          <tr><th>Pattern</th><th>Example</th><th>Time to crack</th></tr>
           <tr><td class="k">A common word</td><td class="v">december</td><td>less than a second</td></tr>
           <tr><td class="k">A keyboard pattern</td><td class="v">qwerty</td><td>less than a second</td></tr>
           <tr><td class="k">The family dog</td><td class="v">rusty</td><td>less than a second</td></tr>
           <tr><td class="k">A date or zip code</td><td class="v">03261981</td><td>less than a second</td></tr>
           <tr><td class="k">Letter→number swaps</td><td class="v">S4nfr4n</td><td>less than a second</td></tr>
-          <tr><td class="k">Four random words</td><td class="v">mergers decade labeled manager</td><td><b>6 years</b></td></tr>
+          <tr><td class="k">Four random words</td><td class="v">mergers decade labeled manager</td><td><b>15 minutes</b></td></tr>
         </table></div>
         <p>Those times assume what the meter assumes: a website that had your password got
         hacked, scrambled its stored passwords carelessly, and the thieves are guessing a
         trillion times a second. Every recognisable pattern falls before the first tick of
-        the clock; random words are the only row still standing. And each word added
-        multiplies the work about 8,000-fold: six random words reach the meter's Centuries
-        goal even in this worst case.</p>
+        the clock; random words are the only row still standing.</p>
+        <p>But the clock is the lesser number here. What actually separates the last row
+        from the rest is <b>randomness</b>, and that is what the meter measures: each random
+        word multiplies a guesser's work about 8,000-fold, which is 13 bits. Four words
+        carry about 52 bits; six carry 78, which clears the meter's STRONG mark and passes
+        beyond the reach of any offline grinding. The time underneath is only that bit
+        count run through an assumption about someone else's hardware.</p>
       </details>
 
       <details>
         <summary>Words or ASCII characters — which should I use?</summary>
         <p>Both are offered here, and generated at random they are both strong; the difference
-        is what your memory has to carry. <code>p%9y#k&amp;yFm?</code> and
-        <code>logic finite eager ratio</code> take a comparable number of centuries to crack,
-        but only one of them survives being typed from memory. Use <b>words</b> for anything you
+        is what your memory has to carry. <code>ipz2!az8k%0h</code> and
+        <code>finite anchor velvet harvest candle ruby</code> hold almost exactly the same
+        randomness — 79 bits against 78 — and both take centuries to crack, but only one of
+        them survives being typed from memory. Use <b>words</b> for anything you
         personally have to remember and type — a master password, a computer login. Use
         <b>ASCII characters</b> where a password manager fills the field for you, or where a
         site's length limit squeezes out a passphrase.</p>
@@ -603,26 +662,14 @@
         just counting characters, it hunts for the patterns real crackers try first —
         dictionary words, names, dates, keyboard runs, letter-for-number swaps — and estimates
         how many guesses your text would survive.</p>
-        <p>How fast those guesses run depends on the website that was hacked — that is the
-        difference between the worst case and the best case, covered in the next question.
-        Treat every figure as a comparison tool, not a promise.</p>
+        <p>The page turns that guess count into a time at a trillion tries a second — the
+        rate a serious rig manages against passwords a hacked website stored carelessly. It
+        is deliberately the pessimistic end, because you never get to choose how well a
+        website guards what you gave it. Treat the figure as a comparison tool, not a
+        promise: the bits above it are the number that is actually measured, and the time is
+        only that number run through an assumption about somebody else's hardware.</p>
       </details>
 
-      <details>
-        <summary>What are the worst case and best case scenarios?</summary>
-        <p>Both start the same way: a website where you used your passphrase gets hacked,
-        and the thieves carry off its list of stored passwords to guess against on their
-        own machines, as fast as their hardware allows. What differs is how the site stored
-        them. In the <b>best case</b> it hashed them properly — a slow, modern algorithm
-        such as bcrypt, scrypt or PBKDF2 — which limits guessing to about 10,000 tries a
-        second. In the <b>worst case</b> it stored them carelessly, with a fast, dated
-        algorithm like plain MD5, and a serious rig manages about a trillion tries a second
-        — a hundred million times faster.</p>
-        <p>You never get to choose which kind of website ends up guarding your password, so
-        the meter shows the worst case by default and judges the ★ Centuries goal against
-        it. The toggle beside the meter lets you peek at the best case — but a passphrase
-        that only survives the best case is a bet on every website doing its job.</p>
-      </details>
 
       <div class="grp2">The generation pools</div>
 
@@ -667,7 +714,7 @@
         digit is drawn independently, so leading zeros are as likely as anything else:
         <code>0042</code> is a perfectly good 4-digit PIN, which is exactly what
         pick-a-number-in-a-range generators can never give you. A digit carries about 3.3 bits,
-        so a 6-digit PIN is only ~20 bits and the meter will show it cracking almost instantly.
+        so a 6-digit PIN is only ~20 bits and barely registers on the meter.
         That figure is honest — but it describes an attacker who can guess without limit. A
         PIN's real protection is the <b>device's lockout</b>: hardware wallets throttle,
         lock or wipe themselves after a few wrong tries, so ~20 bits is fine there. The same
@@ -743,7 +790,7 @@
     <div class="l">MY PASSPHRASE <span>· GENERATOR</span></div>
     <!-- bump the version on every release: it lets a saved copy be compared
          against the repo's releases -->
-    <div class="r">v1.7.2 · RUNS OFFLINE</div>
+    <div class="r">v1.8.0 · RUNS OFFLINE</div>
     <details class="creds">
       <summary>Credits</summary>
       <div class="prov">
@@ -3206,15 +3253,39 @@ function convertSecondsToReadable(seconds) {
 }
 
 /* ---- meter ----------------------------------------------------------- */
-// Two attack speeds bracket reality. zxcvbn's crack_time assumes 10,000
-// guesses/second — a stolen password file protected by a slow, modern hash.
-// The headline and the ladder assume the worst case instead: the same theft
-// from a badly run site, where fast hashing lets serious hardware try a
-// trillion guesses a second. The goal is centuries even then.
-const SEC_YEAR = 60 * 60 * 24 * 365, SEC_CENTURY = SEC_YEAR * 100;
-const WORST_FACTOR = 1e8;                  // 10^12 guesses/s vs zxcvbn's 10^4
-const SEC_UNIVERSE = 1.38e10 * SEC_YEAR;   // the universe is ~13.8bn years old
-const TIERS = [60, 3600, 86400, SEC_YEAR, SEC_CENTURY];
+// Entropy is the measurement; crack time is a consequence of it. How much
+// randomness a secret carries is a property of the secret itself — the number
+// of bits that had to be drawn to make it. Time-to-crack is that same number
+// pushed through somebody else's hardware and somebody else's password
+// storage, neither of which you control, so it rides underneath as a caption
+// instead of leading.
+//
+// The bar is linear in bits, which is the only honest way to draw it. The
+// ladder this replaced was a time axis, and its rungs therefore sat 4.6 to 8.5
+// bits apart — stretching and squashing the very quantity it claimed to show,
+// because it was really measuring the calendar.
+const AXIS_BITS = 128;                     // the bar runs 0 -> 128 bits
+const SAFE_BITS = 75;                      // past any offline brute force
+const GOAL_BITS = 128;                     // ★ — the randomness in a 12-word seed
+// One stated attack speed, not two. The pair of scenarios this replaced
+// differed by a constant 26.6 bits applied to every secret alike, so the
+// toggle could not change the ranking of anything — it relabelled the axis and
+// moved no information. A trillion guesses a second is the conservative end,
+// and the page has no way to know which website will end up holding a secret.
+const GUESS_RATE = 1e12;
+// A login that locks or throttles caps a guesser at a few thousand tries a
+// second, and at that rate far less randomness holds. The two rates bracket
+// what actually differs between real attacks, so both are shown in Details.
+const THROTTLED_RATE = 1e3;
+// Below this, a secret is thin even behind a throttled login. Between here and
+// STRONG it is fine for a website and not for anything guessed offline — which
+// is why the short word counts exist rather than being a trap.
+const ONLINE_BITS = 50;
+// "1 bits" reads like a bug, because it is one
+const bitWord = n => n + (n === 1 ? " bit" : " bits");
+// Colour zones, not axis divisions — the bar's POSITION stays strictly linear
+// in bits. Green is held back for the ★ so crossing it is the biggest jump.
+const BANDS = [25, 50, 64, SAFE_BITS, GOAL_BITS];
 // zxcvbn bills the spaces between words as brute-forced characters — about
 // 5.9 bits each, so 23 bits of fiction in a five-word passphrase, a factor of
 // twelve million. An attacker guessing a passphrase knows the words are
@@ -3271,51 +3342,24 @@ function updateMeter(animate) {
   const bits = generated ? lastGenerated.bits
              : Math.min(Math.max(est, lowBound), highBound);
   const isPin = generated && lastGenerated.list === "pin";
-
-  // Both paths price the same way — half the search space at 10,000 guesses a
-  // second, zxcvbn's own convention — so editing a generated phrase nudges the
-  // reading instead of leaping to a different estimator. A generated secret
-  // knows its entropy exactly; typed text uses the corrected estimate. The cap
-  // keeps a pasted wall of text from overflowing to Infinity.
-  const slowSec = Math.pow(2, Math.min(bits, 1024) - 1) / 1e4;
-  const worst = slowSec / WORST_FACTOR;
-
-  // A PIN is not a website password — it guards a device that locks after a
-  // few wrong tries, and nobody hashes it into a database that can be stolen.
-  // The two hacked-website scenarios simply do not apply, so the toggle goes
-  // away and the reading stays on unrestricted guessing.
-  $("mscenwrap").style.display = isPin ? "none" : "";
-
-  // The value, ladder and colours follow the selected scenario; the ★ goal is
-  // ALWAYS judged on the worst case, so the Best case view cannot hand out a
-  // win the Worst case view would refuse.
-  const shown = (!isPin && scenario === "best") ? slowSec : worst;
-  const won  = worst >= SEC_CENTURY;
-  const tone = shown >= SEC_CENTURY ? "green" : shown >= 86400 ? "orange" : "red";
-  const cls  = tone === "green" ? "ok-c" : tone === "orange" ? "warn-c" : "bad-c";
+  const rounded = Math.round(bits);
 
   $("meter").style.display = "block";
-  $("mval").className = "mval " + cls;
-  $("mval").textContent = convertSecondsToReadable(shown);
-  // The fill climbs the ladder: five rungs, then the long run from a century
-  // to the age of the universe fills the last one. Within a rung the fill is
-  // logarithmic, because so is the ladder. On generate it sweeps up from zero
-  // rather than nudging a pixel or two.
-  let tier = 0; for (const t of TIERS) if (shown >= t) tier++;
-  let frac;
-  if (tier === 0) frac = Math.min(1, shown / 60);
-  else {
-    const lo = TIERS[tier - 1], hi = tier < 5 ? TIERS[tier] : SEC_UNIVERSE;
-    frac = Math.min(1, Math.log(shown / lo) / Math.log(hi / lo));
-  }
-  const fill = $("mfill");
-  const pct = Math.max(2, Math.round((tier + frac) / 6 * 100));
-  // The bar carries every rung it has climbed: a gradient running from the
-  // red of Instant to the colour of the rung it currently sits on, so the
-  // whole spectrum earned so far is visible and the bar only turns green
-  // once it is past the ★ goal.
+
+  // The headline. Counted bits for a generated secret, an estimate otherwise —
+  // and the estimate says so on its face, because zxcvbn reads a genuinely
+  // random typed password well below its true strength and that gap is far
+  // more visible now that bits are the number people read.
+  $("mval").className = "mval " + (bits >= SAFE_BITS ? "ok-c"
+                                 : bits >= 48 ? "warn-c" : "bad-c");
+  $("mval").textContent = rounded + " bits" + (generated ? "" : " est.");
+
+  // Position: linear in bits, capped at the end of the axis. Colour: banded.
+  const pct = Math.max(2, Math.min(100, bits / AXIS_BITS * 100));
+  let tier = 0; for (const t of BANDS) if (bits >= t) tier++;
   const stops = [];
   for (let i = 0; i <= tier; i++) stops.push("var(--rung" + i + ")");
+  const fill = $("mfill");
   fill.style.background = stops.length > 1
     ? "linear-gradient(90deg," + stops.join(",") + ")" : stops[0];
   if (animate) {
@@ -3326,57 +3370,78 @@ function updateMeter(animate) {
   }
   fill.style.width = pct + "%";
 
-  // the goal itself is marked on the ladder — this line only appears for the
-  // win, always judged on the worst case
+  // One short line under the bar — the status, and nothing else. Where the
+  // randomness came from and what it costs to guess moved into the ⓘ: they are
+  // reference, read once, and they were crowding the number that matters.
   const g = $("mgoal");
-  const noun = generated && !isPin && !LISTS[lastGenerated.list].chars
-    ? "passphrase" : "password";
+  g.style.display = "";
   if (isPin) {
-    // a PIN can never climb this ladder, and saying why matters more than the
-    // number: its safety comes from the lock, not from the digits
-    g.style.display = "";
     g.className = "mgoal";
-    g.textContent = "A PIN is not built to survive open guessing — it is safe because the "
-      + "device locks after a few wrong tries. The ladder assumes no such lock.";
-  } else if (won) {
-    // Claim only what the meter measures — guessing. The page cannot see a
-    // keylogger, a phishing page or a sticky note, so it must not promise the
-    // secret is safe, only that it should hold out against guessing.
-    g.style.display = "";
+    g.textContent = "Safe only because the device locks after a few wrong tries.";
+  } else if (bits >= GOAL_BITS) {
     g.className = "mgoal won";
-    g.textContent = "★ Goal reached — this " + noun + (worst >= SEC_UNIVERSE
-      ? " should outlast the universe" : " should take centuries to guess");
+    g.textContent = "★ Goal reached — as much randomness as a 12-word seed.";
+  } else if (bits >= SAFE_BITS) {
+    g.className = "mgoal won";
+    g.textContent = "Past brute force — " + bitWord(Math.round(GOAL_BITS - bits))
+      + " short of the ★ goal.";
   } else {
-    g.style.display = "none";
+    // Not a blanket verdict: how much randomness is enough depends entirely on
+    // whether a guesser is rate-limited. Four words is 58,000 years against a
+    // throttled login and half an hour against a stolen password file, so the
+    // line says which of those it is good for rather than calling it unsafe.
     g.className = "mgoal";
-    g.textContent = "";
+    // the advice is only offered for secrets we drew, because only then does
+    // the page know what a further draw is worth
+    let advice = "";
+    if (generated) {
+      const per = Math.log2(LISTS[lastGenerated.list].words.length);
+      const more = Math.ceil((SAFE_BITS - bits) / per);
+      advice = " Add " + more + " more "
+        + (LISTS[lastGenerated.list].chars
+            ? (more === 1 ? "character" : "characters")
+            : (more === 1 ? "word" : "words")) + " to survive offline guessing.";
+    }
+    g.textContent = (bits >= ONLINE_BITS
+      ? "Fine for a login that limits guesses."
+      : "Weak — offline guessing breaks this quickly.") + advice;
   }
 
-  // one short line — the full how-it's-measured story lives in the ⓘ beside
-  // the meter label
-  $("mnote").innerHTML = generated
-    ? "<b>" + Math.round(bits) + " bits of real randomness</b> — " + lastGenerated.count
-      + (lastGenerated.list === "pin" ? " digits"
-         : LISTS[lastGenerated.list].chars ? " characters" : " words")
-      + " drawn uniformly from " + LISTS[lastGenerated.list].label + "."
-    : floored
-    ? "<b>At least " + Math.round(bits) + " bits</b> — everything the generator drew is "
-      + "still in here, so what you added on top can only help."
-    : "<b>About " + Math.round(bits) + " bits, estimated</b> — typed text is judged by "
-      + "zxcvbn's pattern hunt. Press <b>Generate</b> for randomness that can be counted "
-      + "honestly.";
-}
+  // The crack time the bits imply, on its own line and nothing else on it.
+  $("mcrack").textContent =
+    convertSecondsToReadable(Math.pow(2, Math.min(bits, 1024) - 1) / GUESS_RATE);
 
-// which attack scenario the meter renders — worst case unless flipped
-let scenario = "worst";
-function setScenario(s) {
-  scenario = s;
-  $("scworst").setAttribute("aria-pressed", String(s === "worst"));
-  $("scbest").setAttribute("aria-pressed", String(s === "best"));
-  updateMeter();
+  // Details carries the reasoning the two headlines leave out: the assumption
+  // behind that time, then where the randomness actually came from — the one
+  // thing a strength meter cannot show you about a secret it did not draw.
+  // The headline uses the pessimistic rate. Showing the throttled rate beside
+  // it is the honest way to say why a short passphrase is not simply "unsafe":
+  // the two differ by nine orders of magnitude, and which one you face is a
+  // property of the site, not of the secret.
+  const at = r => convertSecondsToReadable(Math.pow(2, Math.min(bits, 1024) - 1) / r);
+  $("ctrates").innerHTML =
+    "<div><span>Login that throttles · 1,000 guesses/sec</span><b>" + at(THROTTLED_RATE)
+    + "</b></div>"
+    + "<div><span>Stolen file, fast hash · 1 trillion/sec</span><b>" + at(GUESS_RATE)
+    + "</b></div>";
+  $("ctbody").innerHTML =
+    "The crack time above is the second row — the pessimistic end, because you never "
+    + "get to choose how well a site guards what you gave it. A login that locks or "
+    + "throttles is the first row, and there far less randomness holds."
+    + "<br><br>"
+    + (generated
+      ? "<b>" + rounded + " bits of real randomness</b> — " + lastGenerated.count
+        + (lastGenerated.list === "pin" ? " digits"
+           : LISTS[lastGenerated.list].chars ? " characters" : " words")
+        + " drawn uniformly from " + LISTS[lastGenerated.list].label
+        + ", by <code>crypto.getRandomValues</code>."
+      : floored
+      ? "<b>At least " + rounded + " bits</b> — everything the generator drew is still "
+        + "in here, so what you added on top can only help."
+      : "<b>About " + rounded + " bits, estimated</b> — typed text is judged by zxcvbn's "
+        + "pattern hunt, which reads a truly random password low. Press <b>Generate</b> "
+        + "for randomness that can be counted honestly.");
 }
-$("scworst").onclick = () => setScenario("worst");
-$("scbest").onclick = () => setScenario("best");
 
 /* ---- blur shield (ported from BIP-39 Checksum) ------------------------ */
 // A generated passphrase arrives hidden — smudges, not words — and the eye
@@ -3514,7 +3579,7 @@ function generate() {
    ASCII pool, so its options swap when the pool does — each mode remembers the
    count it was last set to. */
 const COUNTS = {
-  words:  { values: [3, 4, 5, 6, 7, 8, 10, 12], unit: "words", last: "5" },
+  words:  { values: [4, 5, 6, 7, 8, 10, 12], unit: "words", last: "6" },
   chars:  { values: [8, 12, 16, 20, 24, 32, 48, 64], unit: "characters", last: "16" },
   digits: { values: [4, 5, 6, 7, 8, 10, 12], unit: "digits", last: "6" }
 };
@@ -3535,9 +3600,15 @@ function rebuildCountOptions() {
 // the button names what it makes
 function syncGenLabel() {
   const k = $("wordlist").value;
-  $("gen").textContent = k === "pin" ? "Generate new PIN"
-                       : k === "ascii" ? "Generate new password"
-                       : "Generate new passphrase";
+  const noun = k === "pin" ? "PIN" : k === "ascii" ? "password" : "passphrase";
+  $("gen").textContent = "Generate new " + noun;
+  // the label over the box names whatever the pool actually makes — it read
+  // "Your passphrase" even in PIN mode, and said nothing about what the box
+  // was for
+  $("fieldlab").textContent = "Your " + noun
+    + " appears here — or type your own to test it";
+  // character pools stay monospace so I/l and 0/O cannot be confused
+  $("passphrase").classList.toggle("monofield", !!LISTS[k].chars);
 }
 
 $("gen").onclick = generate;
@@ -3593,7 +3664,6 @@ $("cliphint").style.display = "none";
 $("st").textContent = "";
 rebuildCountOptions();                     // counts match the pool that is selected
 syncGenLabel();                            // and so does the button
-setScenario(scenario);                     // toggle matches the default it reset to
 if ($("passphrase").value.trim()) applyShield();
 else shieldReset();
 updateMeter();                             // empty box, no meter
