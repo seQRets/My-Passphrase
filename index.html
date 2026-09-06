@@ -23,11 +23,12 @@
        ground, so light mode uses a deeper burnt orange for small text
        while keeping #F7931A for rules, borders and fills. */
     --accent-ink:#9C5206; --green-ink:#0F7A45; --red-ink:#B3261E;
-    /* The crack-time ladder's six rungs, red climbing to green. Green is
-       reserved for the last rung, so the biggest colour jump is the moment
-       the ★ goal is crossed. */
-    --rung0:#D12B2B; --rung1:#E05A18; --rung2:#EF8511;
-    --rung3:#F0AE0E; --rung4:#D9C40A; --rung5:#19A971;
+    /* The randomness ramp, red climbing to green. Green arrives at the 78-bit
+       mark — six words — because that is where a secret passes beyond any
+       offline guessing. Everything to the right of it is green: the goal at
+       128 is a comparison, not a bar to clear. */
+    --rung0:#D12B2B; --rung1:#E2631A; --rung2:#E9A50E;
+    --rung3:#19A971; --rung4:#0C8A5B;
     --code-ink:#8A5A08; --code-bg:rgba(240,180,41,.16);
     --field:#FFFFFF; --fieldline:rgba(27,24,20,.16);
     --grid:rgba(247,147,26,0.055); --glow:rgba(247,147,26,0.10);
@@ -52,8 +53,8 @@
     --line:rgba(255,255,255,0.12); --line2:rgba(255,255,255,0.08);
     --ink:#F4F6FB; --muted:rgba(244,246,251,0.72); --dim:rgba(244,246,251,0.5);
     --accent-ink:#F7931A; --green-ink:#36D399; --red-ink:#F87171;
-    --rung0:#F87171; --rung1:#FB8B5A; --rung2:#FBA94C;
-    --rung3:#F6C445; --rung4:#E8E255; --rung5:#36D399;
+    --rung0:#F87171; --rung1:#FB9457; --rung2:#F3C34A;
+    --rung3:#36D399; --rung4:#24B584;
     --code-ink:#F0B429; --code-bg:rgba(240,180,41,.08);
     --field:rgba(255,255,255,.06); --fieldline:rgba(255,255,255,.24);
     --grid:rgba(247,147,26,0.025); --glow:rgba(247,147,26,0.13);
@@ -238,11 +239,18 @@
      randomness in a 12-word seed phrase — because bits are what the meter
      measures. Only the COLOUR is banded, and green is held back for the ★ so
      that crossing it is the biggest jump on the bar. */
-  .ladder{position:relative;height:10px;border-radius:999px;background:var(--panel2);
+  /* The bar is the number, so it carries the weight of one: at 10px it read as
+     a hairline rule under the figure rather than the figure itself. */
+  .ladder{position:relative;height:20px;border-radius:5px;background:var(--panel2);
        border:1px solid var(--line2);overflow:hidden}
-  .lfill{height:100%;width:0;border-radius:999px;transition:width .45s ease,background .3s ease}
-  .ladder i{position:absolute;top:0;bottom:0;width:1px;background:var(--line2)}
+  /* Square right end: a pill tip rounds away from the mark it is meant to meet,
+     which reads as falling short of a line the bar has actually reached. The
+     track's own soft corners clip the left end. */
+  .lfill{height:100%;width:0;border-radius:0;transition:width .45s ease,background .3s ease}
+  .ladder i{position:absolute;top:0;bottom:0;width:1px;background:var(--line2);
+       mix-blend-mode:multiply}
   .ladder i.safemark{width:2px;background:var(--muted)}
+  :root[data-theme="dark"] .ladder i{mix-blend-mode:screen}
   /* ticks are absolutely placed, so a label sits exactly on the bit value it
      names rather than floating in the middle of a band */
   .lticks{position:relative;height:2.5em;margin-top:.5rem}
@@ -251,6 +259,9 @@
   .lticks span.first{left:0;transform:none}
   .lticks .safetick{color:var(--muted)}
   .lticks .goaltick{right:0;left:auto;transform:none;color:var(--ink)}
+  /* On a narrow screen the 100 tick runs into the right-aligned 128 label.
+     The two that carry meaning are 78 and 128, so 100 is the one to drop. */
+  @media (max-width:430px){ .lticks span:nth-child(5){display:none} }
   /* The sub-label is wider than the number it belongs to, and as a block child
      of a shrink-to-fit tick it overflowed and centred on its own box instead of
      the number's. Positioning it against the tick pins it under the number. */
@@ -553,10 +564,10 @@
       </div>
       <div class="ladder" aria-hidden="true"><div class="lfill" id="mfill"></div><i
         style="left:19.53%"></i><i style="left:39.06%"></i><i class="safemark"
-        style="left:58.59%"></i><i style="left:78.13%"></i></div>
+        style="left:60.94%"></i><i style="left:78.13%"></i></div>
       <div class="lticks" aria-hidden="true"><span class="first">0</span><span
         style="left:19.53%">25</span><span style="left:39.06%">50</span><span
-        class="safetick" style="left:58.59%">75<span class="goalsub">strong</span></span><span
+        class="safetick" style="left:60.94%">78<span class="goalsub">💪</span></span><span
         style="left:78.13%">100</span><span
         class="goaltick">128 &#9733;<span class="goalsub">goal</span></span></div>
       <div class="mstatus">
@@ -796,7 +807,7 @@
     <div class="l">MY PASSPHRASE <span>· GENERATOR</span></div>
     <!-- bump the version on every release: it lets a saved copy be compared
          against the repo's releases -->
-    <div class="r">v1.8.1 · RUNS OFFLINE</div>
+    <div class="r">v1.8.2 · RUNS OFFLINE</div>
     <details class="creds">
       <summary>Credits</summary>
       <div class="prov">
@@ -3271,9 +3282,17 @@ function convertSecondsToReadable(seconds) {
 // bits apart — stretching and squashing the very quantity it claimed to show,
 // because it was really measuring the calendar.
 const AXIS_BITS = 128;                     // the bar runs 0 -> 128 bits
-const SAFE_BITS = 75;                      // past any offline brute force
+const SAFE_BITS = 78;                      // six words — past any offline guessing
 const GOAL_BITS = 128;                     // ★ — the randomness in a 12-word seed
 const SEED24_BITS = 256;                   // a 24-word seed, the most BIP-39 carries
+// Colour is positioned by where a stop sits on the AXIS, not by how far the
+// fill has travelled, so a given bit count is always the same colour and the
+// stretch beyond the 78 mark is always green.
+// The green stop sits below SAFE_BITS so green has fully arrived BEFORE the 78
+// mark, leaving a solid green run into it. It cannot cross: a six-word bar ends
+// exactly on that line, which is what makes it 78. The mark itself stays at the
+// true 60.94% — moving it left made a correct bar overshoot its own label.
+const RAMP = [[0, 0], [26, 1], [50, 2], [74, 3], [GOAL_BITS, 4]];
 // One stated attack speed, not two. The pair of scenarios this replaced
 // differed by a constant 26.6 bits applied to every secret alike, so the
 // toggle could not change the ranking of anything — it relabelled the axis and
@@ -3292,7 +3311,6 @@ const ONLINE_BITS = 50;
 const bitWord = n => n + (n === 1 ? " bit" : " bits");
 // Colour zones, not axis divisions — the bar's POSITION stays strictly linear
 // in bits. Green is held back for the ★ so crossing it is the biggest jump.
-const BANDS = [25, 50, 64, SAFE_BITS, GOAL_BITS];
 // zxcvbn bills the spaces between words as brute-forced characters — about
 // 5.9 bits each, so 23 bits of fiction in a five-word passphrase, a factor of
 // twelve million. An attacker guessing a passphrase knows the words are
@@ -3378,18 +3396,26 @@ function updateMeter(animate) {
   // and the estimate says so on its face, because zxcvbn reads a genuinely
   // random typed password well below its true strength and that gap is far
   // more visible now that bits are the number people read.
-  $("mval").className = "mval " + (bits >= SAFE_BITS ? "ok-c"
-                                 : bits >= 48 ? "warn-c" : "bad-c");
+  $("mval").className = "mval " + (rounded >= SAFE_BITS ? "ok-c"
+                                 : rounded >= 48 ? "warn-c" : "bad-c");
   $("mval").textContent = rounded + " bits" + (generated ? "" : " est.");
 
   // Position: linear in bits, capped at the end of the axis. Colour: banded.
-  const pct = Math.max(2, Math.min(100, bits / AXIS_BITS * 100));
-  let tier = 0; for (const t of BANDS) if (bits >= t) tier++;
+  // Length tracks the figure on screen, not the raw value behind it. Six words
+  // is 77.55 bits and reads "78 bits"; running the bar to 77.55 left it a few
+  // pixels short of the 78 mark it had just been told it reached.
+  const pct = Math.max(2, Math.min(100, rounded / AXIS_BITS * 100));
+  // Each ramp stop is placed where it falls inside the fill, so 40 bits is the
+  // same colour whether the bar ends at 45 or at 128. The last stop's colour
+  // carries on to the tip, which is what keeps everything past 78 green.
   const stops = [];
-  for (let i = 0; i <= tier; i++) stops.push("var(--rung" + i + ")");
+  for (const [at, i] of RAMP) {
+    if (at > rounded) break;
+    stops.push("var(--rung" + i + ") " + (at / Math.max(rounded, 1) * 100).toFixed(1) + "%");
+  }
   const fill = $("mfill");
   fill.style.background = stops.length > 1
-    ? "linear-gradient(90deg," + stops.join(",") + ")" : stops[0];
+    ? "linear-gradient(90deg," + stops.join(",") + ")" : "var(--rung0)";
   if (animate) {
     fill.style.transition = "none";
     fill.style.width = "0%";
@@ -3423,10 +3449,14 @@ function updateMeter(animate) {
       : over <= 0
         ? "★ Goal reached — as much randomness as a 12-word seed."
         : "★ Goal passed — " + bitWord(over) + " beyond a 12-word seed.";
-  } else if (bits >= SAFE_BITS) {
+  } else if (rounded >= SAFE_BITS) {
+    // Not "N bits short of the goal". Past 78 bits nothing guesses this, and
+    // telling someone with six words that they are 50 bits short of a star
+    // invites them to add words they do not need — at the cost of more to
+    // transcribe, more to check, and more to get wrong on a metal backup,
+    // which is how people actually lose coins.
     g.className = "mgoal won";
-    g.textContent = "Past brute force — " + bitWord(GOAL_BITS - rounded)
-      + " short of the ★ goal.";
+    g.textContent = "\uD83D\uDCAA Strong — beyond the reach of offline guessing.";
   } else {
     // Not a blanket verdict: how much randomness is enough depends entirely on
     // whether a guesser is rate-limited. Four words is 58,000 years against a
@@ -3438,7 +3468,8 @@ function updateMeter(animate) {
     let advice = "";
     if (generated) {
       const per = Math.log2(LISTS[lastGenerated.list].words.length);
-      const more = Math.ceil((SAFE_BITS - bits) / per);
+      let more = 1;
+      while (Math.round((lastGenerated.count + more) * per) < SAFE_BITS) more++;
       advice = " Add " + more + " more "
         + (LISTS[lastGenerated.list].chars
             ? (more === 1 ? "character" : "characters")
