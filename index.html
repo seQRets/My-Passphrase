@@ -23,6 +23,11 @@
        ground, so light mode uses a deeper burnt orange for small text
        while keeping #F7931A for rules, borders and fills. */
     --accent-ink:#9C5206; --green-ink:#0F7A45; --red-ink:#B3261E;
+    /* The crack-time ladder's six rungs, red climbing to green. Green is
+       reserved for the last rung, so the biggest colour jump is the moment
+       the ★ goal is crossed. */
+    --rung0:#D12B2B; --rung1:#E05A18; --rung2:#EF8511;
+    --rung3:#F0AE0E; --rung4:#D9C40A; --rung5:#19A971;
     --code-ink:#8A5A08; --code-bg:rgba(240,180,41,.16);
     --field:#FFFFFF; --fieldline:rgba(27,24,20,.16);
     --grid:rgba(247,147,26,0.055); --glow:rgba(247,147,26,0.10);
@@ -39,6 +44,8 @@
     --line:rgba(255,255,255,0.12); --line2:rgba(255,255,255,0.08);
     --ink:#F4F6FB; --muted:rgba(244,246,251,0.72); --dim:rgba(244,246,251,0.5);
     --accent-ink:#F7931A; --green-ink:#36D399; --red-ink:#F87171;
+    --rung0:#F87171; --rung1:#FB8B5A; --rung2:#FBA94C;
+    --rung3:#F6C445; --rung4:#E8E255; --rung5:#36D399;
     --code-ink:#F0B429; --code-bg:rgba(240,180,41,.08);
     --field:rgba(255,255,255,.06); --fieldline:rgba(255,255,255,.24);
     --grid:rgba(247,147,26,0.025); --glow:rgba(247,147,26,0.13);
@@ -214,7 +221,10 @@
   .mscen{display:flex;border:1px solid var(--line2);border-radius:999px;overflow:hidden}
   .mscen button{font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
        padding:.28rem .6rem;background:transparent;color:var(--dim);border:0;cursor:pointer}
-  .mscen button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+  /* the active side wears the scenario's colour: red for a careless website,
+     green for a careful one */
+  .mscen button#scworst[aria-pressed="true"]{background:var(--red-ink);color:var(--bg)}
+  .mscen button#scbest[aria-pressed="true"]{background:var(--green-ink);color:var(--bg)}
   .mlab{font-size:.7rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
   .mval{font:700 .95rem var(--mono)}
   /* The crack-time ladder: six rungs, each one a jump in scale, with the goal
@@ -481,16 +491,16 @@
           bit doubles their work. Generated secrets show their true randomness; for text you
           type, the figure is zxcvbn's estimate — an upper bound, not a
           guarantee.</span></span></span>
-        <span class="mscenwrap"><span class="mscen" role="group" aria-label="Attack scenario">
+        <span class="mscenwrap" id="mscenwrap"><span class="mscen" role="group" aria-label="Attack scenario">
           <button id="scworst" type="button" aria-pressed="true">Worst case</button>
           <button id="scbest" type="button" aria-pressed="false">Best case</button>
         </span><span class="tipwrap"><button class="tipbtn" type="button"
           aria-label="What the two cases mean">i</button><span class="tipbox"
-          role="tooltip">Both assume a website you use gets hacked. <b>Worst case:</b> it
-          stored your password carelessly, and guessing runs at about a trillion tries a
-          second. <b>Best case:</b> it was properly hashed, slowing guessing to about
-          10,000 a second. The ★ goal is always judged on the worst
-          case.</span></span></span>
+          role="tooltip">Both assume a website where you used this passphrase or password
+          gets hacked. <b>Worst case:</b> it stored the secret carelessly, and guessing runs
+          at about a trillion tries a second. <b>Best case:</b> it was properly hashed,
+          slowing guessing to about 10,000 a second. Your goal should be to reach ★ Centuries
+          of protection under the worst case.</span></span></span>
         </span>
         <span class="mval" id="mval"></span>
       </div>
@@ -733,7 +743,7 @@
     <div class="l">MY PASSPHRASE <span>· GENERATOR</span></div>
     <!-- bump the version on every release: it lets a saved copy be compared
          against the repo's releases -->
-    <div class="r">v1.7.0 · RUNS OFFLINE</div>
+    <div class="r">v1.7.1 · RUNS OFFLINE</div>
     <details class="creds">
       <summary>Credits</summary>
       <div class="prov">
@@ -3169,20 +3179,23 @@ function convertSecondsToReadable(seconds) {
   var numYears       = Math.floor(numSeconds / (60 * 60 * 24 * 365));
   var numCenturies   = Math.floor(numSeconds / (60 * 60 * 24 * 365 * 100));
 
+  // "1 years" reads like a bug, because it is one
+  var plural = function (n, one, many) { return n + ' ' + (n === 1 ? one : many); };
+
   if (numMilliseconds < 1000) {
     timeString = 'less than a second';
   } else if (numSeconds < 60) {
-    timeString = numSeconds + ' seconds';
+    timeString = plural(numSeconds, 'second', 'seconds');
   } else if (numMinutes < 60) {
-    timeString = numMinutes + ' minutes';
+    timeString = plural(numMinutes, 'minute', 'minutes');
   } else if (numHours < 24) {
-    timeString = numHours + ' hours';
+    timeString = plural(numHours, 'hour', 'hours');
   } else if (numDays < 365) {
-    timeString = numDays + ' days';
+    timeString = plural(numDays, 'day', 'days');
   } else if (numYears < 100) {
-    timeString = numYears + ' years';
+    timeString = plural(numYears, 'year', 'years');
   } else if (numCenturies < 1e15) {
-    timeString = numCenturies + ' centuries';
+    timeString = plural(numCenturies, 'century', 'centuries');
   } else {
     // Past ~10^15 the number turns into scientific notation and the comma
     // regex below mangles it; a power of ten reads better anyway.
@@ -3202,6 +3215,30 @@ const SEC_YEAR = 60 * 60 * 24 * 365, SEC_CENTURY = SEC_YEAR * 100;
 const WORST_FACTOR = 1e8;                  // 10^12 guesses/s vs zxcvbn's 10^4
 const SEC_UNIVERSE = 1.38e10 * SEC_YEAR;   // the universe is ~13.8bn years old
 const TIERS = [60, 3600, 86400, SEC_YEAR, SEC_CENTURY];
+// zxcvbn bills the spaces between words as brute-forced characters — about
+// 5.9 bits each, so 23 bits of fiction in a five-word passphrase, a factor of
+// twelve million. An attacker guessing a passphrase knows the words are
+// separated by spaces; the spaces are not secret. Deducting exactly that
+// brings its estimate of a generated phrase to within a bit or two of the
+// true entropy, and leaves passwords without spaces untouched.
+function estimateBits(r) {
+  let spaceBits = 0;
+  for (const m of r.match_sequence) {
+    if (m.pattern !== "bruteforce" || !(m.cardinality > 1)) continue;
+    const spaces = (m.token.match(/\s/g) || []).length;
+    if (spaces) spaceBits += spaces * Math.log2(m.cardinality);
+  }
+  return Math.max(0, r.entropy - spaceBits);
+}
+// Is every character of `needle` present in `hay`, in order, with anything
+// allowed in between? Used to tell an edited generated secret from a fresh
+// one: inserting characters keeps the subsequence, deleting a word breaks it.
+function isSubsequence(hay, needle) {
+  let i = 0;
+  for (let j = 0; j < hay.length && i < needle.length; j++)
+    if (hay[j] === needle[i]) i++;
+  return i === needle.length;
+}
 // What was last generated, so the meter can tell true entropy (we know the
 // words were drawn uniformly) from an estimate about text someone typed.
 let lastGenerated = null;
@@ -3211,20 +3248,48 @@ function updateMeter(animate) {
   if (!v.trim()) { $("meter").style.display = "none"; return; }
   const r = zxcvbn(v);
   const generated = lastGenerated && v === lastGenerated.phrase;
-  const bits = generated ? lastGenerated.bits : r.entropy;
+  // zxcvbn prices a word by how common it is, so its estimate of a generated
+  // phrase swings either side of the truth: ordinary words ("manual", "taking")
+  // are rated below the list's own 12.9 bits, rare ones far above. Editing a
+  // generated secret would therefore make one added character look like a
+  // collapse or a thousandfold windfall, depending only on which words the
+  // draw happened to produce. When the edit still contains every character the
+  // generator drew, in order, two bounds can be proved, so the estimate is held
+  // between them: it cannot be weaker than the secret it grew from, and the
+  // characters added cannot be worth more than log2(94) bits each, even if
+  // every one were drawn at random from the whole printable set. Neither bound
+  // is extended to text we never generated — pricing hand-picked words at the
+  // list's rate would flatter a human-chosen phrase, the one direction in which
+  // this meter must never err.
+  const est = estimateBits(r);
+  const derived = !generated && lastGenerated && isSubsequence(v, lastGenerated.phrase);
+  const lowBound = derived ? lastGenerated.bits : 0;
+  const highBound = derived
+    ? lastGenerated.bits + (v.length - lastGenerated.phrase.length) * Math.log2(94)
+    : Infinity;
+  const floored = derived && est <= lowBound;
+  const bits = generated ? lastGenerated.bits
+             : Math.min(Math.max(est, lowBound), highBound);
   const isPin = generated && lastGenerated.list === "pin";
 
-  // For generated secrets the entropy is known exactly, so the times come
-  // from it (zxcvbn has never heard of most EFF words and would overrate
-  // them wildly). Typed text keeps zxcvbn's pattern-hunting estimate.
-  // Average guesses to a hit: half the space, matching zxcvbn's convention.
-  const slowSec = generated ? Math.pow(2, bits - 1) / 1e4 : r.crack_time;
+  // Both paths price the same way — half the search space at 10,000 guesses a
+  // second, zxcvbn's own convention — so editing a generated phrase nudges the
+  // reading instead of leaping to a different estimator. A generated secret
+  // knows its entropy exactly; typed text uses the corrected estimate. The cap
+  // keeps a pasted wall of text from overflowing to Infinity.
+  const slowSec = Math.pow(2, Math.min(bits, 1024) - 1) / 1e4;
   const worst = slowSec / WORST_FACTOR;
+
+  // A PIN is not a website password — it guards a device that locks after a
+  // few wrong tries, and nobody hashes it into a database that can be stolen.
+  // The two hacked-website scenarios simply do not apply, so the toggle goes
+  // away and the reading stays on unrestricted guessing.
+  $("mscenwrap").style.display = isPin ? "none" : "";
 
   // The value, ladder and colours follow the selected scenario; the ★ goal is
   // ALWAYS judged on the worst case, so the Best case view cannot hand out a
   // win the Worst case view would refuse.
-  const shown = scenario === "best" ? slowSec : worst;
+  const shown = (!isPin && scenario === "best") ? slowSec : worst;
   const won  = worst >= SEC_CENTURY;
   const tone = shown >= SEC_CENTURY ? "green" : shown >= 86400 ? "orange" : "red";
   const cls  = tone === "green" ? "ok-c" : tone === "orange" ? "warn-c" : "bad-c";
@@ -3245,7 +3310,14 @@ function updateMeter(animate) {
   }
   const fill = $("mfill");
   const pct = Math.max(2, Math.round((tier + frac) / 6 * 100));
-  fill.style.background = "var(--" + tone + ")";
+  // The bar carries every rung it has climbed: a gradient running from the
+  // red of Instant to the colour of the rung it currently sits on, so the
+  // whole spectrum earned so far is visible and the bar only turns green
+  // once it is past the ★ goal.
+  const stops = [];
+  for (let i = 0; i <= tier; i++) stops.push("var(--rung" + i + ")");
+  fill.style.background = stops.length > 1
+    ? "linear-gradient(90deg," + stops.join(",") + ")" : stops[0];
   if (animate) {
     fill.style.transition = "none";
     fill.style.width = "0%";
@@ -3259,15 +3331,24 @@ function updateMeter(animate) {
   const g = $("mgoal");
   const noun = generated && !isPin && !LISTS[lastGenerated.list].chars
     ? "passphrase" : "password";
-  if (won) {
+  if (isPin) {
+    // a PIN can never climb this ladder, and saying why matters more than the
+    // number: its safety comes from the lock, not from the digits
+    g.style.display = "";
+    g.className = "mgoal";
+    g.textContent = "A PIN is not built to survive open guessing — it is safe because the "
+      + "device locks after a few wrong tries. The ladder assumes no such lock.";
+  } else if (won) {
+    // Claim only what the meter measures — guessing. The page cannot see a
+    // keylogger, a phishing page or a sticky note, so it must not promise the
+    // secret is safe, only that it should hold out against guessing.
     g.style.display = "";
     g.className = "mgoal won";
-    g.textContent = worst >= SEC_UNIVERSE
-      ? "★ Goal reached — your secret will be secure behind this " + noun
-        + " for longer than the universe has existed."
-      : "★ Goal reached — your secret will be secure behind this " + noun + ".";
+    g.textContent = "★ Goal reached — this " + noun + (worst >= SEC_UNIVERSE
+      ? " should outlast the universe" : " should take centuries to guess");
   } else {
     g.style.display = "none";
+    g.className = "mgoal";
     g.textContent = "";
   }
 
@@ -3278,6 +3359,9 @@ function updateMeter(animate) {
       + (lastGenerated.list === "pin" ? " digits"
          : LISTS[lastGenerated.list].chars ? " characters" : " words")
       + " drawn uniformly from " + LISTS[lastGenerated.list].label + "."
+    : floored
+    ? "<b>At least " + Math.round(bits) + " bits</b> — everything the generator drew is "
+      + "still in here, so what you added on top can only help."
     : "<b>About " + Math.round(bits) + " bits, estimated</b> — typed text is judged by "
       + "zxcvbn's pattern hunt. Press <b>Generate</b> for randomness that can be counted "
       + "honestly.";
