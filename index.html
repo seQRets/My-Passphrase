@@ -205,12 +205,34 @@
      solid ground and full-contrast text explicitly. */
   option{background:var(--bg);color:var(--ink)}
   .meter{margin-top:1.2rem;padding-top:1.2rem;border-top:1px solid var(--line2)}
-  .mrow{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;margin-bottom:.55rem}
+  .mrow{display:flex;justify-content:space-between;align-items:center;gap:.8rem;
+       flex-wrap:wrap;margin-bottom:.55rem}
+  /* label and toggle travel together on the left, so the value's changing
+     width cannot shove the toggle around */
+  .mhead{display:flex;align-items:center;gap:.9rem;flex-wrap:wrap}
+  .mscenwrap{display:flex;align-items:center;gap:.35rem}
+  .mscen{display:flex;border:1px solid var(--line2);border-radius:999px;overflow:hidden}
+  .mscen button{font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+       padding:.28rem .6rem;background:transparent;color:var(--dim);border:0;cursor:pointer}
+  .mscen button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
   .mlab{font-size:.7rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
   .mval{font:700 .95rem var(--mono)}
-  .bar{height:6px;border-radius:999px;background:var(--panel2);
+  /* The crack-time ladder: six rungs, each one a jump in scale, with the goal
+     — centuries against the worst case — marked on the last. Rung boundaries
+     are tier thresholds, not a linear time axis. */
+  .ladder{position:relative;height:10px;border-radius:999px;background:var(--panel2);
        border:1px solid var(--line2);overflow:hidden}
-  .fill{height:100%;width:0;border-radius:999px;transition:width .3s ease,background .3s ease}
+  .lfill{height:100%;width:0;border-radius:999px;transition:width .45s ease,background .3s ease}
+  .ladder i{position:absolute;top:0;bottom:0;width:1px;background:var(--line2)}
+  .ladder i.goalmark{width:2px;background:var(--dim)}
+  .lticks{display:flex;margin-top:.4rem}
+  .lticks span{flex:1;text-align:center;font-size:.55rem;font-weight:700;
+       letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
+  .lticks .goaltick{color:var(--ink)}
+  .goalsub{display:block;font-size:.55rem;letter-spacing:.06em;text-transform:none;
+       color:var(--dim)}
+  .mgoal{font-size:.8rem;font-weight:600;color:var(--muted);margin-top:.65rem;line-height:1.6}
+  .mgoal.won{color:var(--green-ink)}
   .mnote{font-size:.8rem;color:var(--muted);margin-top:.7rem;line-height:1.6}
   .mnote b{color:var(--ink);font-weight:700}
   .ok-c{color:var(--green-ink)} .warn-c{color:var(--accent-ink)} .bad-c{color:var(--red-ink)}
@@ -396,7 +418,7 @@
 
   <div class="warn">
     <details>
-      <summary>How to run it safely — 6 steps</summary>
+      <summary>How to run mypassphrase.app safely — 6 steps</summary>
       <p><b>Getting a password from a website? Really?</b> Fair question. This page never
       touches the internet — no images, no fonts, no scripts — and it tells your browser to
       refuse if it ever tried. Check the Network tab in your browser's developer tools to
@@ -452,16 +474,31 @@
     </div>
     <div class="meter" id="meter" style="display:none">
       <div class="mrow">
-        <span class="mlab">Approximate time to crack<span class="tipwrap"><button class="tipbtn"
+        <span class="mhead">
+        <span class="mlab">Time to crack<span class="tipwrap"><button class="tipbtn"
           type="button" aria-label="How this is measured">i</button><span class="tipbox"
           role="tooltip">A bit is one yes-or-no answer a guesser has to get right, and every
-          bit doubles their work. The crack time assumes 10,000 guesses per second, typical
-          for a properly hashed password database. Generated passphrases show their true
-          entropy; for text you type, the figure is zxcvbn's estimate — an upper bound, not
-          a guarantee.</span></span></span>
+          bit doubles their work. Generated secrets show their true randomness; for text you
+          type, the figure is zxcvbn's estimate — an upper bound, not a
+          guarantee.</span></span></span>
+        <span class="mscenwrap"><span class="mscen" role="group" aria-label="Attack scenario">
+          <button id="scworst" type="button" aria-pressed="true">Worst case</button>
+          <button id="scbest" type="button" aria-pressed="false">Best case</button>
+        </span><span class="tipwrap"><button class="tipbtn" type="button"
+          aria-label="What the two cases mean">i</button><span class="tipbox"
+          role="tooltip">Both assume a website you use gets hacked. <b>Worst case:</b> it
+          stored your password carelessly, and guessing runs at about a trillion tries a
+          second. <b>Best case:</b> it was properly hashed, slowing guessing to about
+          10,000 a second. The ★ goal is always judged on the worst
+          case.</span></span></span>
+        </span>
         <span class="mval" id="mval"></span>
       </div>
-      <div class="bar"><div class="fill" id="mfill"></div></div>
+      <div class="ladder" aria-hidden="true"><div class="lfill" id="mfill"></div><i
+        style="left:16.66%"></i><i style="left:33.33%"></i><i style="left:50%"></i><i
+        style="left:66.66%"></i><i class="goalmark" style="left:83.33%"></i></div>
+      <div class="lticks" aria-hidden="true"><span>Instant</span><span>Minutes</span><span>Hours</span><span>Days</span><span>Years</span><span class="goaltick">★ Centuries<span class="goalsub">(goal)</span></span></div>
+      <div class="mgoal" id="mgoal"></div>
       <div class="mnote" id="mnote"></div>
     </div>
     <div class="row">
@@ -508,14 +545,20 @@
         number or a symbol. Crackers know every one of those patterns, and passwords built from
         them fall instantly.</p>
         <div class="scroll"><table>
-          <tr><th>Pattern</th><th>Example</th><th>Time to crack</th></tr>
-          <tr><td class="k">A common word</td><td class="v">december</td><td>18 milliseconds</td></tr>
-          <tr><td class="k">A keyboard pattern</td><td class="v">qwerty</td><td>10 milliseconds</td></tr>
-          <tr><td class="k">The family dog</td><td class="v">rusty</td><td>27 milliseconds</td></tr>
-          <tr><td class="k">A date or zip code</td><td class="v">03261981</td><td>2 seconds</td></tr>
-          <tr><td class="k">Letter→number swaps</td><td class="v">S4nfr4n</td><td>639 milliseconds</td></tr>
-          <tr><td class="k">Four random words</td><td class="v">mergers decade labeled manager</td><td><b>6,000,126 centuries</b></td></tr>
+          <tr><th>Pattern</th><th>Example</th><th>Worst-case time to crack</th></tr>
+          <tr><td class="k">A common word</td><td class="v">december</td><td>less than a second</td></tr>
+          <tr><td class="k">A keyboard pattern</td><td class="v">qwerty</td><td>less than a second</td></tr>
+          <tr><td class="k">The family dog</td><td class="v">rusty</td><td>less than a second</td></tr>
+          <tr><td class="k">A date or zip code</td><td class="v">03261981</td><td>less than a second</td></tr>
+          <tr><td class="k">Letter→number swaps</td><td class="v">S4nfr4n</td><td>less than a second</td></tr>
+          <tr><td class="k">Four random words</td><td class="v">mergers decade labeled manager</td><td><b>6 years</b></td></tr>
         </table></div>
+        <p>Those times assume what the meter assumes: a website that had your password got
+        hacked, scrambled its stored passwords carelessly, and the thieves are guessing a
+        trillion times a second. Every recognisable pattern falls before the first tick of
+        the clock; random words are the only row still standing. And each word added
+        multiplies the work about 8,000-fold: six random words reach the meter's Centuries
+        goal even in this worst case.</p>
       </details>
 
       <details>
@@ -535,7 +578,8 @@
         accounts in under a second — then the same lists with common substitutions
         (<code>december</code> → <code>D3cember</code>), then combinations like name + date, and
         finally brute force over every character. Depending on how a site protects its password
-        database, modern hardware makes between 10,000 and 350&nbsp;billion guesses per second.
+        database, modern hardware makes anywhere from about 10,000 guesses per second to a
+        trillion or more.
         A password built from any recognisable pattern eventually falls to this; a passphrase
         chosen truly at random has no pattern to exploit.</p>
       </details>
@@ -549,10 +593,25 @@
         just counting characters, it hunts for the patterns real crackers try first —
         dictionary words, names, dates, keyboard runs, letter-for-number swaps — and estimates
         how many guesses your text would survive.</p>
-        <p>The time shown assumes 10,000 guesses per second, consistent with passwords hashed
-        using bcrypt, scrypt or PBKDF2. If a service stores passwords with plain MD5 or
-        SHA-256, guessing runs millions of times faster and no amount of password strength
-        really helps. Treat the figure as a comparison tool, not a promise.</p>
+        <p>How fast those guesses run depends on the website that was hacked — that is the
+        difference between the worst case and the best case, covered in the next question.
+        Treat every figure as a comparison tool, not a promise.</p>
+      </details>
+
+      <details>
+        <summary>What are the worst case and best case scenarios?</summary>
+        <p>Both start the same way: a website where you used your passphrase gets hacked,
+        and the thieves carry off its list of stored passwords to guess against on their
+        own machines, as fast as their hardware allows. What differs is how the site stored
+        them. In the <b>best case</b> it hashed them properly — a slow, modern algorithm
+        such as bcrypt, scrypt or PBKDF2 — which limits guessing to about 10,000 tries a
+        second. In the <b>worst case</b> it stored them carelessly, with a fast, dated
+        algorithm like plain MD5, and a serious rig manages about a trillion tries a second
+        — a hundred million times faster.</p>
+        <p>You never get to choose which kind of website ends up guarding your password, so
+        the meter shows the worst case by default and judges the ★ Centuries goal against
+        it. The toggle beside the meter lets you peek at the best case — but a passphrase
+        that only survives the best case is a bet on every website doing its job.</p>
       </details>
 
       <div class="grp2">The generation pools</div>
@@ -674,7 +733,7 @@
     <div class="l">MY PASSPHRASE <span>· GENERATOR</span></div>
     <!-- bump the version on every release: it lets a saved copy be compared
          against the repo's releases -->
-    <div class="r">v1.6.5 · RUNS OFFLINE</div>
+    <div class="r">v1.7.0 · RUNS OFFLINE</div>
     <details class="creds">
       <summary>Credits</summary>
       <div class="prov">
@@ -3098,7 +3157,7 @@ function generatePassphrase(count, listKey) {
   return out.join(pool.chars ? "" : " ");
 }
 
-/* ---- crack time (from useapassphrase, verbatim) ---------------------- */
+/* ---- crack time (adapted from useapassphrase) ------------------------ */
 function convertSecondsToReadable(seconds) {
   var timeString = '';
 
@@ -3111,7 +3170,7 @@ function convertSecondsToReadable(seconds) {
   var numCenturies   = Math.floor(numSeconds / (60 * 60 * 24 * 365 * 100));
 
   if (numMilliseconds < 1000) {
-    timeString = Math.round(numMilliseconds) + ' milliseconds';
+    timeString = 'less than a second';
   } else if (numSeconds < 60) {
     timeString = numSeconds + ' seconds';
   } else if (numMinutes < 60) {
@@ -3134,9 +3193,15 @@ function convertSecondsToReadable(seconds) {
 }
 
 /* ---- meter ----------------------------------------------------------- */
-// zxcvbn's crack_time assumes 10,000 guesses/second. A century is the
-// threshold for "good", a year for "questionable" — anything less is red.
+// Two attack speeds bracket reality. zxcvbn's crack_time assumes 10,000
+// guesses/second — a stolen password file protected by a slow, modern hash.
+// The headline and the ladder assume the worst case instead: the same theft
+// from a badly run site, where fast hashing lets serious hardware try a
+// trillion guesses a second. The goal is centuries even then.
 const SEC_YEAR = 60 * 60 * 24 * 365, SEC_CENTURY = SEC_YEAR * 100;
+const WORST_FACTOR = 1e8;                  // 10^12 guesses/s vs zxcvbn's 10^4
+const SEC_UNIVERSE = 1.38e10 * SEC_YEAR;   // the universe is ~13.8bn years old
+const TIERS = [60, 3600, 86400, SEC_YEAR, SEC_CENTURY];
 // What was last generated, so the meter can tell true entropy (we know the
 // words were drawn uniformly) from an estimate about text someone typed.
 let lastGenerated = null;
@@ -3145,23 +3210,41 @@ function updateMeter(animate) {
   const v = $("passphrase").value;
   if (!v.trim()) { $("meter").style.display = "none"; return; }
   const r = zxcvbn(v);
-  const crackTime = convertSecondsToReadable(r.crack_time);
-
   const generated = lastGenerated && v === lastGenerated.phrase;
   const bits = generated ? lastGenerated.bits : r.entropy;
+  const isPin = generated && lastGenerated.list === "pin";
 
-  const tone = r.crack_time >= SEC_CENTURY ? "green"
-             : r.crack_time >= SEC_YEAR ? "orange" : "red";
+  // For generated secrets the entropy is known exactly, so the times come
+  // from it (zxcvbn has never heard of most EFF words and would overrate
+  // them wildly). Typed text keeps zxcvbn's pattern-hunting estimate.
+  // Average guesses to a hit: half the space, matching zxcvbn's convention.
+  const slowSec = generated ? Math.pow(2, bits - 1) / 1e4 : r.crack_time;
+  const worst = slowSec / WORST_FACTOR;
+
+  // The value, ladder and colours follow the selected scenario; the ★ goal is
+  // ALWAYS judged on the worst case, so the Best case view cannot hand out a
+  // win the Worst case view would refuse.
+  const shown = scenario === "best" ? slowSec : worst;
+  const won  = worst >= SEC_CENTURY;
+  const tone = shown >= SEC_CENTURY ? "green" : shown >= 86400 ? "orange" : "red";
   const cls  = tone === "green" ? "ok-c" : tone === "orange" ? "warn-c" : "bad-c";
 
   $("meter").style.display = "block";
   $("mval").className = "mval " + cls;
-  $("mval").textContent = crackTime;
-  // The bar tracks zxcvbn's estimate of this exact phrase, not the list-size
-  // theory, so it lands somewhere slightly different on every generation. On
-  // generate it sweeps up from zero rather than nudging a pixel or two.
+  $("mval").textContent = convertSecondsToReadable(shown);
+  // The fill climbs the ladder: five rungs, then the long run from a century
+  // to the age of the universe fills the last one. Within a rung the fill is
+  // logarithmic, because so is the ladder. On generate it sweeps up from zero
+  // rather than nudging a pixel or two.
+  let tier = 0; for (const t of TIERS) if (shown >= t) tier++;
+  let frac;
+  if (tier === 0) frac = Math.min(1, shown / 60);
+  else {
+    const lo = TIERS[tier - 1], hi = tier < 5 ? TIERS[tier] : SEC_UNIVERSE;
+    frac = Math.min(1, Math.log(shown / lo) / Math.log(hi / lo));
+  }
   const fill = $("mfill");
-  const pct = Math.max(3, Math.min(100, Math.round(r.entropy / 128 * 100)));
+  const pct = Math.max(2, Math.round((tier + frac) / 6 * 100));
   fill.style.background = "var(--" + tone + ")";
   if (animate) {
     fill.style.transition = "none";
@@ -3170,6 +3253,24 @@ function updateMeter(animate) {
     fill.style.transition = "";
   }
   fill.style.width = pct + "%";
+
+  // the goal itself is marked on the ladder — this line only appears for the
+  // win, always judged on the worst case
+  const g = $("mgoal");
+  const noun = generated && !isPin && !LISTS[lastGenerated.list].chars
+    ? "passphrase" : "password";
+  if (won) {
+    g.style.display = "";
+    g.className = "mgoal won";
+    g.textContent = worst >= SEC_UNIVERSE
+      ? "★ Goal reached — your secret will be secure behind this " + noun
+        + " for longer than the universe has existed."
+      : "★ Goal reached — your secret will be secure behind this " + noun + ".";
+  } else {
+    g.style.display = "none";
+    g.textContent = "";
+  }
+
   // one short line — the full how-it's-measured story lives in the ⓘ beside
   // the meter label
   $("mnote").innerHTML = generated
@@ -3181,6 +3282,17 @@ function updateMeter(animate) {
       + "zxcvbn's pattern hunt. Press <b>Generate</b> for randomness that can be counted "
       + "honestly.";
 }
+
+// which attack scenario the meter renders — worst case unless flipped
+let scenario = "worst";
+function setScenario(s) {
+  scenario = s;
+  $("scworst").setAttribute("aria-pressed", String(s === "worst"));
+  $("scbest").setAttribute("aria-pressed", String(s === "best"));
+  updateMeter();
+}
+$("scworst").onclick = () => setScenario("worst");
+$("scbest").onclick = () => setScenario("best");
 
 /* ---- blur shield (ported from BIP-39 Checksum) ------------------------ */
 // A generated passphrase arrives hidden — smudges, not words — and the eye
