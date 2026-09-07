@@ -25,8 +25,8 @@
     --accent-ink:#9C5206; --green-ink:#0F7A45; --red-ink:#B3261E;
     /* The randomness ramp, red climbing to green. Green arrives at the 78-bit
        mark — six words — because that is where a secret passes beyond any
-       offline guessing. Everything to the right of it is green: the goal at
-       128 is a comparison, not a bar to clear. */
+       offline guessing. Everything to the right of it is green: the 128 mark
+       is a comparison with a 12-word seed, not a bar to clear. */
     --rung0:#D12B2B; --rung1:#E2631A; --rung2:#E9A50E;
     --rung3:#19A971; --rung4:#0C8A5B;
     --code-ink:#8A5A08; --code-bg:rgba(240,180,41,.16);
@@ -237,7 +237,7 @@
   .mval{font:700 var(--fs-xl) var(--mono)}
   /* The entropy bar. Position is strictly linear in bits — 0 to 128, the
      randomness in a 12-word seed phrase — because bits are what the meter
-     measures. Only the COLOUR is banded, and green is held back for the ★ so
+     measures. Only the COLOUR is banded, and green is held back for the seed
      that crossing it is the biggest jump on the bar. */
   /* The bar is the number, so it carries the weight of one: at 10px it read as
      a hairline rule under the figure rather than the figure itself. */
@@ -569,7 +569,7 @@
         style="left:19.53%">25</span><span style="left:39.06%">50</span><span
         class="safetick" style="left:60.94%">78<span class="goalsub">💪</span></span><span
         style="left:78.13%">100</span><span
-        class="goaltick">128 &#9733;<span class="goalsub">goal</span></span></div>
+        class="goaltick">128 🌱<span class="goalsub">seed</span></span></div>
       <div class="mstatus">
         <span class="mgoal" id="mgoal"></span>
         <span class="mcrackwrap"><span class="mclab">Crack time</span><span
@@ -632,8 +632,12 @@
           <tr><td class="k">The family dog</td><td class="v">rusty</td><td>less than a second</td></tr>
           <tr><td class="k">A date or zip code</td><td class="v">03261981</td><td>less than a second</td></tr>
           <tr><td class="k">Letter→number swaps</td><td class="v">S4nfr4n</td><td>less than a second</td></tr>
-          <tr><td class="k">Four random words</td><td class="v">mergers decade labeled manager</td><td><b>15 minutes</b></td></tr>
+          <tr><td class="k">Four random words</td><td class="v">candle harvest anchor velvet</td><td><b>30 minutes</b></td></tr>
         </table></div>
+        <p class="hint">The last row is what the generator draws — four words, 52 bits. Type
+        those same four words in yourself and the meter shows less, because it cannot tell
+        whether you rolled for them or picked them; see <b>“Why do the same words score
+        differently when I type them in?”</b> below.</p>
         <p>Those times assume what the meter assumes: a website that had your password got
         hacked, scrambled its stored passwords carelessly, and the thieves are guessing a
         trillion times a second. Every recognisable pattern falls before the first tick of
@@ -641,7 +645,7 @@
         <p>But the clock is the lesser number here. What actually separates the last row
         from the rest is <b>randomness</b>, and that is what the meter measures: each random
         word multiplies a guesser's work about 8,000-fold, which is 13 bits. Four words
-        carry about 52 bits; six carry 78, which clears the meter's STRONG mark and passes
+        carry about 52 bits; six carry 78, which reaches the 💪 mark on the meter and passes
         beyond the reach of any offline grinding. The time underneath is only that bit
         count run through an assumption about someone else's hardware.</p>
       </details>
@@ -649,7 +653,8 @@
       <details>
         <summary>Words or ASCII characters — which should I use?</summary>
         <p>Both are offered here, and generated at random they are both strong; the difference
-        is what your memory has to carry. <code>ipz2!az8k%0h</code> and
+        is what your memory has to carry. (The counts below are what the generator draws;
+        typed in by hand they read lower, for the reason given further down.) <code>ipz2!az8k%0h</code> and
         <code>finite anchor velvet harvest candle ruby</code> hold almost exactly the same
         randomness — 79 bits against 78 — and both take centuries to crack, but only one of
         them survives being typed from memory. Use <b>words</b> for anything you
@@ -671,15 +676,47 @@
       </details>
 
       <details>
-        <summary>How is the crack time calculated?</summary>
-        <p>By <code>zxcvbn</code>, an open-source strength estimator created at Dropbox — and
+        <summary>Can I use this for a wallet (BIP-39) passphrase?</summary>
+        <p>Yes, and it is what this generator suits best — but the rules are different from a
+        website password, in two directions at once.</p>
+        <p><b>It has to be stronger.</b> There is no server to throttle anyone. A thief who
+        finds your seed backup guesses offline, at full speed, for as long as they like, so
+        the pessimistic rate on this page is the <i>only</i> rate that applies. Six words
+        clears that; seven is the sensible choice when the wallet holds real money.</p>
+        <p><b>And it has to be reproducible forever.</b> A wallet passphrase has no reset:
+        one wrong character opens a different, empty wallet, with nothing to tell you it was
+        the wrong one. Write it on metal, store it apart from the seed itself, and restore
+        the whole thing onto a wiped device <b>before</b> you fund it. Far more coins are
+        lost to a passphrase nobody can reproduce than to one somebody guessed.</p>
+        <p>Generate it with this page offline — see the six steps at the top — or with
+        physical dice against the EFF list. The moment you pick the words yourself, none of
+        the arithmetic on this page describes what you have.</p>
+      </details>
+
+      <div class="grp2">Reading the meter</div>
+
+      <details>
+        <summary>How are the bits and the crack time worked out?</summary>
+        <p>Two different ways, depending on where the secret came from — and the difference
+        matters more than anything else on this page.</p>
+        <p><b>For anything this page generated, the count is exact and nothing is estimated.</b>
+        Six words drawn from a list of 7,776 is 7,776⁶ possible phrases, which is 77.55 bits,
+        shown as 78. It is the same 78 for every six-word draw, however ordinary or exotic
+        the words look, because a guesser has to search the whole list either way. That
+        figure is arithmetic, not a judgement.</p>
+        <p><b>For text you type, the page has no idea where it came from</b> — dice, a
+        password manager, or the first line of a song — so it can only estimate, and it marks
+        the number <b>est.</b> The estimate comes from <code>zxcvbn</code>, an open-source
+        strength estimator created at Dropbox — and
         don't let the name on the box put you off: it has become the industry's de-facto
         standard, the same engine behind the strength meters in major password managers
         (Bitwarden among them) and at login providers such as Stripe and GitLab. Rather than
         just counting characters, it hunts for the patterns real crackers try first —
         dictionary words, names, dates, keyboard runs, letter-for-number swaps — and estimates
-        how many guesses your text would survive.</p>
-        <p>The page turns that guess count into a time at a trillion tries a second — the
+        how many guesses your text would survive. It is a good estimator, but an estimator
+        is all it is: it prices each word by how common the word is in English, which is a
+        different question from how large a list the word was drawn from.</p>
+        <p>Either way, the page turns the bit count into a time at a trillion tries a second — the
         rate a serious rig manages against passwords a hacked website stored carelessly. It
         is deliberately the pessimistic end, because you never get to choose how well a
         website guards what you gave it. Treat the figure as a comparison tool, not a
@@ -687,6 +724,66 @@
         only that number run through an assumption about somebody else's hardware.</p>
       </details>
 
+
+      <details>
+        <summary>What does <b>est.</b> mean next to the number?</summary>
+        <p>Estimated — nothing more. It appears whenever the box holds something the page
+        did not draw itself, which includes a generated passphrase you have since edited by
+        so much as one character. It is not a verdict on your words: a brilliant passphrase
+        and <code>password123</code> both get it.</p>
+        <p>Read it as a confidence label. A number without <b>est.</b> is arithmetic the
+        page can prove. A number with it is a guess about text whose origin the page cannot
+        see — and a guess that can land either side of the truth.</p>
+      </details>
+
+      <details>
+        <summary>Why do the same words score differently when I type them in?</summary>
+        <p>Because the page is answering two different questions.</p>
+        <p>When it draws the words, it knows the recipe: six independent picks from 7,776
+        words is 78 bits, every time, whichever words come out. When you type them, it has
+        no way to know whether you rolled dice or chose your favourites — so it falls back
+        to the estimator, which prices each word by how <b>common</b> the word is in English.
+        Rare words get priced high, everyday ones low, and the total wanders either side of
+        the truth. Type in six words the button gave you a moment ago and you can watch the
+        figure change, though not one word did.</p>
+        <p>Which is right? If a random process chose the words, the generated figure is —
+        an attacker who knows you used the EFF list faces all 7,776⁶ phrases no matter how
+        exotic yours look. And if you picked the words yourself, the honest number is
+        <b>lower</b> than either, because people do not choose uniformly: we avoid repeats,
+        reach for words we find interesting, and skip the ones that feel odd. That is the
+        one direction this meter must never flatter, which is why typed words are never
+        credited at the list's rate.</p>
+      </details>
+
+      <details>
+        <summary>It says my passphrase “reads like a sentence” — what does that mean?</summary>
+        <p>That the estimator is about to overrate it badly, and the page would rather warn
+        you than hand you a comforting number.</p>
+        <p>The estimator prices each word on its own and has no model of grammar, so it
+        cannot see that <i>your</i> is usually followed by <i>own</i> rather than by
+        <i>urologist</i>. A sentence therefore scores like a passphrase while being nothing
+        of the kind — the label above this very field, typed into it, once read 86 bits and
+        twelve thousand centuries, for a line of text printed on the page and published in a
+        public code repository.</p>
+        <p>The warning fires on function words — <i>the, of, to, it, and</i> — because a
+        sentence is built from them and words drawn from a list contain almost none. The
+        number itself is left alone: the true strength of a sentence is not something this
+        page can work out, and quietly substituting a smaller invented figure would be no
+        more honest than the large one. If you want a number that can be counted, press
+        <b>Generate</b>.</p>
+      </details>
+
+      <details>
+        <summary>What do the 💪 and 🌱 marks on the meter mean?</summary>
+        <p><b>💪 at 78 bits</b> is the line that matters: six words, the point past which
+        offline guessing stops being a threat at any plausible speed. Everything from there
+        rightward is green.</p>
+        <p><b>🌱 at 128 bits</b> is a comparison, not a target. It is the randomness in a
+        12-word seed phrase, put there so you can see how a passphrase measures against the
+        thing it often sits beside. Reaching it is not a requirement, and the meter does not
+        treat anything short of it as lacking — a six-word passphrase is already past every
+        attack the number describes.</p>
+      </details>
 
       <div class="grp2">The generation pools</div>
 
@@ -708,7 +805,7 @@
         <p>From <code>crypto.getRandomValues</code>, the random number generator your browser
         provides for security work. The everyday one, <code>Math.random</code>, is predictable
         enough that it should never choose a password, and it appears nowhere in this file.
-        None of the three pools is a round number in binary, so each draw uses rejection
+        None of the four pools is a round number in binary, so each draw uses rejection
         sampling — a draw that lands past the end of the pool is thrown away and taken again —
         which keeps every word, and every character, exactly as likely as every other. No
         modulo, so no modulo bias.</p>
@@ -741,13 +838,29 @@
 
       <details>
         <summary>How many words — or characters — do I need?</summary>
-        <p>Each word adds about 13 bits, and every bit doubles the work a guesser faces. Four
-        words (~52 bits) is a strong everyday password. Five or six words is a good master
-        password for a password manager. Eight or more approaches the strength of the keys that
-        protect cryptocurrency wallets. In ASCII mode the same arithmetic runs per character:
-        each of the 94 symbols carries about 6.6 bits, so 8 characters matches a 4-word phrase
-        and 16 characters (~105 bits) beats an 8-word one. The meter above shows the honest
-        count for whatever you generate.</p>
+        <p>Each word adds about 13 bits, and every bit doubles the work a guesser faces.
+        The line that matters is <b>78 bits — six words</b>, the 💪 mark on the meter. Below
+        it, how much is enough depends on who is guessing; above it, nobody is.</p>
+        <div class="scroll"><table>
+          <tr><th>Length</th><th>Bits</th><th>Good for</th></tr>
+          <tr><td class="k">4 words</td><td>52</td><td>A site that locks after wrong tries — not a stolen password file</td></tr>
+          <tr><td class="k">5 words</td><td>65</td><td>The same, with more room to spare</td></tr>
+          <tr><td class="k"><b>6 words</b></td><td><b>78</b></td><td><b>Past offline guessing. A good master password.</b></td></tr>
+          <tr><td class="k">7 words</td><td>90</td><td>Wallet passphrase, or anything guarding real money</td></tr>
+          <tr><td class="k">10 words</td><td>129</td><td>Matches a 12-word seed — 🌱 on the meter</td></tr>
+        </table></div>
+        <p>Four words is fine for a login that throttles guesses, and falls in half an hour
+        to a rig grinding a stolen password file — which is why the meter names the case
+        rather than calling it good or bad. Six words ends that argument. Seven is the one
+        to reach for when the secret guards money, not because six is breakable but because
+        it costs you a single extra word.</p>
+        <p>Going far past that is not free either. Ten words buys nothing a guesser will
+        ever notice, while adding three more words to write down, to check, and to get
+        wrong on a metal backup — and losing a passphrase you cannot reproduce is far more
+        likely than anyone guessing one.</p>
+        <p>In ASCII mode the same arithmetic runs per character: each of the 94 symbols
+        carries about 6.6 bits, so 8 characters matches a 4-word phrase, 12 characters
+        (79 bits) matches six words, and 16 characters (105 bits) beats an 8-word one.</p>
       </details>
 
       <div class="grp2">Trust</div>
@@ -807,7 +920,7 @@
     <div class="l">MY PASSPHRASE <span>· GENERATOR</span></div>
     <!-- bump the version on every release: it lets a saved copy be compared
          against the repo's releases -->
-    <div class="r">v1.8.2 · RUNS OFFLINE</div>
+    <div class="r">v1.8.3 · RUNS OFFLINE</div>
     <details class="creds">
       <summary>Credits</summary>
       <div class="prov">
@@ -3283,7 +3396,7 @@ function convertSecondsToReadable(seconds) {
 // because it was really measuring the calendar.
 const AXIS_BITS = 128;                     // the bar runs 0 -> 128 bits
 const SAFE_BITS = 78;                      // six words — past any offline guessing
-const GOAL_BITS = 128;                     // ★ — the randomness in a 12-word seed
+const GOAL_BITS = 128;                     // 🌱 — the randomness in a 12-word seed
 const SEED24_BITS = 256;                   // a 24-word seed, the most BIP-39 carries
 // Colour is positioned by where a stop sits on the AXIS, not by how far the
 // fill has travelled, so a given bit count is always the same colour and the
@@ -3310,7 +3423,7 @@ const ONLINE_BITS = 50;
 // "1 bits" reads like a bug, because it is one
 const bitWord = n => n + (n === 1 ? " bit" : " bits");
 // Colour zones, not axis divisions — the bar's POSITION stays strictly linear
-// in bits. Green is held back for the ★ so crossing it is the biggest jump.
+// in bits. Green is held back for the seed mark so crossing is the biggest jump.
 // zxcvbn bills the spaces between words as brute-forced characters — about
 // 5.9 bits each, so 23 bits of fiction in a five-word passphrase, a factor of
 // twelve million. An attacker guessing a passphrase knows the words are
@@ -3435,9 +3548,9 @@ function updateMeter(animate) {
   } else if (rounded >= GOAL_BITS) {
     // Branch on the ROUNDED figure, the one actually on screen. Comparing the
     // raw value instead let 127.93 bits display as "128 bits" and then read
-    // "0 bits short of the ★ goal" — the headline and the line disagreeing
+    // "0 bits short" — the headline and the line disagreeing
     // about the same secret.
-    // Reaching the goal and sailing past it are not the same sentence. Ten
+    // Matching a 12-word seed and sailing past it are not the same sentence. Ten
     // words clears 128 bits by one; twelve clears it by twenty-seven. Telling
     // both of them they hold "as much randomness as a 12-word seed" is wrong
     // in the flattering direction for the first and the miserly one for the
@@ -3445,12 +3558,12 @@ function updateMeter(animate) {
     g.className = "mgoal won";
     const over = Math.round(bits) - GOAL_BITS;
     g.textContent = rounded >= SEED24_BITS
-      ? "★ Goal passed — beyond a 24-word seed, the most BIP-39 carries."
+      ? "\uD83C\uDF31 Ultra secure — beyond a 24-word seed, the most BIP-39 carries."
       : over <= 0
-        ? "★ Goal reached — as much randomness as a 12-word seed."
-        : "★ Goal passed — " + bitWord(over) + " beyond a 12-word seed.";
+        ? "\uD83C\uDF31 Ultra secure — as much randomness as a 12-word seed."
+        : "\uD83C\uDF31 Ultra secure — " + bitWord(over) + " beyond a 12-word seed.";
   } else if (rounded >= SAFE_BITS) {
-    // Not "N bits short of the goal". Past 78 bits nothing guesses this, and
+    // Not "N bits short of a seed". Past 78 bits nothing guesses this, and
     // telling someone with six words that they are 50 bits short of a star
     // invites them to add words they do not need — at the cost of more to
     // transcribe, more to check, and more to get wrong on a metal backup,
