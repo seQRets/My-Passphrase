@@ -1,7 +1,7 @@
 # My Passphrase
 
 A passphrase and password generator in **one self-contained HTML file**. No
-build, no dependencies, nothing ever sent over the internet — save `index.html`, open it in a
+build, no dependencies, nothing ever sent over the internet: download one file, open it in a
 browser, done. It works with the Wi-Fi off, and a Content-Security-Policy tells
 the browser to refuse if anything on the page ever tried to phone home.
 
@@ -50,14 +50,15 @@ the browser to refuse if anything on the page ever tried to phone home.
 
 ## Use it
 
-1. Download `index.html` from the
+1. Download `mypassphrase.html` from the
    [latest release](https://github.com/seQRets/My-Passphrase/releases/latest)
-   (or clone the repo — the file is the app).
+   (or clone the repo — `index.html` there is the same file, named for the web
+   server that has to serve it at the domain root).
 2. Optionally verify the download — each release publishes the SHA-256 of its
    attached file:
 
    ```
-   shasum -a 256 index.html
+   shasum -a 256 mypassphrase.html
    ```
 
 3. For a passphrase that will guard something important: **go offline first.**

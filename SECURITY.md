@@ -20,10 +20,10 @@ You should get an acknowledgement within a week.
 
 Check that the copy you loaded matches what was published: every
 [release](https://github.com/seQRets/My-Passphrase/releases) states the SHA-256 of
-its attached `index.html`, and
+its attached `mypassphrase.html`, and
 
 ```
-shasum -a 256 index.html
+shasum -a 256 mypassphrase.html
 ```
 
 must reproduce it. If it doesn't, include that — a mismatch is significant on
