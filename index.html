@@ -483,10 +483,10 @@
   </div>
   <h1>My <em>Passphrase</em><span class="tipwrap"><button class="tipbtn" type="button"
       aria-label="Why this page is safe to use">i</button><span class="tipbox" role="tooltip"
-      ><b>Nothing</b> leaves this page.<br><b>Offline</b> — works with the wi-fi
-      off.<br><b>One file</b> — nothing to install.</span></span></h1>
+      ><b>Nothing</b> leaves this page.<br><b>Offline</b>: works with the wi-fi
+      off.<br><b>One file</b>: nothing to install.</span></span></h1>
   <p class="dek"><b>A free passphrase &amp; password generator.</b> Truly random words that are
-     easy to remember and take centuries to crack — or classic random characters when a site
+     easy to remember and take centuries to crack, or classic random characters when a site
      demands them. Made entirely in your browser; nothing is stored or sent.</p>
   <div class="ctarow">
     <a class="cta" href="#inputcard">Generate one now ↓</a>
@@ -495,9 +495,9 @@
 
   <div class="warn">
     <details>
-      <summary>How to run mypassphrase.app safely — 6 steps</summary>
+      <summary>How to run mypassphrase.app safely, in 6 steps</summary>
       <p><b>Getting a password from a website? Really?</b> Fair question. This page never
-      touches the internet — no images, no fonts, no scripts — and it tells your browser to
+      touches the internet (no images, no fonts, no scripts) and it tells your browser to
       refuse if it ever tried. Check the Network tab in your browser's developer tools to
       verify.</p>
       <p><b>Browser extensions are the risk this page cannot touch.</b> Anything you have added
@@ -506,23 +506,23 @@
       <ol>
         <li><b>Get the file while you are still online.</b>
             <a href="https://github.com/seQRets/My-Passphrase/releases/latest/download/index.html"
-               target="_blank" rel="noopener noreferrer">Download the latest release</a> — one
+               target="_blank" rel="noopener noreferrer">Download the latest release</a>: one
             file, nothing to install, and the only copy whose SHA-256 matches the checksum
             published beside it. Your browser's <i>Save Page As</i> works too, but rewrites
             the file as it saves, so that copy can never match.</li>
-        <li>Make a fresh browser profile — Chrome/Edge: profile icon → Add; Firefox:
+        <li>Make a fresh browser profile. Chrome/Edge: profile icon → Add; Firefox:
             <code>about:profiles</code> → Create a New Profile. Install nothing into it,
             sign in to nothing.</li>
         <li>Turn off Wi-Fi and unplug any internet cable.</li>
         <li>Open the downloaded file in that profile and check the badge below reads
-            <b>Offline — safe to generate</b>.</li>
+            <b>Offline: safe to generate</b>.</li>
         <li>Generate your passphrase, then write it down, memorize it or store it in your
             password manager.</li>
         <li>Close the browser completely before reconnecting.</li>
       </ol>
       <p>And for the truly paranoid, take the randomness away from the computer entirely:
-      <b>roll dice</b>. The EFF wordlist holds exactly 7,776 words — every outcome of five
-      six-sided dice — so five rolls pick one word, repeated until your passphrase is long
+      <b>roll dice</b>. The EFF wordlist holds exactly 7,776 words, every outcome of five
+      six-sided dice, so five rolls pick one word, repeated until your passphrase is long
       enough. Look each roll up in
       <a href="https://www.eff.org/files/2016/07/18/eff_large_wordlist.txt" target="_blank"
       rel="noopener noreferrer">the EFF's published list</a>, or a printout of it if even the
@@ -532,10 +532,10 @@
 
   <div class="card" id="inputcard">
     <div id="badge" class="badge on"><span class="led"></span><span id="badgetxt">Checking…</span></div>
-    <div class="h" id="fieldlab">Your passphrase appears here — or type your own to test it</div>
+    <div class="h" id="fieldlab">Your passphrase appears here, or type your own to test it</div>
     <div class="inwrap" id="inwrap">
     <textarea id="passphrase" rows="2" spellcheck="false" autocomplete="off" autocapitalize="off"
-      autocorrect="off" placeholder="Your passphrase will appear here — press Generate below, ideally with the wi-fi off. Or type any password to see how it holds up."></textarea>
+      autocorrect="off" placeholder="Your passphrase will appear here. Press Generate below, ideally with the wi-fi off. Or type any password to see how it holds up."></textarea>
     <div class="inctl" id="inctl" style="display:none">
       <button class="ictl" id="peek" type="button" aria-label="Show the passphrase" aria-pressed="false">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
@@ -559,10 +559,10 @@
         <span class="mlab">Randomness<span class="tipwrap"><button class="tipbtn"
           type="button" aria-label="What randomness means and how it is measured"
           >i</button><span class="tipbox" role="tooltip">Randomness is counted in
-          <b>bits</b> — its formal name is <b>entropy</b>. A bit is one yes-or-no answer a
+          <b>bits</b> (its formal name is <b>entropy</b>). A bit is one yes-or-no answer a
           guesser has to get right, so every bit doubles their work: 65 bits is twice the
           work of 64, and a thousand times the work of 55. A secret's bits come from how it
-          was drawn, not from how it looks — which is why a generated secret shows its true
+          was drawn, not from how it looks, which is why a generated secret shows its true
           count, and text you type can only be estimated, marked
           <b>est.</b></span></span></span>
         </span>
@@ -594,7 +594,7 @@
       <span class="tipwrap"><button class="tipbtn" type="button"
         aria-label="Where the randomness comes from">i</button><span class="tipbox"
         role="tooltip">Words, characters and digits come from your browser's random number generator,
-        the one built for security work — never <code>Math.random</code>. Edit the box to test
+        the one built for security work, never <code>Math.random</code>. Edit the box to test
         a password of your own; nothing is saved, recorded or sent anywhere.</span></span>
       <select id="wordcount" aria-label="How many words">
         <option value="4">4 words</option>
@@ -628,7 +628,7 @@
       <details>
         <summary>Why should I use a random passphrase?</summary>
         <p>Because humans are terrible at creating secure passwords. We base them on things we
-        can remember — names, dates, common words — then add some spice with a capital letter, a
+        can remember (names, dates, common words), then add some spice with a capital letter, a
         number or a symbol. Crackers know every one of those patterns, and passwords built from
         them fall instantly.</p>
         <div class="scroll"><table>
@@ -640,7 +640,7 @@
           <tr><td class="k">Letter→number swaps</td><td class="v">S4nfr4n</td><td>less than a second</td></tr>
           <tr><td class="k">Four random words</td><td class="v">candle harvest anchor velvet</td><td><b>30 minutes</b></td></tr>
         </table></div>
-        <p class="hint">The last row is what the generator draws — four words, 52 bits. Type
+        <p class="hint">The last row is what the generator draws: four words, 52 bits. Type
         those same four words in yourself and the meter shows less, because it cannot tell
         whether you rolled for them or picked them; see <b>“Why do the same words score
         differently when I type them in?”</b> below.</p>
@@ -657,22 +657,22 @@
       </details>
 
       <details>
-        <summary>Words or ASCII characters — which should I use?</summary>
+        <summary>Words or ASCII characters: which should I use?</summary>
         <p>Both are offered here, and generated at random they are both strong; the difference
         is what your memory has to carry. (The counts below are what the generator draws;
         typed in by hand they read lower, for the reason given further down.) <code>ipz2!az8k%0h</code> and
         <code>finite anchor velvet harvest candle ruby</code> hold almost exactly the same
-        randomness — 79 bits against 78 — and both take centuries to crack, but only one of
+        randomness (79 bits against 78) and both take centuries to crack, but only one of
         them survives being typed from memory. Use <b>words</b> for anything you
-        personally have to remember and type — a master password, a computer login. Use
+        personally have to remember and type: a master password, a computer login. Use
         <b>ASCII characters</b> where a password manager fills the field for you, or where a
         site's length limit squeezes out a passphrase.</p>
       </details>
 
       <details>
         <summary>How are passwords actually cracked?</summary>
-        <p>Roughly in this order: first wordlists — the top 10,000 passwords crack about 30% of
-        accounts in under a second — then the same lists with common substitutions
+        <p>Roughly in this order: first wordlists (the top 10,000 passwords crack about 30% of
+        accounts in under a second), then the same lists with common substitutions
         (<code>december</code> → <code>D3cember</code>), then combinations like name + date, and
         finally brute force over every character. Depending on how a site protects its password
         database, modern hardware makes anywhere from about 10,000 guesses per second to a
@@ -683,7 +683,7 @@
 
       <details>
         <summary>Can I use this for a wallet (BIP-39) passphrase?</summary>
-        <p>Yes, and it is what this generator suits best — but the rules are different from a
+        <p>Yes, and it is what this generator suits best, but the rules are different from a
         website password, in two directions at once.</p>
         <p><b>It has to be stronger.</b> There is no server to throttle anyone. A thief who
         finds your seed backup guesses offline, at full speed, for as long as they like, so
@@ -694,7 +694,7 @@
         the wrong one. Write it on metal, store it apart from the seed itself, and restore
         the whole thing onto a wiped device <b>before</b> you fund it. Far more coins are
         lost to a passphrase nobody can reproduce than to one somebody guessed.</p>
-        <p>Generate it with this page offline — see the six steps at the top — or with
+        <p>Generate it with this page offline (see the six steps at the top) or with
         physical dice against the EFF list. The moment you pick the words yourself, none of
         the arithmetic on this page describes what you have.</p>
       </details>
@@ -703,26 +703,26 @@
 
       <details>
         <summary>How are the bits and the crack time worked out?</summary>
-        <p>Two different ways, depending on where the secret came from — and the difference
+        <p>Two different ways, depending on where the secret came from, and the difference
         matters more than anything else on this page.</p>
         <p><b>For anything this page generated, the count is exact and nothing is estimated.</b>
         Six words drawn from a list of 7,776 is 7,776⁶ possible phrases, which is 77.55 bits,
         shown as 78. It is the same 78 for every six-word draw, however ordinary or exotic
         the words look, because a guesser has to search the whole list either way. That
         figure is arithmetic, not a judgement.</p>
-        <p><b>For text you type, the page has no idea where it came from</b> — dice, a
-        password manager, or the first line of a song — so it can only estimate, and it marks
+        <p><b>For text you type, the page has no idea where it came from</b>: dice, a
+        password manager, or the first line of a song. So it can only estimate, and it marks
         the number <b>est.</b> The estimate comes from <code>zxcvbn</code>, an open-source
-        strength estimator created at Dropbox — and
+        strength estimator created at Dropbox, and
         don't let the name on the box put you off: it has become the industry's de-facto
         standard, the same engine behind the strength meters in major password managers
         (Bitwarden among them) and at login providers such as Stripe and GitLab. Rather than
-        just counting characters, it hunts for the patterns real crackers try first —
-        dictionary words, names, dates, keyboard runs, letter-for-number swaps — and estimates
+        just counting characters, it hunts for the patterns real crackers try first
+        (dictionary words, names, dates, keyboard runs, letter-for-number swaps) and estimates
         how many guesses your text would survive. It is a good estimator, but an estimator
         is all it is: it prices each word by how common the word is in English, which is a
         different question from how large a list the word was drawn from.</p>
-        <p>Either way, the page turns the bit count into a time at a trillion tries a second — the
+        <p>Either way, the page turns the bit count into a time at a trillion tries a second: the
         rate a serious rig manages against passwords a hacked website stored carelessly. It
         is deliberately the pessimistic end, because you never get to choose how well a
         website guards what you gave it. Treat the figure as a comparison tool, not a
@@ -733,13 +733,13 @@
 
       <details>
         <summary>What does <b>est.</b> mean next to the number?</summary>
-        <p>Estimated — nothing more. It appears whenever the box holds something the page
+        <p>Estimated, nothing more. It appears whenever the box holds something the page
         did not draw itself, which includes a generated passphrase you have since edited by
         so much as one character. It is not a verdict on your words: a brilliant passphrase
         and <code>password123</code> both get it.</p>
         <p>Read it as a confidence label. A number without <b>est.</b> is arithmetic the
         page can prove. A number with it is a guess about text whose origin the page cannot
-        see — and a guess that can land either side of the truth.</p>
+        see, and a guess that can land either side of the truth.</p>
       </details>
 
       <details>
@@ -747,12 +747,12 @@
         <p>Because the page is answering two different questions.</p>
         <p>When it draws the words, it knows the recipe: six independent picks from 7,776
         words is 78 bits, every time, whichever words come out. When you type them, it has
-        no way to know whether you rolled dice or chose your favourites — so it falls back
+        no way to know whether you rolled dice or chose your favourites, so it falls back
         to the estimator, which prices each word by how <b>common</b> the word is in English.
         Rare words get priced high, everyday ones low, and the total wanders either side of
         the truth. Type in six words the button gave you a moment ago and you can watch the
         figure change, though not one word did.</p>
-        <p>Which is right? If a random process chose the words, the generated figure is —
+        <p>Which is right? If a random process chose the words, the generated figure is:
         an attacker who knows you used the EFF list faces all 7,776⁶ phrases no matter how
         exotic yours look. And if you picked the words yourself, the honest number is
         <b>lower</b> than either, because people do not choose uniformly: we avoid repeats,
@@ -762,16 +762,16 @@
       </details>
 
       <details>
-        <summary>It says my passphrase “reads like a sentence” — what does that mean?</summary>
+        <summary>It says my passphrase “reads like a sentence”. What does that mean?</summary>
         <p>That the estimator is about to overrate it badly, and the page would rather warn
         you than hand you a comforting number.</p>
         <p>The estimator prices each word on its own and has no model of grammar, so it
         cannot see that <i>your</i> is usually followed by <i>own</i> rather than by
         <i>urologist</i>. A sentence therefore scores like a passphrase while being nothing
-        of the kind — the label above this very field, typed into it, once read 86 bits and
+        of the kind. The label above this very field, typed into it, once read 86 bits and
         twelve thousand centuries, for a line of text printed on the page and published in a
         public code repository.</p>
-        <p>The warning fires on function words — <i>the, of, to, it, and</i> — because a
+        <p>The warning fires on function words (<i>the, of, to, it, and</i>) because a
         sentence is built from them and words drawn from a list contain almost none. The
         number itself is left alone: the true strength of a sentence is not something this
         page can work out, and quietly substituting a smaller invented figure would be no
@@ -787,7 +787,7 @@
         <p><b>🌱 at 128 bits</b> is a comparison, not a target. It is the randomness in a
         12-word seed phrase, put there so you can see how a passphrase measures against the
         thing it often sits beside. Reaching it is not a requirement, and the meter does not
-        treat anything short of it as lacking — a six-word passphrase is already past every
+        treat anything short of it as lacking: a six-word passphrase is already past every
         attack the number describes.</p>
       </details>
 
@@ -800,7 +800,7 @@
         is a prefix of another, and easily-confused pairs were removed. Its 7,776 entries match
         the outcomes of five dice rolls, so the same list works offline with physical
         dice. <b>Common English</b> is 7,459 everyday words drawn from the most
-        frequently used words in English — the phrases can read a little more naturally, at the
+        frequently used words in English, so the phrases read a little more naturally, at the
         cost of the EFF list's careful curation. Both lists give about 13 bits of randomness per
         word, so the strength is essentially the same; pick whichever produces phrases you find
         easier to remember.</p>
@@ -812,57 +812,57 @@
         provides for security work. The everyday one, <code>Math.random</code>, is predictable
         enough that it should never choose a password, and it appears nowhere in this file.
         None of the four pools is a round number in binary, so each draw uses rejection
-        sampling — a draw that lands past the end of the pool is thrown away and taken again —
+        sampling (a draw that lands past the end of the pool is thrown away and taken again)
         which keeps every word, and every character, exactly as likely as every other. No
         modulo, so no modulo bias.</p>
       </details>
 
       <details>
         <summary>What exactly is in the ASCII pool?</summary>
-        <p>Every printable ASCII character except the space — 94 in all: letters in both cases,
+        <p>Every printable ASCII character except the space, 94 in all: letters in both cases,
         the digits, and every symbol on a US keyboard. That is the classic
         <code>ipz2!az8k%0h</code>-style random password. Each character carries about 6.6 bits,
         and the pool is drawn from with the same cryptographic generator and the same rejection
         sampling as the wordlists, so every symbol is exactly as likely as every other. Some
-        sites reject certain symbols; if one does, just generate again — never trim or swap
+        sites reject certain symbols; if one does, just generate again, and never trim or swap
         characters by hand.</p>
       </details>
 
       <details>
-        <summary>What is the PIN pool — and why is its crack time so scary?</summary>
-        <p>Random digits for device PINs — the kind a hardware wallet asks you to set. Each
+        <summary>What is the PIN pool, and why is its crack time so scary?</summary>
+        <p>Random digits for device PINs, the kind a hardware wallet asks you to set. Each
         digit is drawn independently, so leading zeros are as likely as anything else:
         <code>0042</code> is a perfectly good 4-digit PIN, which is exactly what
         pick-a-number-in-a-range generators can never give you. A digit carries about 3.3 bits,
         so a 6-digit PIN is only ~20 bits and barely registers on the meter.
-        That figure is honest — but it describes an attacker who can guess without limit. A
+        That figure is honest, but it describes an attacker who can guess without limit. A
         PIN's real protection is the <b>device's lockout</b>: hardware wallets throttle,
         lock or wipe themselves after a few wrong tries, so ~20 bits is fine there. The same
-        20 bits is catastrophic anywhere unlimited guessing is possible — never reuse a device
+        20 bits is catastrophic anywhere unlimited guessing is possible. Never reuse a device
         PIN as an online password.</p>
       </details>
 
       <details>
-        <summary>How many words — or characters — do I need?</summary>
+        <summary>How many words, or characters, do I need?</summary>
         <p>Each word adds about 13 bits, and every bit doubles the work a guesser faces.
-        The line that matters is <b>78 bits — six words</b>, the 💪 mark on the meter. Below
+        The line that matters is <b>78 bits (six words)</b>, the 💪 mark on the meter. Below
         it, how much is enough depends on who is guessing; above it, nobody is.</p>
         <div class="scroll"><table>
           <tr><th>Length</th><th>Bits</th><th>Good for</th></tr>
-          <tr><td class="k">4 words</td><td>52</td><td>A site that locks after wrong tries — not a stolen password file</td></tr>
+          <tr><td class="k">4 words</td><td>52</td><td>A site that locks after wrong tries, not a stolen password file</td></tr>
           <tr><td class="k">5 words</td><td>65</td><td>The same, with more room to spare</td></tr>
           <tr><td class="k"><b>6 words</b></td><td><b>78</b></td><td><b>Past offline guessing. A good master password.</b></td></tr>
           <tr><td class="k">7 words</td><td>90</td><td>Wallet passphrase, or anything guarding real money</td></tr>
-          <tr><td class="k">10 words</td><td>129</td><td>Matches a 12-word seed — 🌱 on the meter</td></tr>
+          <tr><td class="k">10 words</td><td>129</td><td>Matches a 12-word seed, 🌱 on the meter</td></tr>
         </table></div>
         <p>Four words is fine for a login that throttles guesses, and falls in half an hour
-        to a rig grinding a stolen password file — which is why the meter names the case
+        to a rig grinding a stolen password file, which is why the meter names the case
         rather than calling it good or bad. Six words ends that argument. Seven is the one
         to reach for when the secret guards money, not because six is breakable but because
         it costs you a single extra word.</p>
         <p>Going far past that is not free either. Ten words buys nothing a guesser will
         ever notice, while adding three more words to write down, to check, and to get
-        wrong on a metal backup — and losing a passphrase you cannot reproduce is far more
+        wrong on a metal backup. And losing a passphrase you cannot reproduce is far more
         likely than anyone guessing one.</p>
         <p>In ASCII mode the same arithmetic runs per character: each of the 94 symbols
         carries about 6.6 bits, so 8 characters matches a 4-word phrase, 12 characters
@@ -874,7 +874,7 @@
       <details>
         <summary>What else should I do beyond a good passphrase?</summary>
         <p>Three things: <b>use a password manager</b>, so each site gets its own password;
-        <b>use a strong master passphrase</b> for that manager — this is exactly what a
+        <b>use a strong master passphrase</b> for that manager, which is exactly what a
         generated passphrase is for; and <b>never reuse a passphrase</b> between sites, because
         a breach at one becomes a breach at all of them.</p>
       </details>
@@ -882,7 +882,7 @@
       <details>
         <summary>Does anything I type here leave my computer?</summary>
         <p>No. The page never sends anything anywhere, and it tells your browser to block the
-        attempt if it ever tried — nothing at all is fetched from the internet, not a typeface,
+        attempt if it ever tried. Nothing at all is fetched from the internet, not a typeface,
         not an image, not a line of code. Nothing is saved or logged either. That covers this
         page only, though: a browser extension can read what you type here, and no web page can
         stop it.</p>
@@ -916,7 +916,7 @@
       <details class="qrmore">
         <summary>What it is, and downloading</summary>
         <p>Plain text, for wallets that scan a passphrase instead of making you type it on
-        the device (Krux, for one). Downloading saves the QR — and the secret inside it — as
+        the device (Krux, for one). Downloading saves the QR, and the secret inside it, as
         a picture on this computer; delete the file once it has served its purpose.</p>
       </details>
     </div>
@@ -926,7 +926,7 @@
     <div class="l">MY PASSPHRASE <span>· GENERATOR</span></div>
     <!-- bump the version on every release: it lets a saved copy be compared
          against the repo's releases -->
-    <div class="r">v1.8.6 · RUNS OFFLINE</div>
+    <div class="r">v1.8.7 · RUNS OFFLINE</div>
     <details class="creds">
       <summary>Credits</summary>
       <div class="prov">
@@ -947,7 +947,7 @@
       <a href="https://myseedphrase.app" target="_blank" rel="noopener noreferrer">
         <span class="g" aria-hidden="true">↗</span> myseedphrase.app</a>
     </div>
-    <div class="copyline">Copyright © 2026 Toothjockey LLC — MIT licensed, and open source so
+    <div class="copyline">Copyright © 2026 Toothjockey LLC. MIT licensed, and open source so
       you can check all of this.</div>
   </footer>
 </main>
@@ -3401,8 +3401,8 @@ function convertSecondsToReadable(seconds) {
 // bits apart — stretching and squashing the very quantity it claimed to show,
 // because it was really measuring the calendar.
 const AXIS_BITS = 128;                     // the bar runs 0 -> 128 bits
-const SAFE_BITS = 78;                      // six words — past any offline guessing
-const GOAL_BITS = 128;                     // 🌱 — the randomness in a 12-word seed
+const SAFE_BITS = 78;                      // six words, past any offline guessing
+const GOAL_BITS = 128;                     // 🌱 the randomness in a 12-word seed
 const SEED24_BITS = 256;                   // a 24-word seed, the most BIP-39 carries
 // Colour is positioned by where a stop sits on the AXIS, not by how far the
 // fill has travelled, so a given bit count is always the same colour and the
@@ -3564,10 +3564,10 @@ function updateMeter(animate) {
     g.className = "mgoal won";
     const over = Math.round(bits) - GOAL_BITS;
     g.textContent = rounded >= SEED24_BITS
-      ? "\uD83C\uDF31 Ultra secure — beyond a 24-word seed, the most BIP-39 carries."
+      ? "\uD83C\uDF31 Ultra secure: beyond a 24-word seed, the most BIP-39 carries."
       : over <= 0
-        ? "\uD83C\uDF31 Ultra secure — as much randomness as a 12-word seed."
-        : "\uD83C\uDF31 Ultra secure — " + bitWord(over) + " beyond a 12-word seed.";
+        ? "\uD83C\uDF31 Ultra secure: as much randomness as a 12-word seed."
+        : "\uD83C\uDF31 Ultra secure: " + bitWord(over) + " beyond a 12-word seed.";
   } else if (rounded >= SAFE_BITS) {
     // Not "N bits short of a seed". Past 78 bits nothing guesses this, and
     // telling someone with six words that they are 50 bits short of a star
@@ -3575,7 +3575,7 @@ function updateMeter(animate) {
     // transcribe, more to check, and more to get wrong on a metal backup,
     // which is how people actually lose coins.
     g.className = "mgoal won";
-    g.textContent = "\uD83D\uDCAA Strong — beyond the reach of offline guessing.";
+    g.textContent = "\uD83D\uDCAA Strong: beyond the reach of offline guessing.";
   } else {
     // Not a blanket verdict: how much randomness is enough depends entirely on
     // whether a guesser is rate-limited. Four words is 58,000 years against a
@@ -3596,7 +3596,7 @@ function updateMeter(animate) {
     }
     g.textContent = (bits >= ONLINE_BITS
       ? "Fine for a login that limits guesses."
-      : "Weak — offline guessing breaks this quickly.") + advice;
+      : "Weak: offline guessing breaks this quickly.") + advice;
   }
 
   // A sentence gets a warning, never a silent haircut. The number stays as
@@ -3609,7 +3609,7 @@ function updateMeter(animate) {
     $("msent").style.display = "";
     $("msent").innerHTML = "<b>This reads like a sentence.</b> The figure above prices each "
       + "word on its own, but grammar makes the next word easy to guess, so a sentence is "
-      + "far weaker than it looks — and one you have read anywhere is weaker still. Press "
+      + "far weaker than it looks, and one you have read anywhere is weaker still. Press "
       + "<b>Generate</b> for randomness that can be counted.";
   } else {
     $("msent").style.display = "none";
@@ -3634,20 +3634,20 @@ function updateMeter(animate) {
     + "<div><span>Stolen file, fast hash · 1 trillion/sec</span><b>" + at(GUESS_RATE)
     + "</b></div>";
   $("ctbody").innerHTML =
-    "The crack time above is the second row — the pessimistic end, because you never "
+    "The crack time above is the second row, the pessimistic end, because you never "
     + "get to choose how well a site guards what you gave it. A login that locks or "
     + "throttles is the first row, and there far less randomness holds."
     + "<br><br>"
     + (generated
-      ? "<b>" + rounded + " bits of real randomness</b> — " + lastGenerated.count
+      ? "<b>" + rounded + " bits of real randomness</b>: " + lastGenerated.count
         + (lastGenerated.list === "pin" ? " digits"
            : LISTS[lastGenerated.list].chars ? " characters" : " words")
         + " drawn uniformly from " + LISTS[lastGenerated.list].label
         + ", by <code>crypto.getRandomValues</code>."
       : floored
-      ? "<b>At least " + rounded + " bits</b> — everything the generator drew is still "
+      ? "<b>At least " + rounded + " bits</b>: everything the generator drew is still "
         + "in here, so what you added on top can only help."
-      : "<b>About " + rounded + " bits, estimated</b> — typed text is judged by zxcvbn's "
+      : "<b>About " + rounded + " bits, estimated</b>: typed text is judged by zxcvbn's "
         + "pattern hunt, which reads a truly random password low. Press <b>Generate</b> "
         + "for randomness that can be counted honestly.");
 }
@@ -3770,7 +3770,7 @@ function generate() {
     phrase = generatePassphrase(count, list);
   } catch (e) {
     $("st").className = "status bad";
-    $("st").textContent = "✕  " + e.message + " — do not use this page to generate a passphrase.";
+    $("st").textContent = "✕  " + e.message + ". Do not use this page to generate a passphrase.";
     return;
   }
   lastGenerated = {
@@ -3815,7 +3815,7 @@ function syncGenLabel() {
   // "Your passphrase" even in PIN mode, and said nothing about what the box
   // was for
   $("fieldlab").textContent = "Your " + noun
-    + " appears here — or type your own to test it";
+    + " appears here, or type your own to test it";
   // character pools stay monospace so I/l and 0/O cannot be confused
   $("passphrase").classList.toggle("monofield", !!LISTS[k].chars);
 }
@@ -3852,9 +3852,9 @@ function netBadge() {
   const b = $("badge");
   b.className = "badge " + (online ? "on" : "off");
   $("badgetxt").textContent = online
-    ? (local ? "Online — disconnect first"
-             : "Online — your secret is at risk")
-    : "Offline — safe to generate";
+    ? (local ? "Online: disconnect first"
+             : "Online: your secret is at risk")
+    : "Offline: safe to generate";
 }
 addEventListener("online", netBadge);
 addEventListener("offline", netBadge);
