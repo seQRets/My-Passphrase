@@ -91,14 +91,6 @@
   .dek{font-size:clamp(1rem,2vw,1.2rem);color:var(--muted);max-width:44rem;line-height:1.45}
   .dek b{color:var(--ink)}
   /* ---- hero call-to-action: the "how do I do it" answer ---- */
-  .ctarow{display:flex;align-items:center;gap:1rem;margin-top:1.5rem;flex-wrap:wrap}
-  .cta{display:inline-flex;align-items:center;gap:.5rem;text-decoration:none;
-    font-size:var(--fs-sm);font-weight:700;letter-spacing:.1em;text-transform:uppercase;
-    padding:.85rem 1.4rem;border-radius:9px;background:var(--orange);color:#000;
-    border:1px solid var(--orange);transition:background .15s,border-color .15s}
-  .cta:hover{background:var(--gold);border-color:var(--gold)}
-  .cta:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
-  .ctanote{font-size:var(--fs-sm);color:var(--dim);letter-spacing:.02em}
   /* ---- tooltips: hover/focus on desktop, tap on mobile (JS toggles .on) ---- */
   .tipwrap{position:relative;display:inline-flex;align-items:center}
   /* solid ink chip — a pale outline disappeared on the light ground. The
@@ -482,11 +474,6 @@
   <p class="dek"><b>A free passphrase &amp; password generator.</b> Truly random words that are
      easy to remember and take centuries to crack, or classic random characters when a site
      demands them. Made entirely in your browser; nothing is stored or sent.</p>
-  <div class="ctarow">
-    <a class="cta" href="#inputcard">Generate one now ↓</a>
-    <span class="ctanote">Press the button, read the crack time, done.</span>
-  </div>
-
   <div class="warn">
     <details>
       <summary>How to run mypassphrase.app safely, in 6 steps</summary>
@@ -921,7 +908,7 @@
     <div class="l">MY PASSPHRASE <span>· GENERATOR</span></div>
     <!-- bump the version on every release: it lets a saved copy be compared
          against the repo's releases -->
-    <div class="r">v1.8.10 · RUNS OFFLINE</div>
+    <div class="r">v1.8.11 · RUNS OFFLINE</div>
     <details class="creds">
       <summary>Credits</summary>
       <div class="prov">
