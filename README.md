@@ -50,21 +50,41 @@ the browser to refuse if anything on the page ever tried to phone home.
 
 ## Use it
 
-1. Download `mypassphrase.html` from the
-   [latest release](https://github.com/seQRets/My-Passphrase/releases/latest)
-   (or clone the repo — `index.html` there is the same file, named for the web
-   server that has to serve it at the domain root).
-2. Optionally verify the download — each release publishes the SHA-256 of its
-   attached file:
+### Step 1 — Download the file, while still online
 
-   ```
-   shasum -a 256 mypassphrase.html
-   ```
+Download `mypassphrase.html` from the
+[latest release](https://github.com/seQRets/My-Passphrase/releases/latest).
+Every release publishes the SHA-256 of the file alongside it. Check the one you
+downloaded against it before you open it:
 
-3. For a passphrase that will guard something important: **go offline first.**
-   Turn off Wi-Fi, open the saved file in a browser profile with no extensions,
-   generate, and store the result in a password manager (or memory) before
-   reconnecting. The page's badge shows whether you are offline.
+```bash
+# macOS
+shasum -a 256 ~/Downloads/mypassphrase.html
+
+# Linux
+sha256sum ~/Downloads/mypassphrase.html
+```
+
+```powershell
+# Windows (PowerShell)
+Get-FileHash $HOME\Downloads\mypassphrase.html -Algorithm SHA256
+```
+
+If what you get is not the value published on the release page, stop — do not
+open the file.
+
+That tells you the file is the one published. It cannot tell you the published
+one is honest; reading it is what checks that, and it is written to be read.
+
+Cloning the repo works too — `index.html` there is the same file, named for the
+web server that has to serve it at the domain root.
+
+### Step 2 — Go offline for anything that matters
+
+For a passphrase that will guard something important: **go offline first.**
+Turn off Wi-Fi, open the downloaded file in a browser profile with no
+extensions, generate, and store the result in a password manager (or memory)
+before reconnecting. The page's badge shows whether you are offline.
 
 There is no build step. The file you download is the source, readable in any
 text editor — the wordlists, the RNG, the strength meter, and the two embedded
