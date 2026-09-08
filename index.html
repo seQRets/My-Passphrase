@@ -43,6 +43,8 @@
     --fs-md:.95rem;  --fs-lg:1.15rem; --fs-xl:1.35rem;
     --sans:-apple-system,system-ui,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
     --mono:ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace;
+    --display:'Avenir Next','Avenir','Nunito Sans','Segoe UI Variable Display',
+      'Segoe UI',Roboto,'Helvetica Neue',Helvetica,Arial,sans-serif;
   }
   :root[data-theme="dark"]{
     color-scheme:dark;
@@ -83,8 +85,8 @@
   #theme{flex:none;padding:.45rem .8rem;font-size:var(--fs-xs)}
   .kicker .mark{width:30px;height:30px;flex:none;display:block}
   .kicker .label{font-size:var(--fs-xs);font-weight:700;letter-spacing:.32em;color:var(--accent-ink)}
-  h1{font-size:clamp(2.1rem,5.5vw,3.5rem);font-weight:800;letter-spacing:-.02em;
-     line-height:1.04;margin-bottom:1rem}
+  h1{font-family:var(--display);font-size:clamp(2.1rem,5.5vw,3.5rem);font-weight:800;
+     letter-spacing:-.02em;line-height:1.04;margin-bottom:1rem}
   h1 em{color:var(--accent-ink);font-style:normal}
   .dek{font-size:clamp(1rem,2vw,1.2rem);color:var(--muted);max-width:44rem;line-height:1.45}
   .dek b{color:var(--ink)}
@@ -924,7 +926,7 @@
     <div class="l">MY PASSPHRASE <span>· GENERATOR</span></div>
     <!-- bump the version on every release: it lets a saved copy be compared
          against the repo's releases -->
-    <div class="r">v1.8.4 · RUNS OFFLINE</div>
+    <div class="r">v1.8.5 · RUNS OFFLINE</div>
     <details class="creds">
       <summary>Credits</summary>
       <div class="prov">
