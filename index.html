@@ -272,7 +272,12 @@
   .msent b{font-weight:700}
   /* the value needs to say what it is — it is the only figure on the card with
      no label, and "309,710 centuries" alone does not announce itself */
-  .mcrackwrap{display:flex;align-items:baseline;gap:.6rem;margin-left:auto}
+  /* The label and the number cannot break apart, so on a narrow screen a long
+     value ("272,556 centuries") pushed the pair wider than the card and the
+     whole page scrolled sideways. Let the pair wrap onto two right-aligned
+     lines instead. */
+  .mcrackwrap{display:flex;align-items:baseline;gap:.6rem;margin-left:auto;
+       flex-wrap:wrap;justify-content:flex-end;max-width:100%}
   .mclab{font-size:var(--fs-md);font-weight:700;letter-spacing:.18em;text-transform:uppercase;
        color:var(--dim);white-space:nowrap}
   .mcrack{font:700 var(--fs-lg) var(--mono);color:var(--ink);line-height:1.4;white-space:nowrap}
@@ -293,11 +298,15 @@
   .ctbody b{color:var(--ink);font-weight:700}
   /* the same secret costed at the rates that actually differ */
   .ctrates{margin:0 0 .9rem}
-  .ctrates div{display:flex;justify-content:space-between;gap:1rem;
+  /* The value cannot break mid-number, so on a narrow screen a long one made
+     the row wider than the panel. Since the panel is right-aligned, the excess
+     spilled off the LEFT edge and cut the labels in half rather than showing a
+     scrollbar. Let the value drop to its own line instead, still right-aligned. */
+  .ctrates div{display:flex;justify-content:space-between;gap:.25rem 1rem;flex-wrap:wrap;
        padding:.4rem 0;border-bottom:1px solid var(--line2)}
   .ctrates div:first-child{border-top:1px solid var(--line2)}
   .ctrates span{color:var(--dim)}
-  .ctrates b{white-space:nowrap}
+  .ctrates b{white-space:nowrap;margin-left:auto}
   .ok-c{color:var(--green-ink)} .warn-c{color:var(--accent-ink)} .bad-c{color:var(--red-ink)}
   .status{font-size:var(--fs-md);margin-top:1rem;min-height:1.4em;font-weight:600}
   /* an empty status was silently reserving a line below the buttons, making
@@ -908,7 +917,7 @@
     <div class="l">MY PASSPHRASE <span>· GENERATOR</span></div>
     <!-- bump the version on every release: it lets a saved copy be compared
          against the repo's releases -->
-    <div class="r">v1.8.11 · RUNS OFFLINE</div>
+    <div class="r">v1.8.12 · RUNS OFFLINE</div>
     <details class="creds">
       <summary>Credits</summary>
       <div class="prov">
@@ -3406,9 +3415,15 @@ const RAMP = [[0, 0], [26, 1], [50, 2], [74, 3], [GOAL_BITS, 4]];
 // and the page has no way to know which website will end up holding a secret.
 const GUESS_RATE = 1e12;
 // A login that locks or throttles caps a guesser at a few thousand tries a
-// second, and at that rate far less randomness holds. The two rates bracket
-// what actually differs between real attacks, so both are shown in Details.
+// second, and at that rate far less randomness holds.
 const THROTTLED_RATE = 1e3;
+// A wallet passphrase is the middle case, and the headline badly understates
+// it. BIP-39 puts every guess through 2048 rounds of PBKDF2-HMAC-SHA512, so a
+// rig that manages a trillion fast hashes a second manages millions here, not
+// trillions. Ten million is the generous end of published GPU figures, chosen
+// because erring high keeps this the conservative reading. The three rates
+// bracket what actually differs between real attacks, so all are in Details.
+const WALLET_RATE = 1e7;
 // Below this, a secret is thin even behind a throttled login. Between here and
 // STRONG it is fine for a website and not for anything guessed offline — which
 // is why the short word counts exist rather than being a trap.
@@ -3610,20 +3625,24 @@ function updateMeter(animate) {
   // Details carries the reasoning the two headlines leave out: the assumption
   // behind that time, then where the randomness actually came from — the one
   // thing a strength meter cannot show you about a secret it did not draw.
-  // The headline uses the pessimistic rate. Showing the throttled rate beside
-  // it is the honest way to say why a short passphrase is not simply "unsafe":
-  // the two differ by nine orders of magnitude, and which one you face is a
-  // property of the site, not of the secret.
+  // The headline uses the fastest, most pessimistic rate. Showing the other two
+  // beside it is the honest way to say why a short passphrase is not simply
+  // "unsafe": they span nine orders of magnitude, and which one you face is a
+  // property of what holds the secret, not of the secret itself.
   const at = r => convertSecondsToReadable(Math.pow(2, Math.min(bits, 1024) - 1) / r);
   $("ctrates").innerHTML =
     "<div><span>Login that throttles · 1,000 guesses/sec</span><b>" + at(THROTTLED_RATE)
     + "</b></div>"
+    + "<div><span>Stolen wallet backup · 10 million/sec</span><b>" + at(WALLET_RATE)
+    + "</b></div>"
     + "<div><span>Stolen file, fast hash · 1 trillion/sec</span><b>" + at(GUESS_RATE)
     + "</b></div>";
   $("ctbody").innerHTML =
-    "The crack time above is the second row, the pessimistic end, because you never "
+    "The crack time above is the last row, the pessimistic end, because you never "
     + "get to choose how well a site guards what you gave it. A login that locks or "
-    + "throttles is the first row, and there far less randomness holds."
+    + "throttles is the first row, and there far less randomness holds. A wallet "
+    + "passphrase sits between them: the BIP-39 standard puts every guess through two "
+    + "thousand rounds of work, so the same hardware gets through far fewer of them."
     + "<br><br>"
     + (generated
       ? "<b>" + rounded + " bits of real randomness</b>: " + lastGenerated.count
