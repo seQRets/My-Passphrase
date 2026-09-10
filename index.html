@@ -713,6 +713,14 @@
         how many guesses your text would survive. It is a good estimator, but an estimator
         is all it is: it prices each word by how common the word is in English, which is a
         different question from how large a list the word was drawn from.</p>
+        <p>Because that error runs in the flattering direction, one limit is put on top of
+        it. <b>A word that appears on one of the lists above cannot be worth more than the
+        list it came from</b>: anyone who knows the recipe simply tries all 7,776, so that
+        is a ceiling, not a courtesy. Words on no list keep the estimator's own figure,
+        since nothing can be proved about them. It only ever lowers a number, and never
+        credits one: a phrase whose words you chose yourself is still capped rather than
+        counted, and its real worth is lower again, because people do not choose
+        uniformly.</p>
         <p>Either way, the page turns the bit count into a time at a trillion tries a second: the
         rate a serious rig manages against passwords a hacked website stored carelessly. It
         is deliberately the pessimistic end, because you never get to choose how well a
@@ -917,7 +925,7 @@
     <div class="l">MY PASSPHRASE <span>· GENERATOR</span></div>
     <!-- bump the version on every release: it lets a saved copy be compared
          against the repo's releases -->
-    <div class="r">v1.8.12 · RUNS OFFLINE</div>
+    <div class="r">v1.9.0 · RUNS OFFLINE</div>
     <details class="creds">
       <summary>Credits</summary>
       <div class="prov">
@@ -3468,6 +3476,57 @@ function estimateBits(r) {
   }
   return Math.max(0, r.entropy - spaceBits);
 }
+// A ceiling the page can prove, for text it did not draw itself.
+//
+// The estimator prices a word by how common it is and will happily shred one
+// into fragments it charges for separately: "agreeably" becomes agree + a +
+// bly, "marbling" becomes mar + bling. Six words off the EFF list, typed back
+// in, read 115 bits against a true 77.5. Every one of those errors is in the
+// flattering direction, which is the one this meter must never take.
+//
+// But a word ON one of these lists cannot be worth more than the list itself:
+// an attacker who knows the recipe enumerates 7,776 candidates and finds it,
+// so log2(7776) is an upper bound, not a courtesy. A word on NO list could
+// genuinely be random, so nothing can be proved about it and the estimator's
+// own figure stands. Summing the two gives a bound for the whole phrase.
+//
+// This only ever LOWERS a number. It credits nothing: a phrase whose words a
+// human chose off the list is still capped here rather than valued, and its
+// true worth is lower still, because people do not choose uniformly. Being
+// wrong in that direction is the safe one.
+const WORD_POOLS = ["eff", "common"].map(k => ({
+  set: new Set(LISTS[k].words), bits: Math.log2(LISTS[k].words.length)
+}));
+// A listed word costs a Set lookup; an unlisted one costs a zxcvbn run, and
+// this is on the path of every keystroke. Forty unrecognised tokens took 273ms
+// per keypress before these two guards, which reads as a broken text box.
+const tokenCost = new Map();
+const UNLISTED_BUDGET = 12;
+function listCeiling(v) {
+  const tokens = v.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  // A single token is a password, not a passphrase; capping it at one word's
+  // worth would call a long random string weak.
+  if (tokens.length < 2) return Infinity;
+  let total = 0, listed = 0, spent = 0;
+  for (const raw of tokens) {
+    const w = raw.replace(/^[^a-z0-9']+|[^a-z0-9']+$/g, "");
+    const pool = WORD_POOLS.find(p => p.set.has(w));
+    if (pool) { total += pool.bits; listed++; continue; }
+    // Past the budget nothing can be bounded cheaply, so bound nothing: text
+    // with a dozen unrecognised words is not a phrase these lists can speak to.
+    if (++spent > UNLISTED_BUDGET) return Infinity;
+    let c = tokenCost.get(raw);
+    if (c === undefined) {
+      c = estimateBits(zxcvbn(raw));
+      if (tokenCost.size > 500) tokenCost.clear();
+      tokenCost.set(raw, c);
+    }
+    total += c;
+  }
+  // If nothing is recognised there is nothing to bound, and the sum would just
+  // be the estimator's own answer arrived at the long way round.
+  return listed ? total : Infinity;
+}
 // Is every character of `needle` present in `hay`, in order, with anything
 // allowed in between? Used to tell an edited generated secret from a fresh
 // one: inserting characters keeps the subsequence, deleting a word breaks it.
@@ -3499,7 +3558,9 @@ function updateMeter(animate) {
   // is extended to text we never generated — pricing hand-picked words at the
   // list's rate would flatter a human-chosen phrase, the one direction in which
   // this meter must never err.
-  const est = estimateBits(r);
+  // The estimate, held under the word-list ceiling before any other bound is
+  // applied: no reading of typed text may exceed what the lists can prove.
+  const est = Math.min(estimateBits(r), listCeiling(v));
   const derived = !generated && lastGenerated && isSubsequence(v, lastGenerated.phrase);
   const lowBound = derived ? lastGenerated.bits : 0;
   const highBound = derived
