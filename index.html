@@ -925,7 +925,7 @@
     <div class="l">MY PASSPHRASE <span>· GENERATOR</span></div>
     <!-- bump the version on every release: it lets a saved copy be compared
          against the repo's releases -->
-    <div class="r">v1.9.2 · RUNS OFFLINE</div>
+    <div class="r">v1.9.3 · RUNS OFFLINE</div>
     <details class="creds">
       <summary>Credits</summary>
       <div class="prov">
@@ -3503,21 +3503,26 @@ const WORD_POOLS = ["eff", "common"].map(k => ({
 const tokenCost = new Map();
 const UNLISTED_BUDGET = 12;
 function listCeiling(v) {
-  const tokens = v.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const tokens = v.trim().split(/\s+/).filter(Boolean);
   // A single token is a password, not a passphrase; capping it at one word's
   // worth would call a long random string weak.
   if (tokens.length < 2) return Infinity;
   let total = 0, listed = 0, spent = 0;
   for (const raw of tokens) {
-    const w = raw.replace(/^[^a-z0-9']+|[^a-z0-9']+$/g, "");
+    const lower = raw.toLowerCase();
+    const w = lower.replace(/^[^a-z0-9']+|[^a-z0-9']+$/g, "");
     const pool = WORD_POOLS.find(p => p.set.has(w));
-    // The list bounds the word, not the decoration around it: an attacker who
+    // The list bounds the word, not the dressing on it: an attacker who
     // enumerates the list still has to guess the "[" and "*" someone wrapped a
-    // word in. Charging each stripped character at log2(94) — the most any
-    // printable character can carry — keeps the sum an upper bound, so the
-    // clamp stops erasing the credit the estimator gave those symbols.
+    // word in, and the capitals they scattered through it. Each stripped
+    // character is charged at log2(94) — the most any printable character can
+    // carry — and a word showing any capitals is charged one bit per letter,
+    // since its case pattern is one mask out of 2^n. Both keep the sum an
+    // upper bound, so the clamp stops erasing the credit the estimator gave.
     if (pool) {
-      total += pool.bits + (raw.length - w.length) * Math.log2(94);
+      let extra = (raw.length - w.length) * Math.log2(94);
+      if (raw !== lower) extra += (w.match(/[a-z]/g) || []).length;
+      total += pool.bits + extra;
       listed++; continue;
     }
     // Past the budget nothing can be bounded cheaply, so bound nothing: text
