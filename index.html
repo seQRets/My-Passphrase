@@ -925,7 +925,7 @@
     <div class="l">MY PASSPHRASE <span>· GENERATOR</span></div>
     <!-- bump the version on every release: it lets a saved copy be compared
          against the repo's releases -->
-    <div class="r">v1.9.3 · RUNS OFFLINE</div>
+    <div class="r">v1.10.0 · RUNS OFFLINE</div>
     <details class="creds">
       <summary>Credits</summary>
       <div class="prov">
@@ -3498,43 +3498,63 @@ const WORD_POOLS = ["eff", "common"].map(k => ({
   set: new Set(LISTS[k].words), bits: Math.log2(LISTS[k].words.length)
 }));
 // A listed word costs a Set lookup; an unlisted one costs a zxcvbn run, and
-// this is on the path of every keystroke. Forty unrecognised tokens took 273ms
+// this is on the path of every keystroke. Forty unrecognised words took 273ms
 // per keypress before these two guards, which reads as a broken text box.
 const tokenCost = new Map();
 const UNLISTED_BUDGET = 12;
+// A word is a run of letters and digits, apostrophes allowed inside so that
+// "don't" can be found on the common list. Everything else is decoration
+// someone chose: the brackets around a word, the symbol pushed into one, the
+// hyphens of a phrase typed without spaces.
+const WORD_RUN = /[a-z0-9]+(?:'[a-z0-9]+)*/g;
 function listCeiling(v) {
-  const tokens = v.trim().split(/\s+/).filter(Boolean);
-  // A single token is a password, not a passphrase; capping it at one word's
-  // worth would call a long random string weak.
-  if (tokens.length < 2) return Infinity;
+  // A single word is a password, not a passphrase; capping it at one word's
+  // worth would call a long random string weak. The guard counts words, not
+  // whitespace: "alpha-bravo-charlie" is three words joined by a chosen
+  // character, not one lump the lists can say nothing about.
+  if ((v.toLowerCase().match(WORD_RUN) || []).length < 2) return Infinity;
   let total = 0, listed = 0, spent = 0;
-  for (const raw of tokens) {
+  // The list bounds the word, not the dressing on it: an attacker who
+  // enumerates the list still has to guess the "[" and "*" someone wrapped a
+  // word in, the "!" they pushed inside one, the "-" they joined two with,
+  // and the capitals they scattered through it. Each symbol character is
+  // charged at log2(94) — the most any printable character can carry — but a
+  // decoration guessed once is guessed everywhere: the attacker who tries "["
+  // before the first word has it before every word, so a segment repeated
+  // verbatim is charged only the first time. A word showing any capitals is
+  // charged one bit per letter, since its case pattern is one mask out of
+  // 2^n. Where each symbol sits is treated as known, like every other piece
+  // of structure here; only the choices themselves are paid for. All of it
+  // keeps the sum an upper bound an enumeration can prove.
+  const seen = new Set();
+  for (const raw of v.trim().split(/\s+/).filter(Boolean)) {
     const lower = raw.toLowerCase();
-    const w = lower.replace(/^[^a-z0-9']+|[^a-z0-9']+$/g, "");
-    const pool = WORD_POOLS.find(p => p.set.has(w));
-    // The list bounds the word, not the dressing on it: an attacker who
-    // enumerates the list still has to guess the "[" and "*" someone wrapped a
-    // word in, and the capitals they scattered through it. Each stripped
-    // character is charged at log2(94) — the most any printable character can
-    // carry — and a word showing any capitals is charged one bit per letter,
-    // since its case pattern is one mask out of 2^n. Both keep the sum an
-    // upper bound, so the clamp stops erasing the credit the estimator gave.
-    if (pool) {
-      let extra = (raw.length - w.length) * Math.log2(94);
-      if (raw !== lower) extra += (w.match(/[a-z]/g) || []).length;
-      total += pool.bits + extra;
-      listed++; continue;
+    const runs = lower.match(WORD_RUN) || [];
+    for (const seg of lower.replace(WORD_RUN, "\x00").split("\x00")) {
+      if (seg && !seen.has(seg)) { seen.add(seg); total += seg.length * Math.log2(94); }
     }
-    // Past the budget nothing can be bounded cheaply, so bound nothing: text
-    // with a dozen unrecognised words is not a phrase these lists can speak to.
-    if (++spent > UNLISTED_BUDGET) return Infinity;
-    let c = tokenCost.get(raw);
-    if (c === undefined) {
-      c = estimateBits(zxcvbn(raw));
-      if (tokenCost.size > 500) tokenCost.clear();
-      tokenCost.set(raw, c);
+    if (raw !== lower) total += (lower.match(/[a-z]/g) || []).length;
+    if (!runs.length) continue;
+    // A symbol inside a word does not take the word off its list: "com!mute"
+    // is "commute" to an attacker running insertion rules, and cracking tools
+    // ship those rules as defaults, not exotica.
+    const whole = runs.length > 1 && WORD_POOLS.find(p => p.set.has(runs.join("")));
+    if (whole) { total += whole.bits; listed++; continue; }
+    for (const run of runs) {
+      const pool = WORD_POOLS.find(p => p.set.has(run));
+      if (pool) { total += pool.bits; listed++; continue; }
+      // Past the budget nothing can be bounded cheaply, so bound nothing:
+      // text with a dozen unrecognised words is not a phrase these lists can
+      // speak to.
+      if (++spent > UNLISTED_BUDGET) return Infinity;
+      let c = tokenCost.get(run);
+      if (c === undefined) {
+        c = estimateBits(zxcvbn(run));
+        if (tokenCost.size > 500) tokenCost.clear();
+        tokenCost.set(run, c);
+      }
+      total += c;
     }
-    total += c;
   }
   // If nothing is recognised there is nothing to bound, and the sum would just
   // be the estimator's own answer arrived at the long way round.
