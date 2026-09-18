@@ -161,6 +161,22 @@
   .ictl:hover{color:var(--ink);border-color:rgba(247,147,26,.5)}
   .ictl:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
   .ictl svg{width:16px;height:16px}
+  /* ---- conversion: the same secret in another alphabet ---- */
+  /* A well, not a textarea: the conversion is derived, never edited, so it
+     must not look like a place to type. Binary spells six words in three
+     hundred digits; the well scrolls rather than swallowing the card. The
+     wrapper carries the margin so the control strip, absolutely placed like
+     the passphrase box's, lands inside the well rather than above it. */
+  .convwrap{position:relative;margin-top:.9rem}
+  .convout{padding:.8rem 8rem .8rem 1rem;border:1px solid var(--line);
+    border-radius:10px;background:var(--panel);font:var(--fs-sm)/1.7 var(--mono);
+    color:var(--ink);word-break:break-all;min-height:3.2em;max-height:9em;
+    overflow-y:auto}
+  /* the same smudge as the passphrase box, driven by the same eye */
+  .convout.shield{color:transparent;text-shadow:0 0 .5em var(--muted);
+    overflow:hidden}
+  .convnote{font-size:var(--fs-sm);color:var(--muted);line-height:1.65;margin-top:.8rem}
+  .convnote b{color:var(--ink)}
   /* ---- QR modal ---- */
   .qrveil{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.65);
     display:flex;align-items:center;justify-content:center;padding:1.5rem}
@@ -609,6 +625,45 @@
     <div class="status" id="st"></div>
   </div>
 
+  <div class="card" id="convcard" style="display:none">
+    <div class="h">Conversion · the same secret in another alphabet</div>
+    <div class="row">
+      <select id="convsel" aria-label="Which alphabet to spell the secret in">
+        <option value="0" selected>Hex · base 16</option>
+        <option value="1">Base64</option>
+        <option value="2">Base32</option>
+        <option value="3">Base58 · Bitcoin alphabet</option>
+        <option value="4">Binary · base 2</option>
+        <option value="5">Octal · base 8</option>
+        <option value="6">Decimal · bytes 0–255</option>
+      </select>
+    </div>
+    <div class="convwrap">
+    <div class="convout" id="convout"></div>
+    <div class="inctl">
+      <button class="ictl" id="convpeek" type="button" aria-label="Show the conversion" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>
+          <line id="convpeekslash" x1="4" y1="21" x2="20" y2="3" style="display:none"/>
+        </svg></button>
+      <button class="ictl" id="convcopy" type="button" aria-label="Copy the conversion">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+        </svg></button>
+      <button class="ictl" id="convqr" type="button" aria-label="Show the conversion as a QR code">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
+          <path d="M14 14h3v3h-3z"/><path d="M21 14v1M14 21h1M21 20v1h-1"/>
+        </svg></button>
+    </div>
+    </div>
+    <p class="convnote">A conversion is a costume, not a lock: it adds
+      <b>zero bits</b>, because anyone who knows the alphabet reads it straight
+      back. It is for the sites and devices that demand hex or Base64, and it
+      deserves the same care as the phrase itself. Testing it in the box above
+      would only fool the meter — it cannot see the words inside the hex.</p>
+  </div>
+
   <div class="card">
     <details class="qatop">
     <summary>Q &amp; A <span class="qacount" id="qacount"></span></summary>
@@ -925,7 +980,7 @@
     <div class="l">MY PASSPHRASE <span>· GENERATOR</span></div>
     <!-- bump the version on every release: it lets a saved copy be compared
          against the repo's releases -->
-    <div class="r">v1.10.0 · RUNS OFFLINE</div>
+    <div class="r">v1.11.0 · RUNS OFFLINE</div>
     <details class="creds">
       <summary>Credits</summary>
       <div class="prov">
@@ -3575,6 +3630,10 @@ let lastGenerated = null;
 
 function updateMeter(animate) {
   const v = $("passphrase").value;
+  // Every path that changes the box runs through here — typing, generating,
+  // the rebuild on load — so the conversion card tracks the box from the
+  // same spot rather than from a listener of its own on each path.
+  updateConversion(v);
   if (!v.trim()) { $("meter").style.display = "none"; return; }
   const r = zxcvbn(v);
   const generated = lastGenerated && v === lastGenerated.phrase;
@@ -3761,9 +3820,16 @@ function updateMeter(animate) {
 let shieldWanted = true;
 function setShield(on) {
   $("passphrase").classList.toggle("shield", on);
+  // The conversion is the same secret, so one preference drives both boxes
+  // and both eyes: revealing one spelling reveals them all, and each eye's
+  // icon must say so.
+  $("convout").classList.toggle("shield", on);
   $("peek").setAttribute("aria-pressed", String(!on));
   $("peek").setAttribute("aria-label", on ? "Show the passphrase" : "Hide the passphrase");
   $("peekslash").style.display = on ? "none" : "block";
+  $("convpeek").setAttribute("aria-pressed", String(!on));
+  $("convpeek").setAttribute("aria-label", on ? "Show the conversion" : "Hide the conversion");
+  $("convpeekslash").style.display = on ? "none" : "block";
 }
 function applyShield() {
   $("inwrap").classList.add("on");
@@ -3772,6 +3838,7 @@ function applyShield() {
 }
 function shieldReset() {
   $("passphrase").classList.remove("shield");
+  $("convout").classList.remove("shield");
   $("inwrap").classList.remove("on");
   $("inctl").style.display = "none";
 }
@@ -3785,6 +3852,67 @@ $("incopy").onclick = () => {
     .then(() => { $("cliphint").style.display = "block"; })
     .catch(() => {});
 };
+
+/* ---- conversion: the same secret in another alphabet ------------------ */
+// A conversion is a costume, not a lock: hex, Base64 and the rest respell
+// the bytes, and anyone who knows the alphabet reads the phrase straight
+// back. Zero bits are added, and the card says so right where the string is
+// offered. One caution inherited from the save-page-as note below: unlike
+// the textarea's value, the conversion is DOM text, so a page saved from the
+// browser mid-use writes it to disk. Showing one spelling at a time, smudged
+// under the same shield as the box, is the smallest surface that still does
+// the job; the well empties the moment the box does.
+function toBase32(b) {
+  const A = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+  let out = "", acc = 0, bits = 0;
+  for (const x of b) {
+    acc = (acc << 8) | x; bits += 8;
+    while (bits >= 5) { out += A[(acc >>> (bits - 5)) & 31]; bits -= 5; }
+  }
+  if (bits) out += A[(acc << (5 - bits)) & 31];
+  while (out.length % 8) out += "=";
+  return out;
+}
+function toBase58(b) {
+  const A = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+  let n = 0n;
+  for (const x of b) n = n * 256n + BigInt(x);
+  let out = "";
+  for (; n > 0n; n /= 58n) out = A[Number(n % 58n)] + out;
+  // Base58 is positional, so leading zero bytes would vanish; the convention
+  // (Bitcoin's) writes each as the alphabet's zero.
+  for (const x of b) { if (x) break; out = "1" + out; }
+  return out;
+}
+// Indexed by the select's option values, so the two lists cannot drift
+// apart without the mismatch being one line away.
+const ENCODINGS = [
+  b => [...b].map(x => x.toString(16).padStart(2, "0")).join(""),   // hex
+  b => btoa([...b].map(x => String.fromCharCode(x)).join("")),      // base64
+  toBase32,
+  toBase58,
+  b => [...b].map(x => x.toString(2).padStart(8, "0")).join(" "),   // binary
+  b => [...b].map(x => x.toString(8).padStart(3, "0")).join(" "),   // octal
+  b => [...b].map(String).join(" "),                                // decimal
+];
+function updateConversion(v) {
+  const has = !!v.trim();
+  $("convcard").style.display = has ? "" : "none";
+  $("convout").textContent = has
+    ? ENCODINGS[+$("convsel").value](new TextEncoder().encode(v)) : "";
+}
+$("convsel").onchange = () => updateConversion($("passphrase").value);
+$("convcopy").onclick = () => {
+  if (!$("convout").textContent) return;
+  navigator.clipboard?.writeText($("convout").textContent)
+    .then(() => { $("cliphint").style.display = "block"; })
+    .catch(() => {});
+};
+$("convpeek").onclick = () => {
+  shieldWanted = !$("passphrase").classList.contains("shield");
+  setShield(shieldWanted);
+};
+$("convqr").onclick = () => qrShow($("convout").textContent);
 
 /* ---- QR modal --------------------------------------------------------- */
 // The passphrase as a plain-text QR, drawn on a canvas — nothing fetched, and
@@ -3833,12 +3961,19 @@ function qrShield(on) {
   $("qrpeekslash").style.display = on ? "none" : "block";
 }
 $("qrpeek").onclick = () => qrShield(!$("qrbox").classList.contains("shield"));
-$("inqr").onclick = () => {
-  const text = $("passphrase").value.trim();
+function qrShow(text) {
   if (!text) return;
   const qr = qrcode(0, "M");          // 0 = smallest version that fits
-  qr.addData(text, "Byte");
-  qr.make();
+  try {
+    qr.addData(text, "Byte");
+    qr.make();
+  } catch (e) {
+    // Version 40 tops out near 2,300 bytes and the binary spelling of a long
+    // phrase can pass it. Saying so beats a silent button or a thrown error.
+    $("st").className = "status bad";
+    $("st").textContent = "✕  Too much text for a QR code.";
+    return;
+  }
   lastQR = qr;                          // the download button reuses this matrix
   const n = qr.getModuleCount(), scale = 8, quiet = 4;
   const size = (n + quiet * 2) * scale;
@@ -3854,7 +3989,8 @@ $("inqr").onclick = () => {
   qrShield(true);
   $("qrveil").style.display = "flex";
   $("qrclose").focus();
-};
+}
+$("inqr").onclick = () => qrShow($("passphrase").value.trim());
 $("qrclose").onclick = qrHide;
 $("qrveil").addEventListener("click", e => { if (e.target === $("qrveil")) qrHide(); });
 addEventListener("keydown", e => {

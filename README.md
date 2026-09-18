@@ -39,6 +39,11 @@ the browser to refuse if anything on the page ever tried to phone home.
   lists cannot be worth more than the list it came from, since anyone who knows
   the recipe simply tries all 7,776. That only ever lowers a figure and credits
   none. Edit the box to test any password of your own
+- **Conversions**: a separate card spells the exact secret in another alphabet
+  for the sites and devices that demand one: hex, Base64, Base32, Base58,
+  binary, octal, or decimal bytes, with its own reveal, copy and QR controls.
+  A conversion adds zero bits, because anyone who knows the alphabet reads it
+  straight back, so it deserves the same care as the phrase itself
 - **One headline attack speed, three in the detail**: the crack time assumes a
   trillion guesses a second, the pessimistic end, since you never get to choose
   how well a site guards what you gave it. Details costs the same secret at
