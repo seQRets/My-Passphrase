@@ -980,7 +980,7 @@
     <div class="l">MY PASSPHRASE <span>· GENERATOR</span></div>
     <!-- bump the version on every release: it lets a saved copy be compared
          against the repo's releases -->
-    <div class="r">v1.12.0 · RUNS OFFLINE</div>
+    <div class="r">v1.12.1 · RUNS OFFLINE</div>
     <details class="creds">
       <summary>Credits</summary>
       <div class="prov">
@@ -3519,7 +3519,18 @@ const FUNCTION_WORDS = new Set(("the a an and or but if of to in on at by for wi
   + "just very too also only own get got go went make made say said know knew think "
   + "because while after before again more most some any all both each other such").split(" "));
 function sentenceWords(v) {
-  const w = v.toLowerCase().replace(/[^a-z\s']+/g, " ").split(/\s+/).filter(Boolean);
+  const w = [];
+  for (const t of v.toLowerCase().split(/\s+/)) {
+    // A token carrying a digit is not prose. Before this test, digits were
+    // treated as separators like punctuation, so a 64-digit hex string
+    // shattered into letter shrapnel — "3f9a2c" read as "f", "a", "c" —
+    // and the stray "a"s counted as function words, warning that random
+    // hex "reads like a sentence". Punctuation still splits, so a sentence
+    // typed with hyphens for spaces keeps its warning.
+    if (/[0-9]/.test(t)) continue;
+    for (const x of t.replace(/[^a-z']+/g, " ").split(/\s+/))
+      if (x) w.push(x);
+  }
   return { total: w.length, fn: w.filter(x => FUNCTION_WORDS.has(x)).length };
 }
 function estimateBits(r) {
