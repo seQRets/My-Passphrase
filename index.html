@@ -980,7 +980,7 @@
     <div class="l">MY PASSPHRASE <span>· GENERATOR</span></div>
     <!-- bump the version on every release: it lets a saved copy be compared
          against the repo's releases -->
-    <div class="r">v1.11.0 · RUNS OFFLINE</div>
+    <div class="r">v1.12.0 · RUNS OFFLINE</div>
     <details class="creds">
       <summary>Credits</summary>
       <div class="prov">
@@ -3604,7 +3604,9 @@ function listCeiling(v) {
       if (++spent > UNLISTED_BUDGET) return Infinity;
       let c = tokenCost.get(run);
       if (c === undefined) {
-        c = estimateBits(zxcvbn(run));
+        // The estimator's figure, held under the alphabet ceiling below: a
+        // hex run inside a phrase is no harder to enumerate than hex alone.
+        c = Math.min(estimateBits(zxcvbn(run)), alphabetCeiling(run));
         if (tokenCost.size > 500) tokenCost.clear();
         tokenCost.set(run, c);
       }
@@ -3614,6 +3616,38 @@ function listCeiling(v) {
   // If nothing is recognised there is nothing to bound, and the sum would just
   // be the estimator's own answer arrived at the long way round.
   return listed ? total : Infinity;
+}
+// A second provable ceiling, this one from the alphabet alone. A string
+// whose every character comes from a small set cannot be worth more than
+// log2 of that set per character: an attacker who recognises 32 hex digits
+// enumerates 16^32 and is done, however honestly random the digits were.
+// The estimator cannot know this. It prices hex as if 36 symbols were in
+// play, then discounts the word-scraps it imagines in the noise ("fe2",
+// "d0"), and across 200 random hex strings the two errors cancelled so
+// badly that one string in six read ABOVE its true 128 bits — the
+// direction this meter must never take. Binary fares worse: the estimator
+// reads 0s and 1s as decimal digits, overrating them threefold, and the
+// conversion card below the box now hands people exactly such strings.
+// Whitespace and trailing = padding are structure, not choices, so they
+// are stripped before counting; hex and Base32 written in two cases are
+// not one of these recipes, so those alphabets must be single-case to
+// match. The list is ordered smallest first and the first match taken,
+// which is the tightest bound. Like every ceiling here, this only ever
+// lowers a number: a random hex string the estimator read low stays low.
+const ALPHABETS = [
+  [/^[01]+$/, 1],                                    // binary
+  [/^[0-7]+$/, 3],                                   // octal
+  [/^[0-9]+$/, Math.log2(10)],                       // decimal
+  [/^[0-9a-f]+$/, 4], [/^[0-9A-F]+$/, 4],            // hex
+  [/^[a-z2-7]+$/, 5], [/^[A-Z2-7]+$/, 5],            // Base32
+  [/^[1-9A-HJ-NP-Za-km-z]+$/, Math.log2(58)],        // Base58
+  [/^[A-Za-z0-9+/]+$/, 6], [/^[A-Za-z0-9_-]+$/, 6],  // Base64, URL-safe
+];
+function alphabetCeiling(v) {
+  const s = v.replace(/\s+/g, "").replace(/=+$/, "");
+  if (!s) return Infinity;
+  const a = ALPHABETS.find(([re]) => re.test(s));
+  return a ? s.length * a[1] : Infinity;
 }
 // Is every character of `needle` present in `hay`, in order, with anything
 // allowed in between? Used to tell an edited generated secret from a fresh
@@ -3650,9 +3684,10 @@ function updateMeter(animate) {
   // is extended to text we never generated — pricing hand-picked words at the
   // list's rate would flatter a human-chosen phrase, the one direction in which
   // this meter must never err.
-  // The estimate, held under the word-list ceiling before any other bound is
-  // applied: no reading of typed text may exceed what the lists can prove.
-  const est = Math.min(estimateBits(r), listCeiling(v));
+  // The estimate, held under the word-list and alphabet ceilings before any
+  // other bound is applied: no reading of typed text may exceed what either
+  // recipe can prove.
+  const est = Math.min(estimateBits(r), listCeiling(v), alphabetCeiling(v));
   const derived = !generated && lastGenerated && isSubsequence(v, lastGenerated.phrase);
   const lowBound = derived ? lastGenerated.bits : 0;
   const highBound = derived

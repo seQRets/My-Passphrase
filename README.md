@@ -35,10 +35,12 @@ the browser to refuse if anything on the page ever tried to phone home.
 - **Honest accounting**: generated secrets show their true entropy
   (words × bits per word), never an estimate. Typed text is
   [zxcvbn](https://github.com/dropbox/zxcvbn)'s estimate and is labelled
-  `est.`, held under a ceiling the word lists can prove: a word on one of the
+  `est.`, held under two ceilings the page can prove: a word on one of the
   lists cannot be worth more than the list it came from, since anyone who knows
-  the recipe simply tries all 7,776. That only ever lowers a figure and credits
-  none. Edit the box to test any password of your own
+  the recipe simply tries all 7,776, and text written entirely in a small
+  alphabet, such as 32 hex digits, cannot be worth more than that alphabet
+  carries per character. Both only ever lower a figure and credit none. Edit
+  the box to test any password of your own
 - **Conversions**: a separate card spells the exact secret in another alphabet
   for the sites and devices that demand one: hex, Base64, Base32, Base58,
   binary, octal, or decimal bytes, with its own reveal, copy and QR controls.
