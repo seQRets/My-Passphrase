@@ -616,6 +616,7 @@
         <option value="eff" selected>EFF wordlist · 7,776 words</option>
         <option value="common">Common English · 7,459 words</option>
         <option value="ascii">ASCII characters · 94 symbols</option>
+        <option value="hex">Hex digits · 0–f</option>
         <option value="pin">PIN digits · 0–9</option>
       </select>
     </div>
@@ -980,7 +981,7 @@
     <div class="l">MY PASSPHRASE <span>· GENERATOR</span></div>
     <!-- bump the version on every release: it lets a saved copy be compared
          against the repo's releases -->
-    <div class="r">v1.12.1 · RUNS OFFLINE</div>
+    <div class="r">v1.13.0 · RUNS OFFLINE</div>
     <details class="creds">
       <summary>Credits</summary>
       <div class="prov">
@@ -3372,10 +3373,17 @@ const ASCII_CHARS = Array.from({ length: 94 }, (_, i) => String.fromCharCode(33 
 // not a number, and "0042" is a perfectly valid one. Range-style generators
 // ("between 1000 and 9999") silently exclude every PIN starting with 0.
 const PIN_DIGITS = Array.from({ length: 10 }, (_, i) => String(i));
+// The sixteen hex digits, for wallet entropy and anything else that wants
+// its randomness machine-shaped. Drawn independently like the PIN digits,
+// each carries exactly four bits, so 64 of them are 256 bits COUNTED — the
+// figure the estimator can only ever read low, and the ceiling can only
+// ever cap, for hex that someone pastes in from elsewhere.
+const HEX_DIGITS = "0123456789abcdef".split("");
 const LISTS = {
   eff:    { words: EFF_WORDS,    label: "the EFF large wordlist" },
   common: { words: COMMON_WORDS, label: "the common-English list" },
   ascii:  { words: ASCII_CHARS,  label: "the 94 printable ASCII characters", chars: true },
+  hex:    { words: HEX_DIGITS,   label: "the sixteen hex digits", chars: true },
   pin:    { words: PIN_DIGITS,   label: "the ten digits", chars: true }
 };
 
@@ -3764,8 +3772,13 @@ function updateMeter(animate) {
     // second, and makes two very different secrets read identically.
     g.className = "mgoal won";
     const over = Math.round(bits) - GOAL_BITS;
-    g.textContent = rounded >= SEED24_BITS
+    // 64 hex digits land on exactly 256, and "beyond" would overclaim by a
+    // hair; matching the mark and passing it are different sentences here
+    // just as they are at 128.
+    g.textContent = rounded > SEED24_BITS
       ? "\uD83C\uDF31 Ultra secure: beyond a 24-word seed, the most BIP-39 carries."
+      : rounded === SEED24_BITS
+      ? "\uD83C\uDF31 Ultra secure: a 24-word seed's worth, the most BIP-39 carries."
       : over <= 0
         ? "\uD83C\uDF31 Ultra secure: as much randomness as a 12-word seed."
         : "\uD83C\uDF31 Ultra secure: " + bitWord(over) + " beyond a 12-word seed.";
@@ -4072,11 +4085,15 @@ function generate() {
 const COUNTS = {
   words:  { values: [4, 5, 6, 7, 8, 10, 12], unit: "words", last: "6" },
   chars:  { values: [8, 12, 16, 20, 24, 32, 48, 64], unit: "characters", last: "16" },
+  // Hex opens at 64 digits, because 64 × 4 bits is the 256 that wallet
+  // entropy wants, and 32 is the 128 of a 12-word seed.
+  hex:    { values: [16, 24, 32, 40, 48, 64], unit: "digits", last: "64" },
   digits: { values: [4, 5, 6, 7, 8, 10, 12], unit: "digits", last: "6" }
 };
 function countMode() {
   const k = $("wordlist").value;
-  return k === "pin" ? "digits" : LISTS[k].chars ? "chars" : "words";
+  return k === "pin" ? "digits" : k === "hex" ? "hex"
+       : LISTS[k].chars ? "chars" : "words";
 }
 function rebuildCountOptions() {
   const m = COUNTS[countMode()];
@@ -4091,7 +4108,8 @@ function rebuildCountOptions() {
 // the button names what it makes
 function syncGenLabel() {
   const k = $("wordlist").value;
-  const noun = k === "pin" ? "PIN" : k === "ascii" ? "password" : "passphrase";
+  const noun = k === "pin" ? "PIN" : k === "ascii" ? "password"
+             : k === "hex" ? "hex string" : "passphrase";
   $("gen").textContent = "Generate new " + noun;
   // the label over the box names whatever the pool actually makes — it read
   // "Your passphrase" even in PIN mode, and said nothing about what the box
