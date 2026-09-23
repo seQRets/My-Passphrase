@@ -41,11 +41,15 @@ the browser to refuse if anything on the page ever tried to phone home.
   alphabet, such as 32 hex digits, cannot be worth more than that alphabet
   carries per character. Both only ever lower a figure and credit none. Edit
   the box to test any password of your own
-- **Conversions**: a separate card spells the exact secret in another alphabet
-  for the sites and devices that demand one: hex, Base64, Base32, Base58,
-  binary, octal, or decimal bytes, with its own reveal, copy and QR controls.
-  A conversion adds zero bits, because anyone who knows the alphabet reads it
-  straight back, so it deserves the same care as the phrase itself
+- **Conversions, both ways**: a separate card spells the exact secret in
+  another alphabet for the sites and devices that demand one: hex, Base64,
+  Base32, Base58, binary, octal, or decimal bytes, with its own reveal, copy
+  and QR controls. Below it, a Decode section takes a pasted string and reads
+  back the text it holds; if the alphabet you picked is wrong, it names the ones the
+  string does read in, and one press sends the decoded text to the meter. A
+  conversion adds zero bits and decoding needs no key, because anyone who
+  knows the alphabet reads it straight back, so a string deserves the same
+  care as the phrase itself
 - **One headline attack speed, three in the detail**: the crack time assumes a
   trillion guesses a second, the pessimistic end, since you never get to choose
   how well a site guards what you gave it. Details costs the same secret at

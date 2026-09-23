@@ -175,6 +175,31 @@
   /* the same smudge as the passphrase box, driven by the same eye */
   .convout.shield{color:transparent;text-shadow:0 0 .5em var(--muted);
     overflow:hidden}
+  /* The card is always on the page now, because decoding starts from an empty
+     box above; an empty well says what fills it. The hint sets its own colour
+     and drops the smudge, so the shield never blurs an instruction. */
+  .convout:empty::before{content:attr(data-ph);color:var(--dim);text-shadow:none;
+    font-family:var(--sans);font-style:italic}
+  /* Where a string to decode is pasted. It is a secret like the box above,
+     so the textarea.shield rule smudges it under the same eye. */
+  .convin{display:block;width:100%;margin-top:.9rem;padding:.8rem 1rem;
+    border:1px solid var(--line);border-radius:10px;background:var(--bg);
+    font:var(--fs-sm)/1.7 var(--mono);color:var(--ink);resize:vertical}
+  .convin:focus{outline:2px solid var(--orange);outline-offset:1px}
+  .converr{margin-top:.7rem;font-size:var(--fs-sm);line-height:1.6;color:var(--red-ink)}
+  .converr button{margin-left:.35rem;padding:.1rem .55rem;border-radius:999px;
+    border:1px solid var(--line);background:var(--panel);color:var(--ink);
+    font:inherit;font-weight:600;cursor:pointer}
+  .converr button:hover{border-color:rgba(247,147,26,.5)}
+  /* An outlined chip like the meter's Details, so it reads as a thing to press. */
+  .convuse{margin-top:.8rem;padding:.35rem .85rem;border:1px solid var(--line);
+    border-radius:999px;background:var(--panel);color:var(--muted);cursor:pointer;
+    font-size:var(--fs-xs);font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+  .convuse:hover{color:var(--ink);border-color:rgba(247,147,26,.5)}
+  .convuse:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+  /* Decoding sits under encoding in the same card, ruled off so the two read
+     as neighbours rather than as one control that changes its meaning. */
+  .decsec{margin-top:1.6rem;padding-top:1.4rem;border-top:1px solid var(--line2)}
   .convnote{font-size:var(--fs-sm);color:var(--muted);line-height:1.65;margin-top:.8rem}
   .convnote b{color:var(--ink)}
   /* ---- QR modal ---- */
@@ -626,8 +651,8 @@
     <div class="status" id="st"></div>
   </div>
 
-  <div class="card" id="convcard" style="display:none">
-    <div class="h">Conversion · the same secret in another alphabet</div>
+  <div class="card" id="convcard">
+    <div class="h">Encode · the same secret in another alphabet</div>
     <div class="row">
       <select id="convsel" aria-label="Which alphabet to spell the secret in">
         <option value="0" selected>Hex · base 16</option>
@@ -640,7 +665,7 @@
       </select>
     </div>
     <div class="convwrap">
-    <div class="convout" id="convout"></div>
+    <div class="convout" id="convout" data-ph="Generate or type a secret in the box above."></div>
     <div class="inctl">
       <button class="ictl" id="convpeek" type="button" aria-label="Show the conversion" aria-pressed="false">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
@@ -663,6 +688,51 @@
       back. It is for the sites and devices that demand hex or Base64, and it
       deserves the same care as the phrase itself. Testing it in the box above
       would only fool the meter — it cannot see the words inside the hex.</p>
+
+    <div class="decsec">
+    <div class="h">Decode · a string back to its text</div>
+    <div class="row">
+      <select id="decsel" aria-label="Which alphabet the pasted string is in">
+        <option value="0" selected>Hex · base 16</option>
+        <option value="1">Base64</option>
+        <option value="2">Base32</option>
+        <option value="3">Base58 · Bitcoin alphabet</option>
+        <option value="4">Binary · base 2</option>
+        <option value="5">Octal · base 8</option>
+        <option value="6">Decimal · bytes 0–255</option>
+      </select>
+    </div>
+    <textarea id="convin" class="convin" rows="2" spellcheck="false" autocomplete="off"
+      autocapitalize="off" autocorrect="off" placeholder="Paste the Hex string here."
+      aria-label="The string to decode"></textarea>
+    <div class="convwrap">
+    <div class="convout" id="decout" data-ph="The decoded text appears here."></div>
+    <div class="inctl">
+      <button class="ictl" id="decpeek" type="button" aria-label="Show the decoded text" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>
+          <line id="decpeekslash" x1="4" y1="21" x2="20" y2="3" style="display:none"/>
+        </svg></button>
+      <button class="ictl" id="deccopy" type="button" aria-label="Copy the decoded text">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+        </svg></button>
+      <button class="ictl" id="decqr" type="button" aria-label="Show the decoded text as a QR code">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
+          <path d="M14 14h3v3h-3z"/><path d="M21 14v1M14 21h1M21 20v1h-1"/>
+        </svg></button>
+    </div>
+    </div>
+    <div class="converr" id="converr" style="display:none"></div>
+    <button class="convuse" id="convuse" type="button" style="display:none">Test its strength in the box above</button>
+    <p class="convnote">Paste a string spelled in one of these alphabets and
+      read the text back. It all happens in this page and nothing is sent.
+      Decoding needs <b>no key</b>, and that cuts both ways: anyone who finds
+      the string and guesses the alphabet reads it just as easily, so a string
+      is hidden only as well as its hiding place is. To judge the secret, test
+      the <b>decoded text</b>, not the string.</p>
+    </div>
   </div>
 
   <div class="card">
@@ -981,7 +1051,7 @@
     <div class="l">MY PASSPHRASE <span>· GENERATOR</span></div>
     <!-- bump the version on every release: it lets a saved copy be compared
          against the repo's releases -->
-    <div class="r">v1.13.0 · RUNS OFFLINE</div>
+    <div class="r">v1.14.0 · RUNS OFFLINE</div>
     <details class="creds">
       <summary>Credits</summary>
       <div class="prov">
@@ -3879,16 +3949,24 @@ function updateMeter(animate) {
 let shieldWanted = true;
 function setShield(on) {
   $("passphrase").classList.toggle("shield", on);
-  // The conversion is the same secret, so one preference drives both boxes
-  // and both eyes: revealing one spelling reveals them all, and each eye's
-  // icon must say so.
-  $("convout").classList.toggle("shield", on);
   $("peek").setAttribute("aria-pressed", String(!on));
   $("peek").setAttribute("aria-label", on ? "Show the passphrase" : "Hide the passphrase");
   $("peekslash").style.display = on ? "none" : "block";
+  setConvShield(on);
+}
+// The conversion is the same secret, so one preference drives both boxes
+// and both eyes: revealing one spelling reveals them all, and each eye's
+// icon must say so. It is split out because the conversion card has a life
+// of its own: someone decoding a pasted string may never fill the box above,
+// and the string and its text still deserve the smudge.
+function setConvShield(on) {
+  for (const id of ["convout", "convin", "decout"]) $(id).classList.toggle("shield", on);
   $("convpeek").setAttribute("aria-pressed", String(!on));
   $("convpeek").setAttribute("aria-label", on ? "Show the conversion" : "Hide the conversion");
   $("convpeekslash").style.display = on ? "none" : "block";
+  $("decpeek").setAttribute("aria-pressed", String(!on));
+  $("decpeek").setAttribute("aria-label", on ? "Show the decoded text" : "Hide the decoded text");
+  $("decpeekslash").style.display = on ? "none" : "block";
 }
 function applyShield() {
   $("inwrap").classList.add("on");
@@ -3897,7 +3975,6 @@ function applyShield() {
 }
 function shieldReset() {
   $("passphrase").classList.remove("shield");
-  $("convout").classList.remove("shield");
   $("inwrap").classList.remove("on");
   $("inctl").style.display = "none";
 }
@@ -3943,6 +4020,85 @@ function toBase58(b) {
   for (const x of b) { if (x) break; out = "1" + out; }
   return out;
 }
+// The way back. Each decoder is forgiving about what a copy from a hiding
+// place picks up (whitespace, line breaks, a "0x" on hex, missing "="
+// padding, the URL-safe Base64 letters, either case where the alphabet has
+// only one) and strict about everything else. A decoder that guessed would
+// hand back text that looks plausible and is wrong, which is worse than no
+// answer when the text is a secret someone means to use.
+function fromBase32(s) {
+  const A = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+  s = s.replace(/\s+/g, "").replace(/=+$/, "").toUpperCase();
+  if (!/^[A-Z2-7]*$/.test(s)) throw 0;
+  const out = [];
+  let acc = 0, bits = 0;
+  for (const ch of s) {
+    acc = ((acc << 5) | A.indexOf(ch)) & 0xfff; bits += 5;
+    if (bits >= 8) { out.push((acc >>> (bits - 8)) & 255); bits -= 8; }
+  }
+  // Five or more bits left over is a character no encoder would write.
+  if (bits >= 5) throw 0;
+  return out;
+}
+function fromBase58(s) {
+  const A = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+  s = s.replace(/\s+/g, "");
+  if (!/^[1-9A-HJ-NP-Za-km-z]*$/.test(s)) throw 0;
+  let n = 0n;
+  for (const ch of s) n = n * 58n + BigInt(A.indexOf(ch));
+  const out = [];
+  for (; n > 0n; n /= 256n) out.unshift(Number(n % 256n));
+  for (const ch of s) { if (ch !== "1") break; out.unshift(0); }
+  return out;
+}
+// Binary, octal and decimal are written a byte to a group, and the groups
+// are what make them readable back. Binary and octal can also be read
+// without spaces, at a fixed eight or three digits a byte; decimal cannot,
+// since "1234" might be 12 34 or 123 4, so it needs its separators.
+function fromGroups(s, radix, width, digit) {
+  s = s.trim();
+  const spaced = /[\s,]/.test(s);
+  if (!spaced && width && s.length % width) throw 0;
+  const groups = spaced ? s.split(/[\s,]+/).filter(Boolean)
+               : width ? s.match(new RegExp(".{1," + width + "}", "g")) || [] : [s];
+  return groups.map(g => {
+    if (!digit.test(g)) throw 0;
+    const x = parseInt(g, radix);
+    if (x > 255) throw 0;
+    return x;
+  });
+}
+// Same order as ENCODINGS and the select's options.
+const DECODINGS = [
+  s => {                                                           // hex
+    s = s.replace(/\s+/g, "").replace(/^0x/i, "");
+    if (!/^[0-9a-f]*$/i.test(s) || s.length % 2) throw 0;
+    return (s.match(/../g) || []).map(h => parseInt(h, 16));
+  },
+  s => {                                                           // base64
+    s = s.replace(/\s+/g, "").replace(/-/g, "+").replace(/_/g, "/").replace(/=+$/, "");
+    if (!/^[A-Za-z0-9+/]*$/.test(s) || s.length % 4 === 1) throw 0;
+    return [...atob(s + "===".slice((s.length + 3) % 4))].map(c => c.charCodeAt(0));
+  },
+  fromBase32,
+  fromBase58,
+  s => fromGroups(s, 2, 8, /^[01]{1,8}$/),                         // binary
+  s => fromGroups(s, 8, 3, /^[0-7]{1,3}$/),                        // octal
+  s => fromGroups(s, 10, 0, /^[0-9]{1,3}$/),                       // decimal
+];
+const ALPHABET_NAMES = ["Hex", "Base64", "Base32", "Base58", "Binary", "Octal", "Decimal"];
+// Bytes become text only if they are well-formed UTF-8 with nothing
+// unprintable in them. Control characters are what the wrong alphabet
+// produces: hex read as Base64 decodes without complaint into noise.
+function decodeText(s, i) {
+  let bytes;
+  try { bytes = DECODINGS[i](s); } catch (e) { return null; }
+  if (!bytes.length) return null;
+  let text;
+  try { text = new TextDecoder("utf-8", { fatal: true }).decode(new Uint8Array(bytes)); }
+  catch (e) { return null; }
+  return /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(text) ? null : text;
+}
 // Indexed by the select's option values, so the two lists cannot drift
 // apart without the mismatch being one line away.
 const ENCODINGS = [
@@ -3954,24 +4110,78 @@ const ENCODINGS = [
   b => [...b].map(x => x.toString(8).padStart(3, "0")).join(" "),   // octal
   b => [...b].map(String).join(" "),                                // decimal
 ];
+// The two halves of the card run side by side and never hide each other:
+// the encodings follow the box above on every keystroke, and decoding reads
+// only from its own paste box, so neither can quietly stop the other.
 function updateConversion(v) {
-  const has = !!v.trim();
-  $("convcard").style.display = has ? "" : "none";
-  $("convout").textContent = has
+  $("convout").textContent = v.trim()
     ? ENCODINGS[+$("convsel").value](new TextEncoder().encode(v)) : "";
 }
+function updateDecode() {
+  const i = +$("decsel").value;
+  const s = $("convin").value;
+  const e = $("converr");
+  e.style.display = "none";
+  e.textContent = "";
+  $("convuse").style.display = "none";
+  $("convin").placeholder = "Paste the " + ALPHABET_NAMES[i] + " string here.";
+  if (!s.trim()) { $("decout").textContent = ""; return; }
+  const text = decodeText(s, i);
+  $("decout").textContent = text ?? "";
+  if (text !== null) { $("convuse").style.display = ""; return; }
+  // The wrong alphabet is the likeliest mistake, since a hiding place keeps
+  // the string and seldom the label. Offer every alphabet that does turn it
+  // into clean text, and let the person choose: short strings can read
+  // cleanly in more than one, and only they know which one they used.
+  const fits = DECODINGS.map((_, j) => j).filter(j => j !== i && decodeText(s, j) !== null);
+  e.style.display = "";
+  e.append("This does not read as text in " + ALPHABET_NAMES[i] + ".");
+  if (fits.length) {
+    e.append(" It does in:");
+    for (const j of fits) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = ALPHABET_NAMES[j];
+      b.onclick = () => { $("decsel").value = String(j); updateDecode(); };
+      e.append(b);
+    }
+  } else {
+    e.append(" Check that the whole string was copied.");
+  }
+}
 $("convsel").onchange = () => updateConversion($("passphrase").value);
-$("convcopy").onclick = () => {
-  if (!$("convout").textContent) return;
-  navigator.clipboard?.writeText($("convout").textContent)
+$("decsel").onchange = updateDecode;
+$("convin").addEventListener("input", updateDecode);
+// Decoded text goes to the meter, which can see the words in it; the string
+// it came from never should, since the estimator mistakes a costume for
+// randomness. This is the honest route to a strength reading.
+$("convuse").onclick = () => {
+  const text = $("decout").textContent;
+  if (!text) return;
+  $("passphrase").value = text;
+  $("passphrase").dispatchEvent(new Event("input", { bubbles: true }));
+  $("passphrase").scrollIntoView({ behavior: "smooth", block: "center" });
+};
+function copyWell(id) {
+  if (!$(id).textContent) return;
+  navigator.clipboard?.writeText($(id).textContent)
     .then(() => { $("cliphint").style.display = "block"; })
     .catch(() => {});
-};
-$("convpeek").onclick = () => {
-  shieldWanted = !$("passphrase").classList.contains("shield");
-  setShield(shieldWanted);
-};
+}
+$("convcopy").onclick = () => copyWell("convout");
+$("deccopy").onclick = () => copyWell("decout");
+// Flips the preference itself rather than reading it off the box above,
+// which is left unshielded while empty and so would give the wrong answer
+// to someone who is only decoding.
+function flipShield() {
+  shieldWanted = !shieldWanted;
+  if ($("passphrase").value.trim()) setShield(shieldWanted);
+  else setConvShield(shieldWanted);
+}
+$("convpeek").onclick = flipShield;
+$("decpeek").onclick = flipShield;
 $("convqr").onclick = () => qrShow($("convout").textContent);
+$("decqr").onclick = () => qrShow($("decout").textContent);
 
 /* ---- QR modal --------------------------------------------------------- */
 // The passphrase as a plain-text QR, drawn on a canvas — nothing fetched, and
@@ -4175,6 +4385,9 @@ rebuildCountOptions();                     // counts match the pool that is sele
 syncGenLabel();                            // and so does the button
 if ($("passphrase").value.trim()) applyShield();
 else shieldReset();
+$("convin").value = "";                    // a restored paste is a secret left behind
+updateDecode();                            // and so is a decoded well saved with the page
+setConvShield(shieldWanted);               // the card is on the page from the start
 updateMeter();                             // empty box, no meter
 
 /* ---- theme (from BIP-39 Checksum) ------------------------------------ */
