@@ -11,7 +11,7 @@ the browser to refuse if anything on the page ever tried to phone home.
 
 ## Features
 
-- **Four generation pools**
+- **Five generation pools**
   - The **EFF large wordlist**: 7,776 words curated by the Electronic Frontier
     Foundation for passphrases, the same list diceware uses
   - **Common English**: 7,459 everyday words from a frequency corpus, for
@@ -19,6 +19,9 @@ the browser to refuse if anything on the page ever tried to phone home.
   - **ASCII characters**: all 94 printable ASCII symbols, for a classic
     `ipz2!az8k%0h`-style password where a manager autofills or a length limit
     bites
+  - **Hex digits**: 16 to 64 random hex digits, four bits each, for wallet
+    entropy and anything else that wants its randomness machine-shaped; 64
+    digits are exactly 256 bits, counted rather than estimated
   - **PIN digits**: 4 to 12 random digits for the PINs hardware wallets ask
     you to set; drawn per digit, so leading zeros are as likely as anything
     else (`0042` is a valid PIN, which range-style generators cannot produce)
@@ -41,11 +44,12 @@ the browser to refuse if anything on the page ever tried to phone home.
   alphabet, such as 32 hex digits, cannot be worth more than that alphabet
   carries per character. Both only ever lower a figure and credit none. Edit
   the box to test any password of your own
-- **Conversions, both ways**: a separate card spells the exact secret in
-  another alphabet for the sites and devices that demand one: hex, Base64,
-  Base32, Base58, binary, octal, or decimal bytes, with its own reveal, copy
-  and QR controls. Below it, a Decode section takes a pasted string and reads
-  back the text it holds; if the alphabet you picked is wrong, it names the ones the
+- **Encode and decode**: a separate card spells the exact secret in another
+  alphabet for the sites and devices that demand one: hex, Base64, Base32,
+  Base58, binary, octal, or decimal bytes, with its own reveal, copy and QR
+  controls. Its Encode field follows the passphrase box until you type your
+  own text into it. Below it, Decode takes a pasted string and reads back the
+  text it holds; if the alphabet you picked is wrong, it names the ones the
   string does read in, and one press sends the decoded text to the meter. A
   conversion adds zero bits and decoding needs no key, because anyone who
   knows the alphabet reads it straight back, so a string deserves the same
