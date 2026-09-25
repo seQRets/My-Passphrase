@@ -44,6 +44,14 @@ the browser to refuse if anything on the page ever tried to phone home.
   alphabet, such as 32 hex digits, cannot be worth more than that alphabet
   carries per character. Both only ever lower a figure and credit none. Edit
   the box to test any password of your own
+- **Make it stronger (💪)**: one press capitalises a random letter anywhere in
+  a generated phrase and adds a random digit or symbol at a word's edge,
+  taking turns, so two presses cover the capital, digit and symbol that many
+  sites ask for. The same RNG makes every choice, so the gain is counted, not
+  estimated, and priced as if an attacker knows the button exists; the button
+  shows what the next press is worth. Symbols that appear in the word lists,
+  or that sites often refuse (quotes, backtick, backslash, angle brackets),
+  are never used
 - **Encode and decode**: a separate card spells the exact secret in another
   alphabet for the sites and devices that demand one: hex, Base64, Base32,
   Base58, binary, octal, or decimal bytes, with its own reveal, copy and QR

@@ -262,6 +262,21 @@
     transition:border-color .15s,color .15s,background .15s}
   button:hover{border-color:rgba(247,147,26,.5);color:var(--ink)}
   button.primary{background:var(--orange);border-color:var(--orange);color:#000}
+  /* An emoji comes from a fallback font whose own line spacing is taller, and
+     with the default line height it made this button stand 5px above its row.
+     A fixed height for the line keeps it level with Generate. */
+  #bump{line-height:1.22}
+  /* The 💪 button is an action, not a setting, but in the plain outline it
+     shared with the selects beside it, and their shared hover, it read as a
+     third dropdown. It gets the secondary-button look: Generate's orange as
+     an outline and a tint, deepening on hover, and a press it can feel. */
+  #bump{border-color:rgba(247,147,26,.55);background:rgba(247,147,26,.08);
+    color:var(--accent-ink);transition:background .15s,border-color .15s,transform .05s}
+  #bump:hover:not(:disabled){background:rgba(247,147,26,.2);border-color:var(--orange);
+    color:var(--ink)}
+  #bump:active:not(:disabled){transform:translateY(1px)}
+  #bump:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+  #bump:disabled{opacity:.45;cursor:not-allowed}
   button.primary:hover{background:var(--gold);border-color:var(--gold);color:#000}
   .hint{font-size:var(--fs-sm);color:var(--dim);margin-top:.9rem;letter-spacing:.02em}
   /* Native select arrows sit hard against the right border, which reads as
@@ -512,6 +527,7 @@
     #genrow{grid-template-columns:1fr auto}
     #genrow .primary{grid-column:1}
     #genrow .tipwrap{grid-column:2;order:0;align-self:center}
+    #genrow #bump{grid-column:1}
     /* On a phone the overlaid icon strip took eight of the box's twenty-odd
        characters of width, and a six-word phrase wrapped into a column with
        its own scrollbar. The strip sits under the box instead, on the right,
@@ -625,6 +641,16 @@
         role="tooltip">Words, characters and digits come from your browser's random number generator,
         the one built for security work, never <code>Math.random</code>. Edit the box to test
         a password of your own; nothing is saved, recorded or sent anywhere.</span></span>
+      <button id="bump" type="button" disabled title="Make it stronger"
+        aria-label="Make it stronger: add a random capital and a random digit or symbol">💪</button>
+      <span class="tipwrap" id="bumptip"><button class="tipbtn" type="button"
+        aria-label="What the 💪 button adds">i</button><span class="tipbox"
+        role="tooltip"><b>Makes it stronger.</b> Each press capitalises one random letter and adds a random
+        <b>digit</b> or <b>symbol</b> at the edge of a word, taking turns, so two
+        presses cover the capital, digit and symbol that many sites ask for. The same
+        random generator makes every choice, so the bits added are
+        <b>counted, not estimated</b>, and priced as if an attacker knows this
+        button exists. The button shows what the next press is worth.</span></span>
       <select id="wordcount" aria-label="How many words">
         <option value="4">4 words</option>
         <option value="5">5 words</option>
@@ -1092,7 +1118,7 @@
     <div class="l">MY PASSPHRASE <span>· GENERATOR</span></div>
     <!-- bump the version on every release: it lets a saved copy be compared
          against the repo's releases -->
-    <div class="r">v1.15.0 · RUNS OFFLINE</div>
+    <div class="r">v1.16.0 · RUNS OFFLINE</div>
     <details class="creds">
       <summary>Credits</summary>
       <div class="prov">
@@ -3798,6 +3824,7 @@ function updateMeter(animate) {
   // the rebuild on load — so the conversion card tracks the box from the
   // same spot rather than from a listener of its own on each path.
   updateConversion(v);
+  syncBump();
   if (!v.trim()) { $("meter").style.display = "none"; return; }
   const r = zxcvbn(v);
   const generated = lastGenerated && v === lastGenerated.phrase;
@@ -3972,6 +3999,8 @@ function updateMeter(animate) {
         + (lastGenerated.list === "pin" ? " digits"
            : LISTS[lastGenerated.list].chars ? " characters" : " words")
         + " drawn uniformly from " + LISTS[lastGenerated.list].label
+        + (lastGenerated.bump && lastGenerated.bump.k
+            ? ", then " + bumpWords(lastGenerated.bump.k) : "")
         + ", by <code>crypto.getRandomValues</code>."
       : floored
       ? "<b>At least " + rounded + " bits</b>: everything the generator drew is still "
@@ -3979,6 +4008,13 @@ function updateMeter(animate) {
       : "<b>About " + rounded + " bits, estimated</b>: typed text is judged by zxcvbn's "
         + "pattern hunt, which reads a truly random password low. Press <b>Generate</b> "
         + "for randomness that can be counted honestly.");
+}
+
+function bumpWords(k) {
+  const d = Math.ceil(k / 2), y = Math.floor(k / 2);
+  const n = (x, one, many) => x + " " + (x === 1 ? one : many);
+  return n(k, "capital", "capitals") + (y ? ", " : " and ") + n(d, "digit", "digits")
+    + (y ? " and " + n(y, "symbol", "symbols") : "") + " placed at random";
 }
 
 /* ---- blur shield (ported from BIP-39 Checksum) ------------------------ */
@@ -4342,9 +4378,10 @@ function generate() {
     $("st").textContent = "✕  " + e.message + ". Do not use this page to generate a passphrase.";
     return;
   }
+  const bits = count * Math.log2(LISTS[list].words.length);
   lastGenerated = {
-    phrase, count, list,
-    bits: count * Math.log2(LISTS[list].words.length)
+    phrase, count, list, bits, base: bits,
+    bump: LISTS[list].chars ? null : newBump(phrase.split(" "))
   };
   $("passphrase").value = phrase;
   $("cliphint").style.display = "none";
@@ -4352,6 +4389,88 @@ function generate() {
   applyShield();                                // blurred or not, per the eye's setting
   updateMeter(true);
 }
+
+/* ---- bump: randomness added to a drawn phrase, and counted ------------ */
+// Each press capitalises one random letter, anywhere, and puts one random
+// character at a free word edge: a digit on odd presses, a symbol on even
+// ones, so two presses always hold a capital, a digit and a symbol. Every
+// choice comes from the same RNG as the words, so the gain is COUNTED, like
+// the words themselves, and priced as an attacker who knows this recipe
+// would price it. Three rules keep that count exact:
+//
+// The inserted characters never occur in a listed word, so a finished
+// phrase shows exactly which characters were added. The hyphen is left out
+// of the symbols for that reason: the EFF list has "t-shirt" and "yo-yo".
+// Quotes, the backtick, the backslash and angle brackets are left out too:
+// they are the characters sites most often refuse or mangle in escaping, and
+// a bump exists to get a phrase accepted. Fewer symbols means fewer bits,
+// and the count uses the set that is actually drawn from.
+//
+// Each edge takes at most one character, and each letter is capitalised at
+// most once. The string then records WHICH edges and letters were chosen but
+// not in what order, so the outcomes an attacker must try number
+// C(letters, k) for the capitals and S!/(S-k)! / (digits! x symbols!) for
+// the edges, where S is two edges per word; and every one of those outcomes
+// is equally likely, so the count is the entropy, not a bound on it.
+//
+// Digits and symbols alternate by press number rather than by a draw, so
+// which kind went where is structure the attacker is handed, never credit.
+const BUMP_SYMBOLS = [...Array(94)].map((_, i) => String.fromCharCode(33 + i))
+  .filter(c => !/[A-Za-z0-9\-"'`\\<>]/.test(c));
+const log2fact = n => { let s = 0; for (let i = 2; i <= n; i++) s += Math.log2(i); return s; };
+function newBump(words) {
+  const letters = [];
+  words.forEach((w, i) => [...w].forEach((c, j) => { if (/[a-z]/.test(c)) letters.push([i, j]); }));
+  return { words, letters, edges: Array(words.length * 2).fill(""), caps: new Set(), k: 0 };
+}
+function bumpBits(b, k) {
+  const S = b.edges.length, L = b.letters.length;
+  const d = Math.ceil(k / 2), y = Math.floor(k / 2);
+  return log2fact(S) - log2fact(S - k) - log2fact(d) - log2fact(y)
+       + d * Math.log2(10) + y * Math.log2(BUMP_SYMBOLS.length)
+       + log2fact(L) - log2fact(L - k) - log2fact(k);
+}
+const bumpMax = b => Math.min(b.edges.length, b.letters.length);
+function bumpRender(b) {
+  return b.words.map((w, i) => b.edges[2 * i]
+    + [...w].map((c, j) => b.caps.has(i + ":" + j) ? c.toUpperCase() : c).join("")
+    + b.edges[2 * i + 1]).join(" ");
+}
+function bump() {
+  const g = lastGenerated, b = g && g.bump;
+  if (!b || $("passphrase").value !== g.phrase || b.k >= bumpMax(b)) return;
+  const free = b.edges.map((e, s) => e ? -1 : s).filter(s => s >= 0);
+  const open = b.letters.filter(([i, j]) => !b.caps.has(i + ":" + j));
+  const kinds = b.k % 2 === 0 ? "0123456789" : BUMP_SYMBOLS;
+  try {
+    const s = free[randomIndex(free.length)];
+    b.edges[s] = kinds[randomIndex(kinds.length)];
+    const [i, j] = open[randomIndex(open.length)];
+    b.caps.add(i + ":" + j);
+  } catch (e) {
+    $("st").className = "status bad";
+    $("st").textContent = "✕  " + e.message + ". Do not use this page to generate a passphrase.";
+    return;
+  }
+  b.k++;
+  g.phrase = bumpRender(b);
+  g.bits = g.base + bumpBits(b, b.k);
+  $("passphrase").value = g.phrase;
+  $("cliphint").style.display = "none";
+  updateMeter(true);
+}
+// The button names what the next press is worth, and is only offered while
+// the box holds the phrase exactly as drawn and bumped: once someone edits it
+// by hand, the page no longer knows what it would be adding to.
+function syncBump() {
+  const g = lastGenerated, b = g && g.bump, btn = $("bump");
+  btn.style.display = $("bumptip").style.display = LISTS[$("wordlist").value].chars ? "none" : "";
+  const ok = !!b && $("passphrase").value === g.phrase && b.k < bumpMax(b);
+  btn.disabled = !ok;
+  btn.textContent = ok ? "💪 +" + Math.round(bumpBits(b, b.k + 1) - bumpBits(b, b.k)) + " bits"
+                       : "💪";
+}
+$("bump").onclick = bump;
 
 /* The count selector means words for the two wordlists and characters for the
    ASCII pool, so its options swap when the pool does — each mode remembers the
