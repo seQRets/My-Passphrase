@@ -1,0 +1,100 @@
+name: Check
+
+# GitHub Pages serves main, so a push IS a deploy, and README step 1 tells
+# people to compare the file's hash against the published one and stop if it
+# differs. This is the gate before that: the CSP pins must match the inline
+# scripts (a stale pin makes the browser refuse a whole block, which looks like
+# the page loading fine and the tool doing nothing), and SHA256SUMS.txt must
+# match index.html. Plain Node, zero dependencies, same rule as the page.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+
+      - name: CSP pins and SHA256SUMS.txt are current
+        run: node scripts/update-csp-hashes.mjs --check
+
+      # The page's one promise, checked by grep as well as by the CSP: no
+      # Math.random anywhere in script, nothing fetched from anywhere.
+      - name: No Math.random, no network source, no unsafe-inline script
+        run: |
+          node -e '
+            const src = require("fs").readFileSync("index.html", "utf8");
+            const fail = m => { console.error("::error::" + m); process.exit(1); };
+            if (/Math\.random\s*\(/.test(src)) fail("Math.random( found in index.html");
+            const m = src.match(/<meta\s+http-equiv="Content-Security-Policy"[\s\S]*?content="([^"]*)"/i);
+            if (!m) fail("no Content-Security-Policy meta tag");
+            const csp = m[1];
+            if (!/script-src/.test(csp)) fail("CSP has no script-src");
+            if (/script-src[^;]*unsafe-inline/.test(csp)) fail("script-src allows unsafe-inline: " + csp);
+            const bare = csp.replace(/\x27sha256-[A-Za-z0-9+\/=]+\x27/g, "");
+            if (/https?:|\/\/|\*/.test(bare)) fail("CSP names a network source: " + csp);
+            if (!/default-src \x27none\x27/.test(csp)) fail("CSP default-src is not none: " + csp);
+            console.log("CSP ok:", csp.replace(/\x27sha256-[^\x27]+\x27/g, "<pin>"));
+          '
+
+      # 53 checks in headless Chrome: CSP pins recomputed, zero requests, RNG
+      # uniformity, every pool, the meter's ceilings, encode/decode against an
+      # independent encoder, QR, frame guard, layout. Chrome is preinstalled.
+      - name: verify.js in headless Chrome
+        env:
+          CHROME: /usr/bin/google-chrome
+        run: |
+          "$CHROME" --version
+          node verify.js
+
+      # The two embedded wordlists are re-derived from their upstream files
+      # (EFF; google-10000-english with the stated filter) and compared byte
+      # for byte, so "derived from" is a recipe that is checked, not a claim.
+      - name: Embedded wordlists match their stated sources
+        run: node scripts/check-wordlists.mjs
+
+      # The pin script is shared verbatim with the sister project; a fix that
+      # lands in one must land in the other. Compare against the sister's main.
+      - name: update-csp-hashes.mjs is identical to the sister project's copy
+        env:
+          SISTER: seQRets/My-Seed-Phrase
+        run: |
+          curl -fsSL "https://raw.githubusercontent.com/$SISTER/main/scripts/update-csp-hashes.mjs" -o /tmp/sister.mjs \
+            || { echo "::warning::could not fetch the sister's script; skipping the identity check"; exit 0; }
+          if ! diff -q scripts/update-csp-hashes.mjs /tmp/sister.mjs >/dev/null; then
+            diff scripts/update-csp-hashes.mjs /tmp/sister.mjs || true
+            # Strict once both repositories carry the shared version; a warning
+            # while the sister still has an older, unshared copy.
+            if grep -q 'SHARED VERBATIM' /tmp/sister.mjs; then
+              echo "::error::scripts/update-csp-hashes.mjs differs from $SISTER's copy; the two are meant to be byte-identical"
+              exit 1
+            fi
+            echo "::warning::$SISTER's copy predates the shared script; this check becomes strict once it adopts it"
+          fi
+
+      # RFC 9116: an expired security.txt is invalid. CLAUDE.md tracks the
+      # renewal by hand; this fails the build 30 days before it is due.
+      - name: security.txt has more than 30 days left
+        run: |
+          node -e '
+            const t = require("fs").readFileSync(".well-known/security.txt", "utf8");
+            const m = t.match(/^Expires:\s*(\S+)/m);
+            if (!m) { console.error("::error::security.txt has no Expires field"); process.exit(1); }
+            const days = (Date.parse(m[1]) - Date.now()) / 864e5;
+            if (!(days > 30)) { console.error(`::error::security.txt Expires ${m[1]} is ${Math.round(days)} days away; renew it (keep under one year, RFC 9116)`); process.exit(1); }
+            console.log(`security.txt expires ${m[1]} (${Math.round(days)} days)`);
+          '
