@@ -113,7 +113,16 @@ That tells you the file is the one published. It cannot tell you the published
 one is honest; reading it is what checks that, and it is written to be read.
 
 Cloning the repo works too: `index.html` there is the same file, named for the
-web server that has to serve it at the domain root.
+web server that has to serve it at the domain root. `SHA256SUMS.txt` beside it
+records the SHA-256 under both names, so one command checks either copy:
+
+```bash
+shasum -a 256 -c SHA256SUMS.txt   # macOS;  sha256sum -c SHA256SUMS.txt on Linux
+```
+
+Be clear about what that proves: `SHA256SUMS.txt` travels in the same
+repository as the page, so whoever could change one could change the other. It
+tells you the file you hold is the file that was published, nothing more.
 
 ### Step 2: Go offline for anything that matters
 
@@ -133,14 +142,56 @@ CSP (`default-src 'none'`) makes the browser enforce that. Nothing typed or
 generated is stored, logged, or sent. What a web page *cannot* defend against
 (browser extensions, a compromised machine, clipboard snooping) is documented
 in the page's own Q&A and in [SECURITY.md](SECURITY.md), which also explains
-how to report a vulnerability.
+how to report a vulnerability. Machine-readable contact details are at
+[`/.well-known/security.txt`](https://mypassphrase.app/.well-known/security.txt)
+([RFC 9116](https://www.rfc-editor.org/rfc/rfc9116)).
+
+The page does not permit inline script in general. Its Content-Security-Policy
+names each of its four `<script>` blocks by the SHA-256 of its own text, so a
+block the policy was not expecting does not run — including one you meant to
+change. It also refuses to be framed: if another site embeds it, the tool is
+withheld and a notice says so.
+
+## Development
+
+There is no build step. Edit `index.html` and reload.
+
+### After any edit to `index.html`
+
+```bash
+node scripts/update-csp-hashes.mjs
+```
+
+Alter a single character inside a script block and the browser refuses the
+whole block, which looks like the page loading normally and the tool doing
+nothing whatsoever. This script recomputes the four hashes, rewrites the policy
+in place, and regenerates `SHA256SUMS.txt`. Plain Node, no dependencies, like
+everything else here. It also refuses to write if the markup has grown an inline
+event handler (`onclick="…"`), because a hash cannot cover one and making it run
+would take `'unsafe-hashes'`, which hands back what the pinning is for.
+
+```bash
+node scripts/update-csp-hashes.mjs --check
+```
+
+writes nothing and reports whether the pins and the sums are current; CI runs
+this on every push and pull request. The same script, and the same rule, as the
+sister project [seQRets/My-Seed-Phrase](https://github.com/seQRets/My-Seed-Phrase).
 
 ## Credits
 
 - Generator and crack-time code adapted from
   [mike-hearn/useapassphrase](https://github.com/mike-hearn/useapassphrase) (ISC)
 - Strength estimation by [zxcvbn](https://github.com/dropbox/zxcvbn), created at
-  Dropbox by Dan Wheeler (MIT), embedded verbatim
+  Dropbox by Dan Wheeler (MIT). The embedded copy is the build that
+  `useapassphrase` ships as
+  [`js/zxcvbn.js`](https://github.com/mike-hearn/useapassphrase/blob/master/js/zxcvbn.js),
+  byte for byte (SHA-256
+  `0a3d6a34bc9757c5c469b98b77ad8acb500b847a7b57cfe62d8ba8a9206ce41e`), a
+  pre-4.0 Closure-compiled build with the original `entropy` /
+  `match_sequence` API the meter is written against. It does not correspond
+  to any `zxcvbn` release on npm, so check it against that file, not against
+  the npm package
 - QR encoding by
   [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator)
   (Kazuhiko Arase, MIT), embedded verbatim

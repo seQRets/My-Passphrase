@@ -3,8 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- The "never touches the internet" promise, enforced rather than asserted.
+     default-src 'none' blocks every network destination; connect-src 'none'
+     is spelled out although default-src already covers it, because a network
+     request is the one thing this page must never make. script-src names each
+     inline script block by the SHA-256 of its own text — pinned by
+     scripts/update-csp-hashes.mjs, never by hand — so the browser runs exactly
+     those blocks and refuses any injected or altered script. After ANY edit to
+     this file run:  node scripts/update-csp-hashes.mjs -->
 <meta http-equiv="Content-Security-Policy"
-      content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; form-action 'none'; base-uri 'none'">
+      content="default-src 'none'; script-src 'sha256-bpkiOHMXkWaLx3OlGhd51NlrAzD5ikpHekyCZZSO/hE=' 'sha256-mPt8uk52hzYteLgKeY6QftjQBrWs/uH4/6SSXEzZgWQ=' 'sha256-Y3g0YMfsIAIe7KZxEEiRTDMoPSZ8p2Cqvdztl1LVMYI=' 'sha256-Wk2Co9pinxahbhKDP/FrFerI6j3h+qnQsf2rliYnqBQ='; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<!-- Nothing is fetched, but a click on a footer link is still a navigation. -->
+<meta name="referrer" content="no-referrer">
 <meta name="description" content="Generate a random passphrase from the EFF wordlist or common English words. Self-contained, works offline, never touches the internet.">
 <title>My Passphrase</title>
 <!-- Inline favicon: a data: URI is not a fetch, so this adds no request — it
@@ -564,10 +574,34 @@
        edge — hang them from the trigger's right edge instead */
     .tipbox{left:auto;right:0;transform:none}
   }
+  /* Framed: another site is showing this page inside itself. frame-ancestors
+     only works as a real HTTP header, which GitHub Pages cannot send, so the
+     pre-paint script below sets data-framed and the tool is withheld — by this
+     stylesheet AND by the FRAMED gate in generate(), so a careless selector
+     edit cannot hand a working tool back to a hostile wrapper. No link in the
+     notice on purpose: a frame can be sandboxed so that links cannot escape it,
+     and an address you type yourself is the one that cannot lie. */
+  #framed{display:none}
+  html[data-framed] .topbar,html[data-framed] main{display:none}
+  html[data-framed] #framed{display:block;position:relative;z-index:1;max-width:34rem;margin:14vh auto 0;
+    padding:0 1.4rem;font:400 var(--fs-md)/1.75 var(--sans);color:var(--ink)}
+  #framed p{margin:0 0 1rem}
+  #framed b{color:var(--accent-ink)}
+  #framed .addr{display:block;margin:1.2rem 0;font:600 var(--fs-lg)/1.5 var(--mono);
+    color:var(--accent-ink);overflow-wrap:anywhere}
 </style>
-<script>try{if(localStorage.getItem("passphrase-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+<script>try{if(localStorage.getItem("passphrase-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}
+try{if(window.top!==window.self)document.documentElement.setAttribute("data-framed","")}catch(e){document.documentElement.setAttribute("data-framed","")}</script>
 </head>
 <body>
+<div id="framed" role="alert">
+  <p><b>Another website is showing you this page inside itself.</b> That site decides what you
+  see around it, so none of the tool will run here. Do not use a passphrase made in this window.</p>
+  <p>Open the page yourself instead. Type this address into your browser:</p>
+  <span class="addr">mypassphrase.app</span>
+  <p>Better still, save the page from that address and open it on a computer with the wi-fi
+  off. That is the way this page is meant to be used.</p>
+</div>
 <div class="topbar"></div>
 <main>
   <div class="topline">
@@ -732,7 +766,8 @@
 
     <div class="hint" id="cliphint" style="display:none">⚠︎ Copied. The clipboard can be read
       by any program running on your computer, and apps that keep a clipboard history save
-      their own copy. Paste it where it belongs, then copy something harmless.</div>
+      their own copy. Paste it where it belongs. If you stay on this page and copy nothing
+      else, the clipboard is cleared after 60 seconds; the page never reads it.</div>
     <div class="status" id="st"></div>
   </div>
 
@@ -3521,6 +3556,9 @@ var qrcode = function() {
 </script>
 <script>
 "use strict";
+// Set by the pre-paint script in <head> when another site frames this page.
+// The stylesheet hides the tool; this gates it, so the two cannot drift apart.
+const FRAMED = document.documentElement.hasAttribute("data-framed");
 /* ---- wordlists ------------------------------------------------------- */
 // The EFF large wordlist, identical to the list useapassphrase.com ships —
 // 7,776 words — one for every outcome of five six-sided dice.
@@ -4085,11 +4123,37 @@ $("peek").onclick = () => {
   shieldWanted = !$("passphrase").classList.contains("shield");
   setShield(shieldWanted);
 };
+/* ---- clipboard, with a timed clear that never reads it ---------------- */
+// A copied secret outlives the tab in the clipboard. Clearing it after a
+// minute limits that, but reading the clipboard first to check it is still
+// ours needs the clipboard-read permission, which browsers surface as a prompt
+// a minute after the copy with no visible cause: alarming in a tool like this.
+// So do not read. If the page has stayed focused and nothing else was copied
+// or cut from it since our write, the clipboard can only hold what we put
+// there, and overwriting it is safe. If either happened, leave it alone: it may
+// be something of yours.
+let clipTimer = null, clipStale = false;
+window.addEventListener("blur", () => { clipStale = true; });
+document.addEventListener("copy", () => { clipStale = true; });
+document.addEventListener("cut", () => { clipStale = true; });
+function copySecret(text) {
+  if (!text) return;
+  navigator.clipboard?.writeText(text)
+    .then(() => {
+      clipStale = false;
+      $("cliphint").style.display = "block";
+      if (clipTimer) clearTimeout(clipTimer);
+      clipTimer = setTimeout(() => {
+        clipTimer = null;
+        if (clipStale) return;              // you may have copied something else; not ours to clear
+        navigator.clipboard?.writeText("").catch(() => {});
+      }, 60000);
+    })
+    .catch(() => {});
+}
 $("incopy").onclick = () => {
   if (!$("passphrase").value.trim()) return;
-  navigator.clipboard?.writeText($("passphrase").value)
-    .then(() => { $("cliphint").style.display = "block"; })
-    .catch(() => {});
+  copySecret($("passphrase").value);
 };
 
 /* ---- conversion: the same secret in another alphabet ------------------ */
@@ -4290,9 +4354,7 @@ $("convuse").onclick = () => {
 };
 function copyWell(id) {
   if (!$(id).textContent) return;
-  navigator.clipboard?.writeText($(id).textContent)
-    .then(() => { $("cliphint").style.display = "block"; })
-    .catch(() => {});
+  copySecret($(id).textContent);
 }
 $("convcopy").onclick = () => copyWell("convout");
 $("deccopy").onclick = () => copyWell("decout");
@@ -4394,6 +4456,7 @@ addEventListener("keydown", e => {
 
 /* ---- generate / copy ------------------------------------------------- */
 function generate() {
+  if (FRAMED) return;
   const count = +$("wordcount").value;
   const list = $("wordlist").value;
   let phrase;
@@ -4463,6 +4526,7 @@ function bumpRender(b) {
     + b.edges[2 * i + 1]).join(" ");
 }
 function bump() {
+  if (FRAMED) return;
   const g = lastGenerated, b = g && g.bump;
   if (!b || $("passphrase").value !== g.phrase || b.k >= bumpMax(b)) return;
   const free = b.edges.map((e, s) => e ? -1 : s).filter(s => s >= 0);

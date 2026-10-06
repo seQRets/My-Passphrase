@@ -1,0 +1,52 @@
+name: Check
+
+# GitHub Pages serves main, so a push IS a deploy, and README step 1 tells
+# people to compare the file's hash against the published one and stop if it
+# differs. This is the gate before that: the CSP pins must match the inline
+# scripts (a stale pin makes the browser refuse a whole block, which looks like
+# the page loading fine and the tool doing nothing), and SHA256SUMS.txt must
+# match index.html. Plain Node, zero dependencies, same rule as the page.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+
+      - name: CSP pins and SHA256SUMS.txt are current
+        run: node scripts/update-csp-hashes.mjs --check
+
+      # The page's one promise, checked by grep as well as by the CSP: no
+      # Math.random anywhere in script, nothing fetched from anywhere.
+      - name: No Math.random, no network source, no unsafe-inline script
+        run: |
+          node -e '
+            const src = require("fs").readFileSync("index.html", "utf8");
+            const fail = m => { console.error("::error::" + m); process.exit(1); };
+            if (/Math\.random\s*\(/.test(src)) fail("Math.random( found in index.html");
+            const m = src.match(/<meta\s+http-equiv="Content-Security-Policy"[\s\S]*?content="([^"]*)"/i);
+            if (!m) fail("no Content-Security-Policy meta tag");
+            const csp = m[1];
+            if (!/script-src/.test(csp)) fail("CSP has no script-src");
+            if (/script-src[^;]*unsafe-inline/.test(csp)) fail("script-src allows unsafe-inline: " + csp);
+            const bare = csp.replace(/\x27sha256-[A-Za-z0-9+\/=]+\x27/g, "");
+            if (/https?:|\/\/|\*/.test(bare)) fail("CSP names a network source: " + csp);
+            if (!/default-src \x27none\x27/.test(csp)) fail("CSP default-src is not none: " + csp);
+            console.log("CSP ok:", csp.replace(/\x27sha256-[^\x27]+\x27/g, "<pin>"));
+          '
