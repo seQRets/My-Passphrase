@@ -1,0 +1,17 @@
+# Security contact for mypassphrase.app
+# https://www.rfc-editor.org/rfc/rfc9116
+
+# Preferred: private vulnerability report on the repository.
+Contact: https://github.com/seQRets/My-Passphrase/security/advisories/new
+Contact: mailto:security@seqrets.app
+
+Expires: 2027-08-01T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://mypassphrase.app/.well-known/security.txt
+
+# This site is one self-contained HTML file with no backend, no database and no
+# network calls. The findings most worth reporting are therefore:
+#   - anything that weakens the randomness behind generation
+#   - anything that causes the page to make a network request
+#   - anything that overstates a secret's strength in the meter
+# Source: https://github.com/seQRets/My-Passphrase

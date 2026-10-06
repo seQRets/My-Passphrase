@@ -3,8 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- The "never touches the internet" promise, enforced rather than asserted.
+     default-src 'none' blocks every network destination; connect-src 'none'
+     is spelled out although default-src already covers it, because a network
+     request is the one thing this page must never make. script-src names each
+     inline script block by the SHA-256 of its own text — pinned by
+     scripts/update-csp-hashes.mjs, never by hand — so the browser runs exactly
+     those blocks and refuses any injected or altered script. After ANY edit to
+     this file run:  node scripts/update-csp-hashes.mjs -->
 <meta http-equiv="Content-Security-Policy"
-      content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; form-action 'none'; base-uri 'none'">
+      content="default-src 'none'; script-src 'sha256-bpkiOHMXkWaLx3OlGhd51NlrAzD5ikpHekyCZZSO/hE=' 'sha256-mPt8uk52hzYteLgKeY6QftjQBrWs/uH4/6SSXEzZgWQ=' 'sha256-Y3g0YMfsIAIe7KZxEEiRTDMoPSZ8p2Cqvdztl1LVMYI=' 'sha256-pWoszyL/DduWxanHADZG3DSsIP7Om8RWm3xPZHdqdM0='; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<!-- Nothing is fetched, but a click on a footer link is still a navigation. -->
+<meta name="referrer" content="no-referrer">
 <meta name="description" content="Generate a random passphrase from the EFF wordlist or common English words. Self-contained, works offline, never touches the internet.">
 <title>My Passphrase</title>
 <!-- Inline favicon: a data: URI is not a fetch, so this adds no request — it
@@ -83,11 +93,17 @@
     -webkit-mask-image:radial-gradient(ellipse 70% 100% at 50% 0%,#000 25%,transparent 75%);
     mask-image:radial-gradient(ellipse 70% 100% at 50% 0%,#000 25%,transparent 75%)}
   /* Light from above: a wide amber glow over the header with a warmer core,
-     in place of the old ember in the corner. */
-  body::after{content:'';position:absolute;top:-420px;left:50%;transform:translateX(-50%);
-    width:min(1400px,160vw);height:900px;pointer-events:none;z-index:0;
-    background:radial-gradient(ellipse 45% 50% at 50% 50%,var(--glow),transparent 70%),
-               radial-gradient(ellipse 25% 30% at 58% 56%,var(--glow2),transparent 70%)}
+     in place of the old ember in the corner. Drawn on a page-wide box with the
+     ellipse radii given directly, not on a centred min(1400px,160vw) box: that
+     box is 512px wide on a 320px phone and made the page scrollable sideways
+     wherever overflow-x:hidden on <body> is not honoured (iOS Safari). Same
+     light, same pixels, nothing past the edge — the sister project's fix. */
+  body::after{content:'';position:absolute;top:-420px;left:0;right:0;height:900px;
+    pointer-events:none;z-index:0;
+    background:radial-gradient(ellipse min(630px,72vw) 450px at 50% 450px,
+                 var(--glow),transparent 70%),
+               radial-gradient(ellipse min(350px,40vw) 270px at calc(50% + min(112px,12.8vw)) 504px,
+                 var(--glow2),transparent 70%)}
   .topbar{position:fixed;top:0;left:0;right:0;height:3px;
     background:linear-gradient(90deg,#E8710A,var(--orange) 30%,var(--gold) 60%,var(--orange));z-index:10}
   main{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:3.2rem 1.5rem 4rem}
@@ -564,10 +580,34 @@
        edge — hang them from the trigger's right edge instead */
     .tipbox{left:auto;right:0;transform:none}
   }
+  /* Framed: another site is showing this page inside itself. frame-ancestors
+     only works as a real HTTP header, which GitHub Pages cannot send, so the
+     pre-paint script below sets data-framed and the tool is withheld — by this
+     stylesheet AND by the FRAMED gate in generate(), so a careless selector
+     edit cannot hand a working tool back to a hostile wrapper. No link in the
+     notice on purpose: a frame can be sandboxed so that links cannot escape it,
+     and an address you type yourself is the one that cannot lie. */
+  #framed{display:none}
+  html[data-framed] .topbar,html[data-framed] main{display:none}
+  html[data-framed] #framed{display:block;position:relative;z-index:1;max-width:34rem;margin:14vh auto 0;
+    padding:0 1.4rem;font:400 var(--fs-md)/1.75 var(--sans);color:var(--ink)}
+  #framed p{margin:0 0 1rem}
+  #framed b{color:var(--accent-ink)}
+  #framed .addr{display:block;margin:1.2rem 0;font:600 var(--fs-lg)/1.5 var(--mono);
+    color:var(--accent-ink);overflow-wrap:anywhere}
 </style>
-<script>try{if(localStorage.getItem("passphrase-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+<script>try{if(localStorage.getItem("passphrase-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}
+try{if(window.top!==window.self)document.documentElement.setAttribute("data-framed","")}catch(e){document.documentElement.setAttribute("data-framed","")}</script>
 </head>
 <body>
+<div id="framed" role="alert">
+  <p><b>Another website is showing you this page inside itself.</b> That site decides what you
+  see around it, so none of the tool will run here. Do not use a passphrase made in this window.</p>
+  <p>Open the page yourself instead. Type this address into your browser:</p>
+  <span class="addr">mypassphrase.app</span>
+  <p>Better still, save the page from that address and open it on a computer with the wi-fi
+  off. That is the way this page is meant to be used.</p>
+</div>
 <div class="topbar"></div>
 <main>
   <div class="topline">
@@ -3521,6 +3561,9 @@ var qrcode = function() {
 </script>
 <script>
 "use strict";
+// Set by the pre-paint script in <head> when another site frames this page.
+// The stylesheet hides the tool; this gates it, so the two cannot drift apart.
+const FRAMED = document.documentElement.hasAttribute("data-framed");
 /* ---- wordlists ------------------------------------------------------- */
 // The EFF large wordlist, identical to the list useapassphrase.com ships —
 // 7,776 words — one for every outcome of five six-sided dice.
@@ -4394,6 +4437,7 @@ addEventListener("keydown", e => {
 
 /* ---- generate / copy ------------------------------------------------- */
 function generate() {
+  if (FRAMED) return;
   const count = +$("wordcount").value;
   const list = $("wordlist").value;
   let phrase;
@@ -4463,6 +4507,7 @@ function bumpRender(b) {
     + b.edges[2 * i + 1]).join(" ");
 }
 function bump() {
+  if (FRAMED) return;
   const g = lastGenerated, b = g && g.bump;
   if (!b || $("passphrase").value !== g.phrase || b.k >= bumpMax(b)) return;
   const free = b.edges.map((e, s) => e ? -1 : s).filter(s => s >= 0);
