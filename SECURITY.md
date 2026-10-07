@@ -9,6 +9,10 @@ Report it privately:
 1. **[Open a private security advisory](https://github.com/seQRets/My-Passphrase/security/advisories/new)** — preferred
 2. Or email **security@seqrets.app**
 
+Machine-readable contact details are published at
+[`/.well-known/security.txt`](https://mypassphrase.app/.well-known/security.txt),
+per [RFC 9116](https://www.rfc-editor.org/rfc/rfc9116).
+
 Include what you did, what happened, what you expected instead, and your
 browser and version. For a randomness or strength-meter fault, the exact
 settings (pool, count) and an example of the output are the most useful thing
@@ -20,7 +24,8 @@ You should get an acknowledgement within a week.
 
 Check that the copy you loaded matches what was published: every
 [release](https://github.com/seQRets/My-Passphrase/releases) states the SHA-256 of
-its attached `mypassphrase.html`, and
+its attached `mypassphrase.html`, `SHA256SUMS.txt` in this repository records
+the same value, and
 
 ```
 shasum -a 256 mypassphrase.html
