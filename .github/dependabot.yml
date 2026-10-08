@@ -1,0 +1,13 @@
+version: 2
+updates:
+  # The workflows pin every action to a full commit SHA. Dependabot updates
+  # the SHA and the trailing version comment together; nothing else here has
+  # dependencies to update.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns:
+          - "*"

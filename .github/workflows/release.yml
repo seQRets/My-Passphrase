@@ -1,0 +1,94 @@
+name: Release
+
+# Pushing a tag vX.Y.Z publishes a GitHub release carrying index.html under the
+# name both download links point at — releases/latest/download/mypassphrase.html
+# — plus SHA256SUMS.txt, with the hash in the release notes. The asset is the
+# exact committed file: the job refuses if SHA256SUMS.txt does not match it, so
+# a release can never state a hash that the attached file fails. This replaces
+# the hand-run checklist (bump, pin, commit, tag, name the asset correctly,
+# re-download and check) with one tag push.
+#
+# Release notes: if docs/releases/<tag>.md exists it is used; otherwise the
+# notes are the hash block alone. Edit the release afterwards to add prose.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions: {}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write      # to create the release and upload its assets
+      id-token: write      # to sign the provenance attestation (Sigstore)
+      attestations: write  # to store it against the repository
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+
+      - name: Pins and sums are current for the tagged commit
+        run: node scripts/update-csp-hashes.mjs --check
+
+      - name: Stage the asset under its download name and verify it
+        run: |
+          mkdir -p dist
+          cp index.html dist/mypassphrase.html
+          # SHA256SUMS.txt names index.html; the release copy names the asset,
+          # so `sha256sum -c` works in a Downloads folder.
+          want=$(awk '{print $1}' SHA256SUMS.txt)
+          got=$(sha256sum dist/mypassphrase.html | cut -d' ' -f1)
+          [ "$want" = "$got" ] || { echo "::error::SHA256SUMS.txt ($want) does not match index.html ($got)"; exit 1; }
+          printf '%s  mypassphrase.html\n' "$got" > dist/SHA256SUMS.txt
+          (cd dist && sha256sum -c SHA256SUMS.txt)
+          echo "SHA256=$got" >> "$GITHUB_ENV"
+
+      - name: Write the release notes
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          {
+            if [ -f "docs/releases/$TAG.md" ]; then cat "docs/releases/$TAG.md"; echo; fi
+            echo "## Verify your download"
+            echo
+            echo '```'
+            echo "$SHA256  mypassphrase.html"
+            echo '```'
+            echo
+            echo 'macOS: `shasum -a 256 ~/Downloads/mypassphrase.html` · Linux: `sha256sum ~/Downloads/mypassphrase.html` · Windows: `Get-FileHash $HOME\Downloads\mypassphrase.html -Algorithm SHA256`'
+            echo
+            echo 'If the value differs, stop. Do not open the file.'
+          } > notes.md
+
+      # Provenance: SHA256SUMS.txt travels in the same repository as the page,
+      # so whoever could change one could change the other (the README says
+      # so). This signs the asset through Sigstore with the identity of THIS
+      # workflow run, which the repository alone cannot forge. Anyone verifies:
+      #     gh attestation verify ~/Downloads/mypassphrase.html -R seQRets/My-Passphrase
+      - name: Attest the asset's provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: dist/mypassphrase.html
+
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$TAG" dist/mypassphrase.html dist/SHA256SUMS.txt \
+            --title "$TAG" --notes-file notes.md --verify-tag
+
+      # The links live on GitHub, not on Pages, and can fail independently of
+      # the site — v1.8.2 of the sister project shipped an asset under the wrong
+      # name and 404'd both download links until someone fetched one.
+      - name: The latest-download link serves the released bytes
+        run: |
+          sleep 15
+          got=$(curl -sL "https://github.com/${{ github.repository }}/releases/latest/download/mypassphrase.html" | sha256sum | cut -d' ' -f1)
+          [ "$got" = "$SHA256" ] || { echo "::error::releases/latest/download/mypassphrase.html hashes to $got, expected $SHA256"; exit 1; }
