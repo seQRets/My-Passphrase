@@ -1,0 +1,66 @@
+name: Deploy to GitHub Pages
+
+# Pages currently deploys straight from the main branch, so a push IS a
+# deploy and a page that fails its own checks still goes live. This deploys
+# only after check.yml's checks pass on the same commit, so a failing page
+# cannot reach mypassphrase.app.
+#
+# ONE-TIME SETUP, by a repository admin, before this can take effect:
+#   Settings → Pages → Build and deployment → Source: "GitHub Actions"
+# Until then the deploy job fails harmlessly (Pages still serves the branch).
+# The site is the repository root; only the files a visitor needs are
+# published — not .git, not the harness, not the scripts.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+      - run: node scripts/update-csp-hashes.mjs --check
+      - run: node scripts/check-wordlists.mjs
+      - env:
+          CHROME: /usr/bin/google-chrome
+        run: node verify.js
+
+  deploy:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from this workflow
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Stage only what the site serves
+        run: |
+          mkdir -p _site/.well-known
+          cp index.html CNAME .nojekyll _site/
+          cp .well-known/security.txt _site/.well-known/
+          ls -laR _site
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
