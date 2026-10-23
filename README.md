@@ -28,7 +28,7 @@ the browser to refuse if anything on the page ever tried to phone home.
 - **Roll your own randomness**: a folded card under the generator takes dice
   rolls, five per word, and reads the words straight off the EFF table (the
   list is 7,776 = 6⁵ entries in dice order, so `index = Σ (dᵢ−1)·6⁴⁻ⁱ`, no
-  hashing, no bias) — anyone with the same rolls and the printed list gets the
+  hashing, no bias), so anyone with the same rolls and the printed list gets the
   same words. Typed rolls can be invented, so the sister project's roll-quality
   check runs on them before anything is made: one number, a repeating block, a
   run, a missing face or a loaded die are named, and the first press writes
@@ -139,8 +139,8 @@ repository as the page, so whoever could change one could change the other. It
 tells you the file you hold is the file that was published, nothing more.
 
 One check does not share that weakness. Each release is signed, through
-[Sigstore](https://www.sigstore.dev/), by the GitHub Actions run that built it
-— a signature the repository's contents cannot forge. With the
+[Sigstore](https://www.sigstore.dev/), by the GitHub Actions run that built it,
+a signature the repository's contents cannot forge. With the
 [GitHub CLI](https://cli.github.com/):
 
 ```bash
@@ -175,7 +175,7 @@ how to report a vulnerability. Machine-readable contact details are at
 
 The page does not permit inline script in general. Its Content-Security-Policy
 names each of its four `<script>` blocks by the SHA-256 of its own text, so a
-block the policy was not expecting does not run — including one you meant to
+block the policy was not expecting does not run, including one you meant to
 change. It also refuses to be framed: if another site embeds it, the tool is
 withheld and a notice says so.
 
@@ -252,7 +252,7 @@ unblurred secret each trip at least one. CI runs it on every push.
 - Common-English list derived from
   [first20hours/google-10000-english](https://github.com/first20hours/google-10000-english):
   `google-10000-english-usa-no-swears.txt`, keeping the words of 4 to 9
-  lowercase letters, deduplicated and sorted — 7,459 words, SHA-256
+  lowercase letters, deduplicated and sorted: 7,459 words, SHA-256
   `57970da208e266b4df7c52f7599138c10930602a936571c70cbc108aade43de3`.
   `node scripts/check-wordlists.mjs` re-derives both lists from their upstream
   files and fails if either embedded list differs; CI runs it on every push

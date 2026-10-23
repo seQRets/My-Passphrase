@@ -12,7 +12,7 @@
      those blocks and refuses any injected or altered script. After ANY edit to
      this file run:  node scripts/update-csp-hashes.mjs -->
 <meta http-equiv="Content-Security-Policy"
-      content="default-src 'none'; script-src 'sha256-bpkiOHMXkWaLx3OlGhd51NlrAzD5ikpHekyCZZSO/hE=' 'sha256-mPt8uk52hzYteLgKeY6QftjQBrWs/uH4/6SSXEzZgWQ=' 'sha256-Y3g0YMfsIAIe7KZxEEiRTDMoPSZ8p2Cqvdztl1LVMYI=' 'sha256-N4hq77VIC6AN6/TauVqlfgvNiziPAiLvZvvOvK4W/eY='; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+      content="default-src 'none'; script-src 'sha256-bpkiOHMXkWaLx3OlGhd51NlrAzD5ikpHekyCZZSO/hE=' 'sha256-mPt8uk52hzYteLgKeY6QftjQBrWs/uH4/6SSXEzZgWQ=' 'sha256-Y3g0YMfsIAIe7KZxEEiRTDMoPSZ8p2Cqvdztl1LVMYI=' 'sha256-TcP2mXCzEUy1zdMx8bXByRiJ4Jnax2q66EwS2yUvVAM='; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
 <!-- Nothing is fetched, but a click on a footer link is still a navigation. -->
 <meta name="referrer" content="no-referrer">
 <meta name="description" content="Generate a random passphrase from the EFF wordlist or common English words. Self-contained, works offline, never touches the internet.">
@@ -321,9 +321,12 @@
     box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 12px 26px -8px rgba(247,147,26,.75)}
   button.primary:active{transform:translateY(0)}
   .hint{font-size:var(--fs-sm);color:var(--dim);margin-top:.9rem;letter-spacing:.02em}
-  /* Dice: the slow route. A folded card under the generator, in the Q&A's
+  /* Dice: the slow route. A folded card under the meter, in the Q&A's
      clothes; the rolls field takes the passphrase box's shield, because the
-     rolls ARE the passphrase one step earlier. */
+     rolls ARE the passphrase one step earlier. It sits below the meter, not
+     between Generate and it: even folded, it pushed the crack time past the
+     first screen of a laptop, and the meter is the answer the page exists to
+     give. */
   .dice{margin-top:1rem;border:1px solid var(--line);border-radius:14px;padding:0 1rem}
   .dice>summary{padding:.8rem 0;font-size:var(--fs-md);font-weight:600;color:var(--ink);list-style:none;display:flex;gap:.6rem;align-items:baseline}
   .dice>summary::-webkit-details-marker{display:none}
@@ -758,25 +761,6 @@ try{if(window.top!==window.self)document.documentElement.setAttribute("data-fram
         <option value="pin">PIN digits · 0–9</option>
       </select>
     </div>
-    <details class="dice" id="dicepath">
-      <summary>Roll your own randomness <span class="sub">— the slow route, for the truly paranoid</span></summary>
-      <div class="body">
-        <p class="hint" style="margin-top:0">The EFF list holds exactly 7,776 words: every outcome of five six-sided dice,
-          so five rolls pick one word and nothing in this page decides anything. 🎲 Roll a die and type each
-          result below, five per word. <b>Keep these numbers secure, as they are the passphrase.</b></p>
-        <textarea id="rolls" rows="2" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off"
-          inputmode="numeric" placeholder="Enter your die rolls here. 431256…" aria-label="Your dice rolls"></textarea>
-        <div class="dicecount" id="dicecount"></div>
-        <div class="hint" id="dicebad" style="display:none"></div>
-        <div class="hint" id="dicequal"></div>
-        <div class="dicewarn" id="diceweak" style="display:none"></div>
-        <div class="row">
-          <button class="primary" id="dicego" disabled>Make a passphrase from the dice</button>
-          <button id="diceanyway" style="display:none">Make it anyway</button>
-          <button id="diceclr" type="button">Clear the rolls</button>
-        </div>
-      </div>
-    </details>
     <div class="meter" id="meter" style="display:none">
       <div class="mrow">
         <span class="mhead">
@@ -812,6 +796,25 @@ try{if(window.top!==window.self)document.documentElement.setAttribute("data-fram
           <div id="ctbody"></div></div>
       </details>
     </div>
+    <details class="dice" id="dicepath">
+      <summary>Roll your own randomness <span class="sub">— the slow route, for the truly paranoid</span></summary>
+      <div class="body">
+        <p class="hint" style="margin-top:0">The EFF list holds exactly 7,776 words: every outcome of five six-sided dice,
+          so five rolls pick one word and nothing in this page decides anything. 🎲 Roll a die and type each
+          result below, five per word. <b>Keep these numbers secure, as they are the passphrase.</b></p>
+        <textarea id="rolls" rows="2" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off"
+          inputmode="numeric" placeholder="Enter your die rolls here. 431256…" aria-label="Your dice rolls"></textarea>
+        <div class="dicecount" id="dicecount"></div>
+        <div class="hint" id="dicebad" style="display:none"></div>
+        <div class="hint" id="dicequal"></div>
+        <div class="dicewarn" id="diceweak" style="display:none"></div>
+        <div class="row">
+          <button class="primary" id="dicego" disabled>Make a passphrase from the dice</button>
+          <button id="diceanyway" style="display:none">Make it anyway</button>
+          <button id="diceclr" type="button">Clear the rolls</button>
+        </div>
+      </div>
+    </details>
 
     <div class="hint" id="cliphint" style="display:none">⚠︎ Copied. The clipboard can be read
       by any program running on your computer, and apps that keep a clipboard history save
@@ -1228,7 +1231,7 @@ try{if(window.top!==window.self)document.documentElement.setAttribute("data-fram
     <div class="l">MY PASSPHRASE <span>· GENERATOR</span></div>
     <!-- bump the version on every release: it lets a saved copy be compared
          against the repo's releases -->
-    <div class="r">v1.17.0 · RUNS OFFLINE</div>
+    <div class="r">v1.18.0 · RUNS OFFLINE</div>
     <details class="creds">
       <summary>Credits</summary>
       <div class="prov">
@@ -4698,10 +4701,14 @@ function assessRolls(r) {
   return { n, ceiling, bits, flags };
 }
 let diceAcknowledged = false;
+// Dice make EFF words, so they count in words. With a character pool selected
+// the count menu shows characters or digits ("64 digits"), and reading that as
+// words asked for 320 rolls; use the word count the menu remembers instead.
+const diceCount = () => countMode() === "words" ? +$("wordcount").value : +COUNTS.words.last;
 function updateDice() {
   const raw = $("rolls").value, rolls = diceRolls(), n = rolls.length;
   $("rolls").classList.toggle("shield", shieldWanted);
-  const count = +$("wordcount").value, need = count * DICE_PER_WORD;
+  const count = diceCount(), need = count * DICE_PER_WORD;
   const bad = [...new Set([...raw.replace(/\s/g, "")].filter(c => !"123456".includes(c)))];
   $("dicebad").style.display = bad.length ? "block" : "none";
   if (bad.length) { $("dicebad").className = "hint bad-c"; $("dicebad").textContent = "✕  Dice only show 1 to 6. Remove: " + bad.join(", "); }
@@ -4725,7 +4732,7 @@ function updateDice() {
 }
 function makeFromDice() {
   if (FRAMED) return;
-  const rolls = diceRolls(), count = +$("wordcount").value, need = count * DICE_PER_WORD;
+  const rolls = diceRolls(), count = diceCount(), need = count * DICE_PER_WORD;
   if (rolls.length < need) return;
   const q = assessRolls(rolls.slice(0, need));
   if (q.flags.length && !diceAcknowledged) {
@@ -4745,7 +4752,11 @@ function makeFromDice() {
   // 7,776 long, so count × log2(7776) — IF the die was fair, which the page
   // cannot know; the note says so.
   const bits = count * Math.log2(EFF_WORDS.length);
-  $("wordlist").value = "eff"; $("wordlist").dispatchEvent(new Event("change"));
+  // The words are EFF words, so the pool says so. Set it directly: the pool's
+  // change handler would also run generate(), drawing a phrase only to throw
+  // it away a line later.
+  if ($("wordlist").value !== "eff") { $("wordlist").value = "eff"; rebuildCountOptions(); syncGenLabel(); }
+  COUNTS.words.last = String(count); $("wordcount").value = String(count);
   lastGenerated = { phrase, count, list: "eff", bits, base: bits, bump: newBump(words) };
   $("passphrase").value = phrase;
   $("cliphint").style.display = "none";
@@ -4758,6 +4769,7 @@ function makeFromDice() {
 }
 $("rolls").addEventListener("input", updateDice);
 $("wordcount").addEventListener("change", updateDice);
+$("wordlist").addEventListener("change", updateDice);
 $("dicego").onclick = makeFromDice;
 $("diceanyway").onclick = () => { diceAcknowledged = true; makeFromDice(); };
 $("diceclr").onclick = () => { $("rolls").value = ""; updateDice(); };
