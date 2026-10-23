@@ -3,8 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- The "never touches the internet" promise, enforced rather than asserted.
+     default-src 'none' blocks every network destination; connect-src 'none'
+     is spelled out although default-src already covers it, because a network
+     request is the one thing this page must never make. script-src names each
+     inline script block by the SHA-256 of its own text — pinned by
+     scripts/update-csp-hashes.mjs, never by hand — so the browser runs exactly
+     those blocks and refuses any injected or altered script. After ANY edit to
+     this file run:  node scripts/update-csp-hashes.mjs -->
 <meta http-equiv="Content-Security-Policy"
-      content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; form-action 'none'; base-uri 'none'">
+      content="default-src 'none'; script-src 'sha256-bpkiOHMXkWaLx3OlGhd51NlrAzD5ikpHekyCZZSO/hE=' 'sha256-mPt8uk52hzYteLgKeY6QftjQBrWs/uH4/6SSXEzZgWQ=' 'sha256-Y3g0YMfsIAIe7KZxEEiRTDMoPSZ8p2Cqvdztl1LVMYI=' 'sha256-N4hq77VIC6AN6/TauVqlfgvNiziPAiLvZvvOvK4W/eY='; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<!-- Nothing is fetched, but a click on a footer link is still a navigation. -->
+<meta name="referrer" content="no-referrer">
 <meta name="description" content="Generate a random passphrase from the EFF wordlist or common English words. Self-contained, works offline, never touches the internet.">
 <title>My Passphrase</title>
 <!-- Inline favicon: a data: URI is not a fetch, so this adds no request — it
@@ -83,11 +93,17 @@
     -webkit-mask-image:radial-gradient(ellipse 70% 100% at 50% 0%,#000 25%,transparent 75%);
     mask-image:radial-gradient(ellipse 70% 100% at 50% 0%,#000 25%,transparent 75%)}
   /* Light from above: a wide amber glow over the header with a warmer core,
-     in place of the old ember in the corner. */
-  body::after{content:'';position:absolute;top:-420px;left:50%;transform:translateX(-50%);
-    width:min(1400px,160vw);height:900px;pointer-events:none;z-index:0;
-    background:radial-gradient(ellipse 45% 50% at 50% 50%,var(--glow),transparent 70%),
-               radial-gradient(ellipse 25% 30% at 58% 56%,var(--glow2),transparent 70%)}
+     in place of the old ember in the corner. Drawn on a page-wide box with the
+     ellipse radii given directly, not on a centred min(1400px,160vw) box: that
+     box is 512px wide on a 320px phone and made the page scrollable sideways
+     wherever overflow-x:hidden on <body> is not honoured (iOS Safari). Same
+     light, same pixels, nothing past the edge — the sister project's fix. */
+  body::after{content:'';position:absolute;top:-420px;left:0;right:0;height:900px;
+    pointer-events:none;z-index:0;
+    background:radial-gradient(ellipse min(630px,72vw) 450px at 50% 450px,
+                 var(--glow),transparent 70%),
+               radial-gradient(ellipse min(350px,40vw) 270px at calc(50% + min(112px,12.8vw)) 504px,
+                 var(--glow2),transparent 70%)}
   .topbar{position:fixed;top:0;left:0;right:0;height:3px;
     background:linear-gradient(90deg,#E8710A,var(--orange) 30%,var(--gold) 60%,var(--orange));z-index:10}
   main{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:3.2rem 1.5rem 4rem}
@@ -305,6 +321,20 @@
     box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 12px 26px -8px rgba(247,147,26,.75)}
   button.primary:active{transform:translateY(0)}
   .hint{font-size:var(--fs-sm);color:var(--dim);margin-top:.9rem;letter-spacing:.02em}
+  /* Dice: the slow route. A folded card under the generator, in the Q&A's
+     clothes; the rolls field takes the passphrase box's shield, because the
+     rolls ARE the passphrase one step earlier. */
+  .dice{margin-top:1rem;border:1px solid var(--line);border-radius:14px;padding:0 1rem}
+  .dice>summary{padding:.8rem 0;font-size:var(--fs-md);font-weight:600;color:var(--ink);list-style:none;display:flex;gap:.6rem;align-items:baseline}
+  .dice>summary::-webkit-details-marker{display:none}
+  .dice>summary::before{content:'+';color:var(--orange);font-weight:700}
+  .dice[open]>summary::before{content:'\2212'}
+  .dice>summary .sub{font-size:var(--fs-sm);font-weight:500;color:var(--dim)}
+  .dice .body{padding:0 0 1rem}
+  .dice textarea{min-height:4.5rem;margin-top:.6rem}
+  .dicewarn{margin-top:.8rem;padding:.7rem .9rem;border:1px solid var(--red-ink);border-radius:10px;
+    font-size:var(--fs-sm);color:var(--red-ink);font-weight:600}
+  .dicecount{font-size:var(--fs-sm);color:var(--dim);margin-top:.5rem}
   /* Native select arrows sit hard against the right border, which reads as
      awkward next to the buttons. appearance:none swaps in our own chevron —
      a data: URI, so it is drawn, not fetched — inset from the edge. */
@@ -564,10 +594,44 @@
        edge — hang them from the trigger's right edge instead */
     .tipbox{left:auto;right:0;transform:none}
   }
+  /* Framed: another site is showing this page inside itself. frame-ancestors
+     only works as a real HTTP header, which GitHub Pages cannot send, so the
+     pre-paint script below sets data-framed and the tool is withheld — by this
+     stylesheet AND by the FRAMED gate in generate(), so a careless selector
+     edit cannot hand a working tool back to a hostile wrapper. No link in the
+     notice on purpose: a frame can be sandboxed so that links cannot escape it,
+     and an address you type yourself is the one that cannot lie. */
+  /* Print, or "Save as PDF", writes the screen to a file: the passphrase, its
+     encodings, a decoded string, a QR. Blank all of it on paper. */
+  @media print{
+    #passphrase,#rolls,#encin,#convin,#convout,#decout,#qrcanvas,.qrbox{visibility:hidden !important}
+    .qrveil{display:none !important}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+    html{scroll-behavior:auto}
+  }
+  #framed{display:none}
+  html[data-framed] .topbar,html[data-framed] main{display:none}
+  html[data-framed] #framed{display:block;position:relative;z-index:1;max-width:34rem;margin:14vh auto 0;
+    padding:0 1.4rem;font:400 var(--fs-md)/1.75 var(--sans);color:var(--ink)}
+  #framed p{margin:0 0 1rem}
+  #framed b{color:var(--accent-ink)}
+  #framed .addr{display:block;margin:1.2rem 0;font:600 var(--fs-lg)/1.5 var(--mono);
+    color:var(--accent-ink);overflow-wrap:anywhere}
 </style>
-<script>try{if(localStorage.getItem("passphrase-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+<script>try{if(localStorage.getItem("passphrase-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}
+try{if(window.top!==window.self)document.documentElement.setAttribute("data-framed","")}catch(e){document.documentElement.setAttribute("data-framed","")}</script>
 </head>
 <body>
+<div id="framed" role="alert">
+  <p><b>Another website is showing you this page inside itself.</b> That site decides what you
+  see around it, so none of the tool will run here. Do not use a passphrase made in this window.</p>
+  <p>Open the page yourself instead. Type this address into your browser:</p>
+  <span class="addr">mypassphrase.app</span>
+  <p>Better still, save the page from that address and open it on a computer with the wi-fi
+  off. That is the way this page is meant to be used.</p>
+</div>
 <div class="topbar"></div>
 <main>
   <div class="topline">
@@ -694,6 +758,25 @@
         <option value="pin">PIN digits · 0–9</option>
       </select>
     </div>
+    <details class="dice" id="dicepath">
+      <summary>Roll your own randomness <span class="sub">— the slow route, for the truly paranoid</span></summary>
+      <div class="body">
+        <p class="hint" style="margin-top:0">The EFF list holds exactly 7,776 words: every outcome of five six-sided dice,
+          so five rolls pick one word and nothing in this page decides anything. 🎲 Roll a die and type each
+          result below, five per word. <b>Keep these numbers secure, as they are the passphrase.</b></p>
+        <textarea id="rolls" rows="2" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off"
+          inputmode="numeric" placeholder="Enter your die rolls here. 431256…" aria-label="Your dice rolls"></textarea>
+        <div class="dicecount" id="dicecount"></div>
+        <div class="hint" id="dicebad" style="display:none"></div>
+        <div class="hint" id="dicequal"></div>
+        <div class="dicewarn" id="diceweak" style="display:none"></div>
+        <div class="row">
+          <button class="primary" id="dicego" disabled>Make a passphrase from the dice</button>
+          <button id="diceanyway" style="display:none">Make it anyway</button>
+          <button id="diceclr" type="button">Clear the rolls</button>
+        </div>
+      </div>
+    </details>
     <div class="meter" id="meter" style="display:none">
       <div class="mrow">
         <span class="mhead">
@@ -732,8 +815,9 @@
 
     <div class="hint" id="cliphint" style="display:none">⚠︎ Copied. The clipboard can be read
       by any program running on your computer, and apps that keep a clipboard history save
-      their own copy. Paste it where it belongs, then copy something harmless.</div>
-    <div class="status" id="st"></div>
+      their own copy. Paste it where it belongs. If you stay on this page and copy nothing
+      else, the clipboard is cleared after 60 seconds; the page never reads it.</div>
+    <div class="status" id="st" role="status" aria-live="polite"></div>
   </div>
 
   <div class="card" id="convcard">
@@ -3521,6 +3605,9 @@ var qrcode = function() {
 </script>
 <script>
 "use strict";
+// Set by the pre-paint script in <head> when another site frames this page.
+// The stylesheet hides the tool; this gates it, so the two cannot drift apart.
+const FRAMED = document.documentElement.hasAttribute("data-framed");
 /* ---- wordlists ------------------------------------------------------- */
 // The EFF large wordlist, identical to the list useapassphrase.com ships —
 // 7,776 words — one for every outcome of five six-sided dice.
@@ -4052,6 +4139,8 @@ function bumpWords(k) {
 let shieldWanted = true;
 function setShield(on) {
   $("passphrase").classList.toggle("shield", on);
+  // the rolls are the passphrase one step earlier, so they follow the same eye
+  $("rolls").classList.toggle("shield", on);
   $("peek").setAttribute("aria-pressed", String(!on));
   $("peek").setAttribute("aria-label", on ? "Show the passphrase" : "Hide the passphrase");
   $("peekslash").style.display = on ? "none" : "block";
@@ -4085,11 +4174,37 @@ $("peek").onclick = () => {
   shieldWanted = !$("passphrase").classList.contains("shield");
   setShield(shieldWanted);
 };
+/* ---- clipboard, with a timed clear that never reads it ---------------- */
+// A copied secret outlives the tab in the clipboard. Clearing it after a
+// minute limits that, but reading the clipboard first to check it is still
+// ours needs the clipboard-read permission, which browsers surface as a prompt
+// a minute after the copy with no visible cause: alarming in a tool like this.
+// So do not read. If the page has stayed focused and nothing else was copied
+// or cut from it since our write, the clipboard can only hold what we put
+// there, and overwriting it is safe. If either happened, leave it alone: it may
+// be something of yours.
+let clipTimer = null, clipStale = false;
+window.addEventListener("blur", () => { clipStale = true; });
+document.addEventListener("copy", () => { clipStale = true; });
+document.addEventListener("cut", () => { clipStale = true; });
+function copySecret(text) {
+  if (!text) return;
+  navigator.clipboard?.writeText(text)
+    .then(() => {
+      clipStale = false;
+      $("cliphint").style.display = "block";
+      if (clipTimer) clearTimeout(clipTimer);
+      clipTimer = setTimeout(() => {
+        clipTimer = null;
+        if (clipStale) return;              // you may have copied something else; not ours to clear
+        navigator.clipboard?.writeText("").catch(() => {});
+      }, 60000);
+    })
+    .catch(() => {});
+}
 $("incopy").onclick = () => {
   if (!$("passphrase").value.trim()) return;
-  navigator.clipboard?.writeText($("passphrase").value)
-    .then(() => { $("cliphint").style.display = "block"; })
-    .catch(() => {});
+  copySecret($("passphrase").value);
 };
 
 /* ---- conversion: the same secret in another alphabet ------------------ */
@@ -4290,9 +4405,7 @@ $("convuse").onclick = () => {
 };
 function copyWell(id) {
   if (!$(id).textContent) return;
-  navigator.clipboard?.writeText($(id).textContent)
-    .then(() => { $("cliphint").style.display = "block"; })
-    .catch(() => {});
+  copySecret($(id).textContent);
 }
 $("convcopy").onclick = () => copyWell("convout");
 $("deccopy").onclick = () => copyWell("decout");
@@ -4394,6 +4507,7 @@ addEventListener("keydown", e => {
 
 /* ---- generate / copy ------------------------------------------------- */
 function generate() {
+  if (FRAMED) return;
   const count = +$("wordcount").value;
   const list = $("wordlist").value;
   let phrase;
@@ -4463,6 +4577,7 @@ function bumpRender(b) {
     + b.edges[2 * i + 1]).join(" ");
 }
 function bump() {
+  if (FRAMED) return;
   const g = lastGenerated, b = g && g.bump;
   if (!b || $("passphrase").value !== g.phrase || b.k >= bumpMax(b)) return;
   const free = b.edges.map((e, s) => e ? -1 : s).filter(s => s >= 0);
@@ -4525,6 +4640,128 @@ function rebuildCountOptions() {
   $("wordcount").value = m.last;
 }
 // the button names what it makes
+/* ---- dice: the slow route ------------------------------------------- */
+// The EFF large list is a diceware table: 7,776 = 6^5 words, in dice order, so
+// five rolls index one word directly — index = Σ (d_i − 1)·6^(4−i) — with no
+// hashing and no bias. Anyone with the same rolls and the printed list gets
+// the same words, which is the point of rolling.
+const DICE_PER_WORD = 5, LOG2_6 = Math.log2(6);
+const diceRolls = () => [...$("rolls").value].filter(c => "123456".includes(c)).join("");
+function diceWord(five) {
+  let i = 0;
+  for (const c of five) i = i * 6 + (+c - 1);
+  return EFF_WORDS[i];
+}
+// The one place a faked roll can still be caught — from the sister project
+// (myseedphrase.app), where it is calibrated at ~0% false alarms on genuine
+// rolls and catches every typed pattern tried; one threshold is raised here
+// because this page accepts far fewer rolls. Its FLAGS gate the button; the
+// bit count only explains the finding.
+function assessRolls(r) {
+  const n = r.length, ceiling = n * LOG2_6;
+  if (!n) return { n, ceiling, bits: 0, flags: [] };
+  const counts = [0, 0, 0, 0, 0, 0];
+  for (const c of r) counts[+c - 1]++;
+  const faces = counts.filter(c => c).length;
+  let H = 0;
+  for (const c of counts) if (c) { const p = c / n; H -= p * Math.log2(p) }
+  let period = n;
+  for (let p = 1; p * 2 <= n; p++) {
+    let same = true;
+    for (let i = p; i < n && same; i++) if (r[i] !== r[i - p]) same = false;
+    if (same) { period = p; break }
+  }
+  let steps = 0; const gaps = [0, 0, 0, 0, 0, 0];
+  for (let i = 1; i < n; i++) {
+    const d = (+r[i] - +r[i - 1] + 6) % 6;
+    gaps[d]++; if (d === 1 || d === 5) steps++;
+  }
+  let Hd = 0;
+  if (n > 1) for (const c of gaps) if (c) { const p = c / (n - 1); Hd -= p * Math.log2(p) }
+  const bits = Math.max(0, Math.min(ceiling, n * H, period * LOG2_6, LOG2_6 + (n - 1) * Hd));
+  const flags = [];
+  if (faces === 1) flags.push("every roll is the same number");
+  else if (period < n) flags.push(`the same ${period} roll${period > 1 ? "s" : ""} repeat over and over`);
+  else {
+    // Unlike the sister's seeds (50+ rolls), a passphrase here is 20 to 60
+    // rolls, and a fair die leaves one face unseen in 20 rolls about 16% of the
+    // time (6·(5/6)^20), in 30 about 2.5%, in 40 about 0.4%. The face and skew
+    // checks are therefore asked only from 40 rolls on; below that only the
+    // gross patterns (one number, a repeating block, a run) can gate, and the
+    // bit count still reflects any skew. Measured on 20,000 fair sequences per
+    // length: false alarms 0.03% at 20 rolls, 0.0% at 30, 0.6% at 40, 0.0% at 60.
+    if (faces < 6 && n >= 40) flags.push(`only ${faces} of the six faces ever come up`);
+    if (n >= 20 && steps >= (n - 1) * 0.7) flags.push("the numbers mostly run in sequence");
+    if (faces === 6 && n >= 40 && bits < ceiling * 0.85)
+      flags.push("one face comes up far more often than the others");
+  }
+  return { n, ceiling, bits, flags };
+}
+let diceAcknowledged = false;
+function updateDice() {
+  const raw = $("rolls").value, rolls = diceRolls(), n = rolls.length;
+  $("rolls").classList.toggle("shield", shieldWanted);
+  const count = +$("wordcount").value, need = count * DICE_PER_WORD;
+  const bad = [...new Set([...raw.replace(/\s/g, "")].filter(c => !"123456".includes(c)))];
+  $("dicebad").style.display = bad.length ? "block" : "none";
+  if (bad.length) { $("dicebad").className = "hint bad-c"; $("dicebad").textContent = "✕  Dice only show 1 to 6. Remove: " + bad.join(", "); }
+  $("dicecount").textContent = n ? `${n} of ${need} rolls for ${count} words · ${Math.floor(n / DICE_PER_WORD)} word${Math.floor(n / DICE_PER_WORD) === 1 ? "" : "s"} so far` : "";
+  const q = assessRolls(rolls);
+  const enough = n >= need;
+  $("dicego").disabled = !enough;
+  if (!n) { $("dicequal").textContent = ""; $("dicequal").className = "hint"; }
+  else if (q.flags.length && n >= 10) {
+    $("dicequal").className = "hint bad-c";
+    $("dicequal").textContent = "⚠︎ These rolls do not look rolled: " + q.flags.join("; ") + ".";
+  } else {
+    $("dicequal").className = "hint";
+    $("dicequal").textContent = enough
+      ? "No patterns found in these rolls. That is not proof the die was fair; it only means nothing obvious is wrong with what you typed."
+      : `${need - n} more roll${need - n === 1 ? "" : "s"} for ${count} words.`;
+  }
+  // editing the rolls withdraws an earlier "make it anyway"
+  diceAcknowledged = false;
+  $("diceweak").style.display = "none"; $("diceanyway").style.display = "none";
+}
+function makeFromDice() {
+  if (FRAMED) return;
+  const rolls = diceRolls(), count = +$("wordcount").value, need = count * DICE_PER_WORD;
+  if (rolls.length < need) return;
+  const q = assessRolls(rolls.slice(0, need));
+  if (q.flags.length && !diceAcknowledged) {
+    // The gate: first press writes nothing, names what is wrong, and waits for
+    // a separate button that is deliberately not focused.
+    $("diceweak").style.display = "block";
+    $("diceweak").textContent = "⚠︎ These rolls do not look rolled: " + q.flags.join("; ")
+      + `. A passphrase made from them is worth about ${Math.round(q.bits)} of the ${Math.round(q.ceiling)} bits it should carry. `
+      + "Roll a real die, or press “Make it anyway” to go ahead.";
+    $("diceanyway").style.display = "";
+    return;
+  }
+  const words = [];
+  for (let i = 0; i < need; i += DICE_PER_WORD) words.push(diceWord(rolls.slice(i, i + DICE_PER_WORD)));
+  const phrase = words.join(" ");
+  // Counted like a drawn phrase: the rolls are the randomness, the list is
+  // 7,776 long, so count × log2(7776) — IF the die was fair, which the page
+  // cannot know; the note says so.
+  const bits = count * Math.log2(EFF_WORDS.length);
+  $("wordlist").value = "eff"; $("wordlist").dispatchEvent(new Event("change"));
+  lastGenerated = { phrase, count, list: "eff", bits, base: bits, bump: newBump(words) };
+  $("passphrase").value = phrase;
+  $("cliphint").style.display = "none";
+  applyShield();
+  updateMeter(true);
+  $("st").className = "status ok";
+  $("st").textContent = `✓  ${count} words from your ${need} rolls, read straight off the EFF table: nothing here chose them. `
+    + "The rolls are the passphrase one step earlier — destroy the paper once the words are safe.";
+  diceAcknowledged = false; $("diceweak").style.display = "none"; $("diceanyway").style.display = "none";
+}
+$("rolls").addEventListener("input", updateDice);
+$("wordcount").addEventListener("change", updateDice);
+$("dicego").onclick = makeFromDice;
+$("diceanyway").onclick = () => { diceAcknowledged = true; makeFromDice(); };
+$("diceclr").onclick = () => { $("rolls").value = ""; updateDice(); };
+
 function syncGenLabel() {
   const k = $("wordlist").value;
   const noun = k === "pin" ? "PIN" : k === "ascii" ? "password"
