@@ -69,13 +69,17 @@ async function launch(bin, port = 9334) {
     '--disable-component-update', '--disable-sync', '--no-pings',
     '--window-size=1280,900', 'about:blank'], { stdio: ['ignore', 'pipe', 'pipe'] });
   let err = ''; proc.stderr.on('data', d => err += d);
-  for (let i = 0; i < 100; i++) {
+  // Thirty seconds, measured on the clock. Ten was not enough on a busy CI
+  // runner: Chrome once took longer to open its debugging port, and the
+  // deploy failed on a page that had passed every check minutes earlier.
+  const LAUNCH_MS = 30000, deadline = Date.now() + LAUNCH_MS;
+  while (Date.now() < deadline) {
     try {
       const v = await fetch(`http://127.0.0.1:${port}/json/version`).then(r => r.json());
       return { proc, wsUrl: v.webSocketDebuggerUrl, version: v.Browser };
     } catch { await new Promise(r => setTimeout(r, 100)); }
   }
-  proc.kill(); throw new Error('Chrome did not start.\n' + err);
+  proc.kill(); throw new Error(`Chrome did not start within ${LAUNCH_MS / 1000} s.\n` + err);
 }
 
 function connect(wsUrl) {
